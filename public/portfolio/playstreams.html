@@ -1,0 +1,67 @@
+<div class="span12" id="videostreams">
+  <div class="row">
+    <div class="span7">
+      <h2>Main content</h2>
+      <div id="display-panel">Loading the player...</div>
+      <script type="text/javascript">
+        jwplayer("display-panel").setup({ width: 540, height: 405, controls: false});
+      </script>
+    </div>
+    <div class="right-rail span5">
+      <h3>Secondary content</h3>
+      <small>Add frames here the next stages</small>
+      <ul class="topiclist thumbnails">
+        <li class="span4"><div class="topic thumbnail">
+          <img data-src="/assets/ProfileView.jpg">
+          <h3>Label Header</h3>
+          <p>Thumbnail Caption</p>
+          <div class="btn-group">
+            <button class="btn" playFile="rtmp://s1o48mt30g15a0.cloudfront.net/cfx/st/mp4:portfolio/videos/Carnival.mp4" playImage="/assets/Carnival.png">Carnival</button>
+            <button class="btn" playFile="rtmp://s1o48mt30g15a0.cloudfront.net/cfx/st/mp4:portfolio/videos/clip3.mp4" playImage="/assets/Winner120718.png">Two</button>
+            <button class="btn" playFile="rtmp://s1o48mt30g15a0.cloudfront.net/cfx/st/mp4:portfolio/videos/clip4.mp4" playImage="/assets/ProfileView.jpg">Three</button>
+          </div>
+        </div></li>
+        <li class="span4"><div class="topic thumbnail">
+          <img data-src="/assets/images/SpotsAshleyReunite.jpg">
+          <h3>Label Header</h3>
+          <p>Thumbnail Caption</p>
+          <div class="btn-group btn-group-vertical">
+            <button class="btn" playFile="rtmp://s1o48mt30g15a0.cloudfront.net/cfx/st/mp4:portfolio/videos/clip4.mp4" playImage="/assets/images/ProfileView.jpg">Three</button>
+            <button class="btn" playFile="rtmp://s1o48mt30g15a0.cloudfront.net/cfx/st/mp4:portfolio/videos/Carnival.mp4" playImage="/assets/images/Carnival.png">Carnival</button>
+            <button class="btn" playFile="rtmp://s1o48mt30g15a0.cloudfront.net/cfx/st/mp4:portfolio/videos/clip3.mp4" playImage="/assets/images/Winner120718.png">Two</button>
+          </div>
+        </div></li>
+        <li class="span4"><div class="topic thumbnail btn-group">
+          <img data-src="/portfolio/stills/SpotsAshleyReunite.jpg">
+          <h3>Label Header</h3>
+          <p>Thumbnail Caption</p>
+          <button class="btn" playFile="/portfolio/videos/clip3.mp4" playImage="/portfolio/stills/Winner120718.png">Two</button>
+          <button class="btn" playFile="/portfolio/videos/clip4.mp4" playImage="/portfolio/stills/ProfileView.jpg">Three</button>
+          <button class="btn" playFile="/portfolio/videos/Carnival.mp4" playImage="/portfolio/stills/Carnival.png">Carnival</button>
+        </div></li>
+      </ul>
+    </div> <!-- span4 side column -->
+  </div> <!-- row -->
+</div> <!-- span12 -->
+<script type="text/javascript">
+  playMovieOnce = function(movieURL, stillURL) {
+    var $playObject = jwplayer("myElement").setup(
+      { width: 540, height: 405, controls: false, file: movieURL, image: stillURL }
+    );
+
+	$playObject.onReady( function() { $playObject.play(true); } );
+    $playObject.onPause( function() { $playObject.play(true); } );
+    $playObject.onComplete( function() { $playObject.stop(); } );
+  }
+
+  selectNewClip = function(event) {
+    var $wrappedEvent  = $(event.target)
+    var $nextPlayMovie = $wrappedEvent.attr('playFile');
+    var $nextPlayStill = $wrappedEvent.attr('playImage');
+
+    playMovieOnce( $nextPlayMovie, $nextPlayStill );
+  }
+
+  <!-- Give each button a handler to change content -->
+  $('.right-rail button').on('click', selectNewClip);
+</script>

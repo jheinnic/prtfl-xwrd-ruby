@@ -1,0 +1,27 @@
+<h1>Listing crosswords</h1>
+
+<table>
+  <tr>
+    <th>Bonus value</th>
+    <th>Bonus word</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @crosswords.each do |crossword| %>
+  <tr>
+    <td><%= crossword.bonus_value %></td>
+    <td><%= crossword.bonus_word %></td>
+    <td><%= link_to 'Show', crossword %></td>
+    <td><%= link_to 'Edit', edit_crossword_path(crossword) %></td>
+    <td><%= link_to 'Destroy', crossword, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Crossword', new_crossword_path %>
+
+<%= content_for :active_navtab, "crosswords" %>

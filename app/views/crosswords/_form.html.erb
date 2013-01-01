@@ -1,0 +1,404 @@
+<div class="row"><div class="span5">
+  <%= form_for(@crossword) do |f| %>
+    <% if @crossword.errors.any? %>
+      <div id="error_explanation">
+        <h2><%= pluralize(@crossword.errors.count, "error") %> prohibited this crossword from being saved:</h2>
+        <ul>
+        <% @crossword.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+        </ul>
+      </div>
+    <% end %>
+    <div class="field">
+      <%= f.label :bonus_value %><br />
+      <%= f.number_field :bonus_value %>
+    </div>
+    <div class="field">
+      <%= f.label :bonus_word %><br />
+      <%= f.text_field :bonus_word %>
+    </div>
+    <%= f.fields_for :word_items do |w| %>
+      <%= w.hidden_field :text_value %><%= w.hidden_field :triple_letter_index %>
+      <%= w.hidden_field :x_coordinate %><%= w.hidden_field :y_coordinate %><%= w.hidden_field :is_horizontal %>
+    <% end %>
+    <%= f.submit %>
+  </div>	
+  <div class="span7"><form id="pseudoform"><table border="0" cellpadding="0" cellspacing="0" width="440" height="660">
+	<tr valign="top">
+		<td colspan="3"><img name="yellowcard_00" src="<%= path_to_image 'slice/yellow_card_00.jpg' %>" width="440" height="302" border="0"></td>
+	</tr>
+	<tr valign="top">
+		<td rowspan="2"><img name="yellowcard_01" src="<%= path_to_image 'slice/yellow_card_01.jpg' %>" width="116" height="358" border="0"></td>
+		<td><table id="lettergrid" class="xwt-grid" width="308" height="308" border="0" cellpadding="0" cellspacing="0"></table></td>
+		<td rowspan="2"><img name="yellowcard_03" src="<%= path_to_image 'slice/yellow_card_03.jpg' %>" width="16" height="358" border="0"></td>
+	</tr>
+	<tr valign="top">
+		<td><img name="yellowcard_04" src="<%= path_to_image 'slice/yellow_card_04.jpg' %>" width="308" height="50" border="0"></td>
+	</tr>
+  </table></form></div></div>
+<% end %>
+</div>
+<script type="text/javascript">
+  var $allWords = [22];
+  var $freeWords = [22];
+  var $tripleWords = [4];
+  var $nextFreeWord = 0;
+
+  var $blankFlyweight = { row: parseInt(-1), col: parseInt(-1) };
+  var $editWord = $blankFlyweight;
+
+  var $cellStatus = [121];
+  var $horizontalMode = true;
+  var $triplingMode = false;
+
+  var $editCell = $blankFlyweight
+  
+  var $valueImages = $( {
+    blank: "<%= path_to_image 'slice/blank.png' %>", unk: "<%= path_to_image 'val/unk.png' %>",
+    A: "<%= path_to_image 'val/A.png' %>", B: "<%= path_to_image 'val/B.png' %>",
+    C: "<%= path_to_image 'val/C.png' %>", D: "<%= path_to_image 'val/D.png' %>",
+    E: "<%= path_to_image 'val/E.png' %>", F: "<%= path_to_image 'val/F.png' %>",
+    G: "<%= path_to_image 'val/G.png' %>", H: "<%= path_to_image 'val/H.png' %>",
+    I: "<%= path_to_image 'val/I.png' %>", J: "<%= path_to_image 'val/J.png' %>",
+    K: "<%= path_to_image 'val/K.png' %>", L: "<%= path_to_image 'val/L.png' %>",
+    M: "<%= path_to_image 'val/M.png' %>", M: "<%= path_to_image 'val/M.png' %>",
+    O: "<%= path_to_image 'val/O.png' %>", P: "<%= path_to_image 'val/P.png' %>",
+    Q: "<%= path_to_image 'val/Q.png' %>", R: "<%= path_to_image 'val/R.png' %>",
+    S: "<%= path_to_image 'val/S.png' %>", T: "<%= path_to_image 'val/T.png' %>",
+    U: "<%= path_to_image 'val/U.png' %>", V: "<%= path_to_image 'val/V.png' %>",
+    W: "<%= path_to_image 'val/W.png' %>", X: "<%= path_to_image 'val/X.png' %>",
+    Y: "<%= path_to_image 'val/Y.png' %>", Z: "<%= path_to_image 'val/Z.png' %>"
+  } );
+    
+  function initialize() {
+    var tmplt = 
+	  '<td rowId={row} colId={col} class="xw-cell xw-inactive"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-border xw-unit" src="<%= path_to_image 'border/unit.png' %>" /><img class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" /><img class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" /><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>" /><img class="xw-fill xw-light" src="<%= path_to_image 'fill/brite1.png' %>" /></td>';
+    var new_html = [143];
+
+    for(var ii=0;ii<22;ii++) {
+      var nextWord = 
+        { index: ii, row: -1, col: -1, last: -1, length: -1, horizontalMode: -1, textValue: '', tripleLetterIndex: -1 };
+      $allWords[ii] = nextWord;
+      $freeWords[ii] = nextWord;
+    }
+
+    for (var row=0,offs=0;row<11;row++) {
+      new_html.push('<tr>');
+      for (var col=0;col<11;col++,offs++) {
+        new_html.push(tmplt.format({row: row, col: col }));
+        $cellStatus[offs] = 
+          { row: row, col: col, content: '', horizontalWord: null, verticalWord: null };
+      }
+      new_html.push('</tr>');
+    }
+    $("#lettergrid").html( new_html.join(''));
+  }
+  
+  function handleCellSelect(event) {
+    if( ! isBlank( $editWord ) ) { closeWordEditor(); }
+
+    var wrappedEvent  = $(event.target).parent();
+    var cellRef = getCellState( parseInt(wrappedEvent.attr('rowid')), parseInt(wrappedEvent.attr('colid')));
+    var wordRef;
+    
+    if( $horizontalMode ) {
+      wordRef = cellRef.horizontalWord;
+    } else {
+      wordRef = cellRef.verticalWord;
+    }
+
+    if( isBlank(wordRef) ) { 
+      // If no more words remain, we cannot allocate another.  TODO: Set an alert box...
+      if( $nextFreeWord >= 22 ) { return; }
+      
+      wordRef = $freeWords[$nextFreeWord];
+      $nextFreeWord = $nextFreeWord + 1;
+      
+      wordRef.horizontalMode = $horizontalMode;
+      wordRef.row = cellRef.row;
+      wordRef.col = cellRef.col;
+      wordRef.last = cellRef.col;
+      wordRef.length = 0;
+      wordRef.tripleLetterIndex = -1;
+    }
+    
+    $editCell = cellRef;
+    $editWord = wordRef;
+    $editNode = getCellNode(cellRef.row, cellRef.col)
+    $horizontalMode = $editWord.horizontalMode;
+    
+    $(document).on('keydown', advanceCellEditor);
+    displayOpenWord();
+  }
+  
+  function advanceCellEditor(event) {
+    var realEvent = event || window.event;
+    var value = realEvent.keyCode;
+    if( value == null ) { return true; }
+    if( isBlank( $editCell ) ) { return true; }
+
+    // Accept DEL, RETURN, TAB, arrows, and letters.
+    if(value >= 65 && value <= 90) { 
+      var charVal = String.fromCharCode(value);
+      setCharacter( charVal );
+      
+	  if($horizontalMode) {
+	    $editCell = getCellState( $editCell.row, $editCell.col + 1 );
+      } else {
+	    $editCell = getCellState( $editCell.row + 1, $editCell.col );
+	  }
+      
+      if( $editCell == null ) {
+        closeWordEditor();
+        return true;
+      } else {
+        $editWord.last = parseInt(1) + parseInt($editWord.last);
+	    $editWord.length = parseInt(1) + parseInt($editWord.length);
+	    
+	    // Refresh the view to account for any merging and extension that's occurred.
+        displayOpenWord();
+	  }
+    } else if( value == 8 ) {
+      // TODO ESC or return to quit.
+    } else if( value == 8 ) {
+      // TODO DELETE to undo.
+    } else if( value == 30 ) {
+      // TODO Tab to toggle orientation
+    }
+    
+    return true;
+  }
+  
+  function closeWordEditor() {
+    $editCell = $blankFlyweight;
+    $editWord = $blankFlyweight;
+    $editNode = null;
+
+    $("#lettergrid td").removeClass(
+      "xw-active xw-connected xw-unit xw-vtop xw-vmid xw-vend xw-htop xw-hmid xw-hend"
+    ).addClass( "xw-inactive" )
+    $(document).on('keydown', null);
+  }
+  
+  function isBlank(c) {
+     return( c == null || c.row == -1 || c.col == -1 );
+  }
+  
+  // No cell is same as the blank cell.
+  function isSameCell(c1, c2) {
+    if (c1 == null || c2 == null) { return false; }
+    if (isBlank(c1) || isBlank(c2)) { return false; }
+    if( (c1.row != c2.row) || (c1.col != c2.col) ) { return false; }
+    
+    return true;
+  }
+
+  function getCellState(row, col) {
+    // A cell is available iff it is on the grid (0..10),(0..10) and does not cause any 2x2 block of squares
+    // to become fully utilized.
+    //
+    // Appending an available cell may cause one or two pairs of words to become merged.  The 2x2 constraint
+    // effectively limits the number of potential word joins to one horizontal and one vertical.  Words that
+    // would get merged by a cell addition do not become merged until the cell actually recieves a value.
+    // Canceling the concatenation by striking <ESC> or clicking in a different cell effectively prevents the
+    // potential merge by preventing the cell from acquiring a value.
+    //
+    // A "triad" is any L-shaped group of three cells consisting of a pair of cells that touch corners on a 
+    // diagonal and one of their two shared adjacencies.  For the sake of this test, only the cell under 
+    // consideration forms one, two, or four triads.  In every case, the other triad formed with each of 
+    // the candidate's cell's triad-formming cell pairs must not exist.
+
+	if( row > 10 || row < 0 || col > 10 || col < 0 ) { return null; }
+
+    if( row == 0 ) {
+      if( col == 0 ) {
+        // Corner 1 of 4--only one 2x2 block to check.
+        if( checkForTriad( 0, 1, 1, 0, 1, 1 ) ) { return null; }
+      } else if( col == 10 ) {
+        // Corner 2 of 4--only one 2x2 block to check.
+        if( checkForTriad( 0, 9, 1, 10, 1, 9 ) ) { return null; }
+      } else {
+        // Edge 1 of 4--Only two 2x2 blocks to check.
+        if( checkForTriad( 0, col+1, 1, col, 1, col+1 ) ) { return null; }
+        if( checkForTriad( 0, col-1, 1, col, 1, col-1 ) ) { return null; }
+      }
+    } else if( row == 10 ) {
+      if( col == 0 ) {
+        // Corner 3 of 4--only one 2x2 block to check.
+        if( checkForTriad( 10, 1, 9, 0, 9, 1 ) ) { return null; }
+      } else if( col == 10 ) {
+        // Corner 4 of 4--only one 2x2 block to check.
+        if( checkForTriad( 10, 9, 9, 10, 9, 9 ) ) { return null; }
+      } else {
+        // Edge 2 of 4--Only two 2x2 blocks to check.
+        // Edge 1 of 4--Only two 2x2 blocks to check.
+        if( checkForTriad( 10, col+1, 9, col, 9, col+1 ) ) { return null; }
+        if( checkForTriad( 10, col-1, 9, col, 9, col-1 ) ) { return null; }
+      }
+    } else if( col == 0 ) {
+      // Edge 3 of 4--Only two 2x2 blocks to check.
+      if( checkForTriad( row+1, 0, row, 1, row+1, 1 ) ) { return null; }
+      if( checkForTriad( row-1, 0, row, 1, row-1, 1 ) ) { return null; }
+    } else if( col == 10 ) {
+      // Edge 4 of 4--Only two 2x2 blocks to check.
+      if( checkForTriad( row+1, 10, row, 9, row+1, 9 ) ) { return null; }
+      if( checkForTriad( row-1, 10, row, 9, row-1, 9 ) ) { return null; }
+    } else {
+      // Non-boundary case.  All four 2x2 blocks to check.
+      if( checkForTriad( row+1, col, row, col+1, row+1, col+1 ) ) { return null; }
+      if( checkForTriad( row+1, col, row, col-1, row+1, col-1 ) ) { return null; }
+      if( checkForTriad( row-1, col, row, col+1, row-1, col+1 ) ) { return null; }
+      if( checkForTriad( row-1, col, row, col-1, row-1, col-1 ) ) { return null; }
+    }
+  
+    return $cellStatus[row*11 + col];
+  }
+
+  function checkForTriad( aRow, aCol, bRow, bCol, cRow, cCol ) {
+    aCell = $cellStatus[ aRow*11 + aCol ]
+    if( aCell.content == '' ) { return false; }
+    
+    bCell = $cellStatus[ bRow*11 + bCol ]
+    if( bCell.content == '' ) { return false; }
+    
+    cCell = $cellStatus[ cRow*11 + cCol ]
+    if( cCell.content == '' ) { return false; }
+    
+    return true;
+  }
+
+  var $selTmpl = "#lettergrid tr:eq({row}) td:eq({col})";
+  function getCellNode(row, col) {
+    return $($selTmpl.format( { row: row, col: col }));
+  }
+  
+  function connectOrActivateCell( row, col, isActiveCell, borderStyle ) {
+    if(isActiveCell) {
+      getCellNode(row, col).removeClass('xw-inactive').addClass("xw-active " + borderStyle);
+    } else {
+      getCellNode(row, col).removeClass('xw-inactive').addClass("xw-connected " + borderStyle);
+    }
+  }
+  
+  function mergeWords( wordToKeep, wordToFree ) {
+    wordToKeep.textValue = wordToKeep.textValue + wordToFree.textValue
+    wordToKeep.last = wordToFree.last;
+    wordToKeep.length = wordToKeep.length + wordToFree.length;
+    if( wordToKeep.triple_letter_index != -1 ) {
+      wordToFree.tripleLetterIndex = wordToKeep.tripleLetterIndex;
+    } else {
+      wordToKeep.tripleLetterIndex = wordToFree.tripleLetterIndex;
+    }
+
+    wordToFree.textValue = '';
+    wordToFree.last = -1;
+    wordToFree.length = -1;
+    wordToFree.tripleLetterIndex = -1;
+    
+    $nextFreeWord = $nextFreeWord - 1;
+    $freeWords[$nextFreeWord] = wordToFree;
+   }  
+  
+  function setCharacter( c ) {
+    if( isBlank($editCell) || isBlank($editWord) ) { return false; }
+    
+    // First, consider a cell that has not yet been assigned content and therefore is not yet
+    // part of a word.  Concatenate it to the word being editted and account for any automatic
+    // merging that enables between connected words.
+    if( $editCell.content == '' ) {
+      $editCell.content = c
+      $editWord.textValue = $editWord.textValue + c;
+      $editWord.last = $editWord.last + 1;
+      $editWord.length = $editWord.length + 1;
+      $editCell.horizontalWord = $editWord;
+
+      $('img.xw-value', $editNode).attr('src', $valueImages.attr(c));
+
+      // First deal with the potenital merge in the same direction through the new cell.
+      if( $horizontalMode ) {
+        $editCell.horizontalWord == $editWord
+        if( $editCell.col < 10 ) {
+          nextCellRight = $cellStatus[$editCell.row*11 + $editCell.col + 1];
+          if( nextCellRight.content != '' ) {
+            if( nextCellRight.horizontalWord != null ) {
+              mergeWords( $editWord, nextCellRight.horizontalWord );
+            }
+
+            // Advance editCell and absorb cells into $editWord en route.
+            // nextCellRight.horizontalWord = $editWord;
+            for( ii=$editCell.col+1; ii<=$editWord.last; ii++ ) {
+              $editCell = $cellStatus[$editCell.row*11 + ii];
+              $editCell.horizontalWord = $editWord;
+            }
+            $editNode = getCellNode( $editCell.row, $editWord.last );
+          } else {
+            $editCell = nextCellRight;
+            $editCell.horizontalWord = $editWord;
+            $editNode = getCellNode( $editCell.row, $editWord.last );
+          }
+        }
+      } else {
+        $editCell.verticalWord == $editWord
+        if( $editCell.row < 10 ) {
+          nextCellDown = $cellStatus[$editCell.row*11 + $editCell.col + 11];
+          if( nextCellDown.content != '' ) {
+            if( nextCellDown.verticalWord != null ) {
+              mergeWords( $editWord, nextCellDown.verticalWord );
+            }
+
+            // Advance editCell and absorb cells into $editWord en route.
+            // nextCellDown.verticalWord = $editWord;
+            for( ii=$editCell.row+1; ii<=$editWord.last; ii++ ) {
+              $editCell = $cellStatus[ii*11 + $editCell.col];
+              $editCell.verticalWord = $editWord;
+            }
+            $editNode = getCellNode( $editCell.row, $editWord.last );
+          } else {
+            $editCell = nextCellDown;
+            $editCell.verticalWord = $editWord;
+            $editNode = getCellNode( $editWord.last, $editCell.col );
+          }
+        }
+      }
+      
+      // TBD: Deal with the perpendicular merge between two words, neither one of which is $editWord.
+      //      This should be the easier case!!!
+    }
+  }
+  	
+  function inactivateCell( row, col, borderStyle ) {
+    getCellNode(row, col).removeClass('xw-active xw-connected ' + borderStyle).addClass('xw-inactive');
+  }
+    
+  function displayOpenWord() {
+    if($editWord.length == 0) {
+      $editNode.removeClass('xw-inactive').addClass('xw-active xw-unit');
+    } else {
+      // Deal with existing words of length 2 or more by applying end cap borders and 0 or more mid-word
+      // borders.  Mark the selected cell active, and all others as connected.    
+      if( $horizontalMode ) {
+        // Horizontal mode: Use htop, hmid, and hend.  Iterate through and test columns.
+        connectOrActivateCell($editWord.row, $editWord.col, $editWord.col == $editCell.col, 'xw-htop');
+          
+        for( ii=$editWord.col+1;ii<$editWord.last;ii++ ) {
+          connectOrActivateCell( $editWord.row, ii, (ii == $editCell.col), 'xw-hmid' );
+        }
+          
+        connectOrActivateCell($editWord.row, $editWord.last, $editWord.last == $editCell.col, 'xw-hend');
+      } else {
+        // Vertical mode: Use htop, hmid, and hend.  Iterate through and test columns.
+        connectOrActivateCell($editWord.row, $editWord.col, $editWord.row == $editCell.row, 'xw-vtop');
+          
+        for( ii=$editWord.row+1;ii<$editWord.last;ii++ ) {
+          connectOrActivateCell( ii, $editWord.col, (ii == $editCell.row), 'xw-vmid' );
+        }
+          
+        connectOrActivateCell($editWord.last, $editWord.col, $editWord.last == $editCell.row, 'xw-vend');
+      }
+    }    
+  }
+
+  initialize();
+  $("#lettergrid td").on('click', handleCellSelect);
+</script>

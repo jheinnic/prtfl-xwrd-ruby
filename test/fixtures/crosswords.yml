@@ -1,0 +1,246 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  actual_prize: 
+  bonus_word: "comet"
+  bonus_value: 2
+  let00: 0
+  let01: 0
+  let02: 0
+  let03: 0
+  let04: 0
+  let05: 0
+  let06: 0
+  let07: 0
+  let08: 0
+  let09: 0
+  let10: 0
+  let11: 0
+  let12: 0
+  let13: 0
+  let14: 0
+  let15: 0
+  let16: 0
+  let17: 0
+  word_items: [
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: snowshoes
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: false
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: soup
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: false
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: long
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: false
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: thaw
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: false
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: upgrade
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: false
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: piano
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: false
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: kettle
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: false
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: ace
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: false
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: amuse
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: false
+    triple_letter_index: 3
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: squall
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: false
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: exit
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: fever
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: old
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: rope
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: 2
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: button
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: 0
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: layering
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: path
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: act
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: twig
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: paw
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: own
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: -1
+- !ruby/object:WordItem
+  attributes:
+    id:
+    crossword_id:
+    text_value: nautilus
+    x_coordinate: 1
+    y_coordinate: 2
+    is_horizontal: true
+    triple_letter_index: 4
+]
+
+two:
+  bonus_word: 
+  bonus_value: 1
+  let00: 
+  let01: 
+  let02: 
+  let03: 
+  let04: 
+  let05: 
+  let06: 
+  let07: 
+  let08: 
+  let09: 
+  let10: 
+  let11: 
+  let12: 
+  let13: 
+  let14: 
+  let15: 
+  let16: 
+  let17: 

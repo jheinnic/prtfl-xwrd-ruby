@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>John Heinnickel's Portfolio Site</title>
+  <%= stylesheet_link_tag    "application", :media => "all" %>
+  <%= javascript_include_tag "application" %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+  <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container">
+        <a class="brand" href="#">John Heinnickel</a>
+          <ul class="nav">
+            <li class="<%= ns = yield(:active_navtab); 'active' if ns.nil? or ns == 'home' or ns == '' %>"><a href="/">Home</a></li>
+            <li class="divider-vertical"></li>
+            <li class="<%= 'active' if ns == 'crosswords' %>"><%= link_to 'Crosswords', crosswords_path %></li>
+            <li class="<%= 'active' if ns == 'poker' %>"><%= link_to 'Poker Odds', crosswords_path %></li>
+            <li class="<%= 'active' if ns == 'video' %>"><%= link_to 'Video Streaming', crosswords_path %></li>
+            <li class="divider-vertical"></li>
+          </ul>
+        </a>
+      </div> <!-- navbar-inner -->
+    </div> <!-- fill, navbar -->
+  </div> <!-- topbar, container -->
+  <div class="container">
+    <div class="row"><div class="span12">
+<%= yield %>
+    </div>
+    </div> <!-- span12, row -->
+    <footer><p>&copy; John Heinnickel, 2012</p></footer>
+  </div> <!-- container -->
+</body>
+</html>

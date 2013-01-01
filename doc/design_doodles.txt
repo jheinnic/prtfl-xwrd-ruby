@@ -1,0 +1,29 @@
+/crosswords/
+  -- GET shows a list of previously created card GET <A> tags and a new card POST <FORM>.
+
+/crosswords/new?words=apple&words=baTh&words=couch
+/crosswords/new?bonus=acorn&words=apple&words=baTh&words=couch&prize=30
+/crosswords/new?words=apple&words=baTh&words=couch&ltrs=s&ltrs=p&ltrs=e
+/crosswords/new?bonus=acorn&words=apple&words=baTh&words=couch&prize=30&ltrs=s&ltrs=p&ltrs=e
+  -- POST to allocate a new card with the word set fixed.  Optionally can take a portion of 
+     reveale state.  Either returns <i> for the new card or 
+
+/crosswords?id=<i>
+  -- GET shows the state of the card and its prize distribution
+
+/crosswords?id=<i>&slot=<n>&letter=<c>
+  -- POST sets the nth letter to c and shows the card's new state and prize distribution
+  
+/crosswords?id=<i>&
+
+{ id: 1 }
+{ id: 1, 
+  bonus: "acorn", 
+  words: [ "couch", "braNch", "apple" ],
+  letters: [ "a", "r", "o", "d" ],
+  prize: 30,
+  possibilities: [ :Ticket => 3123, :3 => "523434", :20000 => "42", undef => 512 ] }
+ 
+ 1355 Jefferson 
+ 
+ 

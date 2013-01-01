@@ -1,0 +1,148 @@
+body {
+  background-color: #fff;
+  color: #333;
+  font-family: verdana, arial, helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+p, ol, ul, td {
+  font-family: verdana, arial, helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+pre {
+  background-color: #eee;
+  padding: 10px;
+  font-size: 11px;
+}
+
+a {
+  color: #000;
+  &:visited {
+    color: #666;
+  }
+  &:hover {
+    color: #fff;
+    background-color: #000;
+  }
+}
+
+div {
+  &.field, &.actions {
+    margin-bottom: 10px;
+  }
+}
+
+#notice {
+  color: green;
+}
+
+.field_with_errors {
+  padding: 2px;
+  background-color: red;
+  display: table;
+}
+
+#error_explanation {
+  width: 450px;
+  border: 2px solid red;
+  padding: 7px;
+  padding-bottom: 0;
+  margin-bottom: 20px;
+  background-color: #f0f0f0;
+  h2 {
+    text-align: left;
+    font-weight: bold;
+    padding: 5px 5px 5px 15px;
+    font-size: 12px;
+    margin: -7px;
+    margin-bottom: 0px;
+    background-color: #c00;
+    color: #fff;
+  }
+  ul li {
+    font-size: 12px;
+    list-style: square;
+  }
+}
+
+img.xw-fill {
+  z-index: 11;
+}
+
+// The second layer establishes the constant cell grid.  This could be done with style markup, but a 
+// an image of a 1-pixel border around a transparent center was used instead to enable a marbled effect.
+img.xw-grid  {
+  z-index: 14;
+  visibility: visible;
+}
+
+// The third layer establishes highlighting and contents.  These could be two separate layers, but no pixel in 
+// grid is opaque in both a highlighting sprite and a cursor/content sprite, so a fourth layer is spared.
+img.xw-border {
+  z-index: 16;
+}
+
+// Like xw-grid, cell contents (xw-value) are always visible.  JQuery animations temporarily override this with 
+// animation to cause a cursor flicker to indicate the xwt-active cell--the one exception that where style-sheet 
+// rules are overridden.
+img.xw-value {
+  visibility: visible;
+  z-index: 20
+}
+
+// The background image to display depends on the state of a its parent TD cell.  There are four basic states:
+// Inactive -- Base state--not involved in any current edit activity
+// Active -- The result of a mouse click to activate editing on a cell.
+// Connected -- The result of keyboard input flowing to a subsequent cell until word completion
+// Illegal -- An un-clickable cell next to both a horizontal and a vertical word.
+//
+// The Active and Connected states have sub-states to distinguish the single-cell and multi-cell regions.  In
+// the latter case, horizontal and vertical matter as well.
+td.xw-inactive img.xw-fill.xw-dark {
+  visibility: visible;
+}
+
+td.xw-active img.xw-fill.xw-light, td.xw-connected img.xw-fill.xw-light {
+  visibility: visible;
+}
+
+// Highlighting is the most complicated style set present since there are 7 possible states.  Each state is 
+// established by two rules: one activating it under its own td parent selector, and a rule underneath the first
+// seven hiding any image not caught by the higher precedence rules.
+td.xw-unit img.xw-unit, td.xw-htop img.xw-htop, td.xw-hmid img.xw-hmid, td.xw-hend img.xw-hend, td.xw-vtop img.xw-vtop, td.xw-vmid img.xw-vmid, td.xw-vend img.xw-vend {
+  visibility: visible;
+}
+
+// Any image tag not explicitly styled as visible by this point is not active
+// under any cell's given state and so this catch-all rule de-activates the
+// rest to avoid writing lots of rules for de-activation.
+img.xw-border, img.xw-fill {
+  visibility: hidden;
+}
+
+td.xw-cell img {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 28px;
+  height: 28px;
+}
+
+// The TD elements are given relative positioning so that they can provide an
+// anchor for absolutely positiong the layering of images used to compose the
+// crossword grid's graphical elements.
+td.xw-cell {
+  position: relative;
+}
+
+table.xwt-grid {
+  border: 0;
+  cell-padding: 0;
+  cell-spacing: 0;
+  background-color: #19D919;
+}
+
+

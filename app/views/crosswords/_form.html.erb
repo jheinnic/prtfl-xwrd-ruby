@@ -1,5 +1,5 @@
-<div class="row"><div class="span5">
-  <%= form_for(@crossword) do |f| %>
+<div class="row">
+  <div class="span5"><%= form_for(@crossword) do |f| %>
     <% if @crossword.errors.any? %>
       <div id="error_explanation">
         <h2><%= pluralize(@crossword.errors.count, "error") %> prohibited this crossword from being saved:</h2>
@@ -23,8 +23,8 @@
       <%= w.hidden_field :x_coordinate %><%= w.hidden_field :y_coordinate %><%= w.hidden_field :is_horizontal %>
     <% end %>
     <%= f.submit %>
-  </div>	
-  <div class="span7"><form id="pseudoform"><table border="0" cellpadding="0" cellspacing="0" width="440" height="660">
+  <% end %></div>
+  <div class="span7"><table border="0" cellpadding="0" cellspacing="0" width="440" height="660">
 	<tr valign="top">
 		<td colspan="3"><img name="yellowcard_00" src="<%= path_to_image 'slice/yellow_card_00.jpg' %>" width="440" height="302" border="0"></td>
 	</tr>
@@ -36,8 +36,7 @@
 	<tr valign="top">
 		<td><img name="yellowcard_04" src="<%= path_to_image 'slice/yellow_card_04.jpg' %>" width="308" height="50" border="0"></td>
 	</tr>
-  </table></form></div></div>
-<% end %>
+  </table></div>
 </div>
 <script type="text/javascript">
   var $allWords = [22];
@@ -45,7 +44,7 @@
   var $tripleWords = [4];
   var $nextFreeWord = 0;
 
-  var $blankFlyweight = { row: parseInt(-1), col: parseInt(-1) };
+  var $blankFlyweight = { row: -1, col: -1 };
   var $editWord = $blankFlyweight;
 
   var $cellStatus = [121];
@@ -62,7 +61,7 @@
     G: "<%= path_to_image 'val/G.png' %>", H: "<%= path_to_image 'val/H.png' %>",
     I: "<%= path_to_image 'val/I.png' %>", J: "<%= path_to_image 'val/J.png' %>",
     K: "<%= path_to_image 'val/K.png' %>", L: "<%= path_to_image 'val/L.png' %>",
-    M: "<%= path_to_image 'val/M.png' %>", M: "<%= path_to_image 'val/M.png' %>",
+    M: "<%= path_to_image 'val/M.png' %>", N: "<%= path_to_image 'val/N.png' %>",
     O: "<%= path_to_image 'val/O.png' %>", P: "<%= path_to_image 'val/P.png' %>",
     Q: "<%= path_to_image 'val/Q.png' %>", R: "<%= path_to_image 'val/R.png' %>",
     S: "<%= path_to_image 'val/S.png' %>", T: "<%= path_to_image 'val/T.png' %>",
@@ -73,7 +72,7 @@
     
   function initialize() {
     var tmplt = 
-	  '<td rowId={row} colId={col} class="xw-cell xw-inactive"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-border xw-unit" src="<%= path_to_image 'border/unit.png' %>" /><img class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" /><img class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" /><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>" /><img class="xw-fill xw-light" src="<%= path_to_image 'fill/brite1.png' %>" /></td>';
+	  '<td><div rowId={row} colId={col} class="xw-cell xw-inactive"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-border xw-unit" src="<%= path_to_image 'border/unit.png' %>" /><img class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" /><img class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" /><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>" /><img class="xw-fill xw-light" src="<%= path_to_image 'fill/brite1.png' %>" /></div></td>';
     var new_html = [143];
 
     for(var ii=0;ii<22;ii++) {
@@ -99,7 +98,7 @@
     if( ! isBlank( $editWord ) ) { closeWordEditor(); }
 
     var wrappedEvent  = $(event.target).parent();
-    var cellRef = getCellState( parseInt(wrappedEvent.attr('rowid')), parseInt(wrappedEvent.attr('colid')));
+    var cellRef = getCellState( parseInt(wrappedEvent.attr('rowId')), parseInt(wrappedEvent.attr('colId')));
     var wordRef;
     
     if( $horizontalMode ) {
@@ -268,7 +267,7 @@
     return true;
   }
 
-  var $selTmpl = "#lettergrid tr:eq({row}) td:eq({col})";
+  var $selTmpl = "#lettergrid tr:eq({row}) div:eq({col})";
   function getCellNode(row, col) {
     return $($selTmpl.format( { row: row, col: col }));
   }
@@ -400,5 +399,5 @@
   }
 
   initialize();
-  $("#lettergrid td").on('click', handleCellSelect);
+  $("#lettergrid div").on('click', handleCellSelect);
 </script>

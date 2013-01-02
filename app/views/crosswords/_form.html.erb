@@ -44,6 +44,8 @@
   var $horizontalMode = true;
   var $rootTable = $('#lettergrid');
   var $wordCount = 0;
+  var $selectRowTmpl = 'div[data-rowid="{row}"]';
+  var $selectColTmpl = 'div[data-colid="{col}"]';
   
   var $valueImages = $( {
     blank: "<%= path_to_image 'slice/blank.png' %>",
@@ -80,7 +82,7 @@
         new_html.push( tmplt.format(coords) );
         var cellState = 
           {
-            domNode: selTmpl.format(coords),
+            row: row, col: col, domNode: selTmpl.format(coords),
             toLeft: toLeft, toRight: null, toAbove: null, toBelow: null,
             wordLeft: $(), wordRight: $(), wordAbove: $(), wordBelow: $(),
 
@@ -93,9 +95,6 @@
               return this;
             },
 
-            row: function() { return this.domNode.data('rowid'); },
-            col: function() { return this.domNode.data('colid'); },
-            // content: function(s) { if(s == null) { return this.domNode.data('content'); } else { return this.domNode.data('content', s); }
             content: function(s) { if( s === undefined ) { return this.domNode.data('content'); } else { return this.domNode.data('content', s); } },
 
             isBlank: function() { return this.domNode.data('content') == ''; },
@@ -172,19 +171,33 @@
             _advanceCursorRight: function() {
               this.hideCursor();
               $editorCell = this.toRight;
-              this.toRight.showCursor();
+              $sameRow    = $($selectRowTmpl.format(this), $rootTable);
+              $sameCol    = $($selectColTmpl.format(this), $rootTable);
+              $editorCell.showCursor();
             },
 
             _advanceCursorBelow: function() {
               this.hideCursor();
               $editorCell = this.toBelow;
-              this.toBelow.showCursor();
+              $sameRow    = $($selectRowTmpl.format(this), $rootTable);
+              $sameCol    = $($selectColTmpl.format(this), $rootTable);
+              $editorCell.showCursor();
             },
 
             _extendCursorRight: function() {
               this.hideCursor();
               $editorCell = this.toRight;
-              this.toRight.showCursor();
+              $sameRow    = $($selectRowTmpl.format(this), $rootTable);
+              $sameCol    = $($selectColTmpl.format(this), $rootTable);
+              $editorCell.showCursor();
+            },
+
+            _extendCursorBelow: function() {
+              this.hideCursor();
+              $editorCell = this.toBelow;
+              $sameRow    = $($selectRowTmpl.format(this), $rootTable);
+              $sameCol    = $($selectColTmpl.format(this), $rootTable);
+              $editorCell.showCursor();
             },
           };
 
@@ -326,7 +339,7 @@
         $editorCell.hideCursor();
 
         if( $editorCell.isBlank() && $editorCell.wordRight.size() == 0 ) {
-          $editorCell.removeClass('xw-hend');
+          $editorCell.removeClass('xw-hend').addClass('xw-samerow');
           cellLeft.removeClass('xw-hmid').addClass('xw-hend');
 
           $editorCell.wordLeft.each(
@@ -337,6 +350,8 @@
         }
 
         $editorCell = cellLeft;
+        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
+        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
         $editorCell.showCursor();
         addColumnHighlighting();
       }
@@ -347,7 +362,7 @@
         $editorCell.hideCursor();
 
         if( $editorCell.isBlank() && $editorCell.wordBelow.size() == 0 ) {
-          $editorCell.removeClass('xw-vend');
+          $editorCell.removeClass('xw-vend').addClass('xw-samecol');
           cellAbove.removeClass('xw-vmid').addClass('xw-vend');
 
           $editorCell.wordAbove.each(
@@ -358,6 +373,8 @@
         }
 
         $editorCell = cellAbove;
+        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
+        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
         $editorCell.showCursor();
         addRowHighlighting();
       }
@@ -370,59 +387,73 @@
       if( $editorCell.wordRight.size() > 0 ) {
         dropColumnHighlighting();
         $editorCell.hideCursor();
-
         $editorCell = cellRight;
+        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
+        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
         $editorCell.showCursor();
         addColumnHighlighting();
       } else if( cellRight != null && !$editorCell.isBlank() && !isUnavailable(cellRight) ) {
         dropColumnHighlighting();
         $editorCell.hideCursor();
 
-        $editorCell.removeClass('xw-hend').addClass('xw-hmid');
-        cellRight.addClass('xw-hend');
+        if( $editorCell.wordLeft.size() > 0 ) {
+          $editorCell.removeClass('xw-hend').addClass('xw-hmid');
+          $editorCell.wordLeft.each(
+            function(i, c) { c.wordRight = c.wordRight.add(cellRight.domNode); }
+          );
+          cellRight.wordLeft = $editorCell.wordLeft.add($editorCell);
+        } else {
+          $editorCell.removeClass('xw-hend');
+          $editorCell.wordRight = cellRight.domNode;
+          cellRight.wordLeft = $editorCell.domNode;
+        }
 
-        $editorCell.wordLeft.each(
-          function(i, c) { c.wordRight = c.wordRight.add(cellRight.domNode); }
-        );
-        cellRight.wordLeft = $editorCell.wordLeft.add($editorCell);
-        $editorCell.wordRight = cellRight.domNode;
-
+        cellRight.removeClass('xw-samerow').addClass('xw-hend');
         $editorCell = cellRight;
-        $editorCell.showCursor();
+        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
+        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
         addColumnHighlighting();
+        $editorCell.showCursor();
       }
     } else {
       var cellBelow = $editorCell.toBelow
       if( $editorCell.wordBelow.size() > 0 ) {
         dropRowHighlighting();
         $editorCell.hideCursor();
-
         $editorCell = cellBelow;
+        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
+        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
         $editorCell.showCursor();
         addRowHighlighting();
       } else if( cellBelow != null && !$editorCell.isBlank() && !isUnavailable(cellBelow) ) {
         dropRowHighlighting();
         $editorCell.hideCursor();
 
-        $editorCell.removeClass('xw-hend').addClass('xw-hmid');
-        cellBelow.addClass('xw-hend');
+        if( $editorCell.wordAbove.size() > 0 ) {
+          $editorCell.removeClass('xw-vend').addClass('xw-vmid');
+          $editorCell.wordAbove.each(
+            function(i, c) { c.wordBelow = c.wordBelow.add(cellBelow.domNode); }
+          );
+          cellBelow.wordAbove = $editorCell.wordAbove.add($editorCell);
+        } else {
+          $editorCell.removeClass('xw-vend');
+          $editorCell.wordBelow = cellBelow.domNode;
+          cellBelow.wordAbove = $editorCell.domNode;
+        }
 
-        $editorCell.wordAbove.each(
-          function(i, c) { c.wordBelow = c.wordBelow.add(cellBelow); }
-        );
-        cellBelow.wordAbove = $editorCell.wordAbove.add($editorCell);
-        $editorCell.wordBelow = cellBelow;
-
+        cellBelow.removeClass('xw-samecol').addClass('xw-hend');
         $editorCell = cellBelow;
-        $editorCell.showCursor();
+        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
+        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
         addRowHighlighting();
+        $editorCell.showCursor();
       }
     }
   }
 
   function isUnavailable(cellToCheck) {
-    var row = cellToCheck.row();
-    var col = cellToCheck.col();
+    var row = cellToCheck.row;
+    var col = cellToCheck.col;
 
     // A cell is available iff it is on the grid (0..10),(0..10) and does not
     // cause any 2x2 block of squares to become fully occupied.
@@ -515,6 +546,7 @@
 
     midWord = midWord.not(wordTop).not(wordEnd);
 
+    $sameRow.removeClass('xw-inactive');
     nearby.addClass('xw-samerow');
     wordTop.addClass('xw-htop');
     midWord.addClass('xw-hmid');
@@ -539,6 +571,7 @@
 
     midWord = midWord.not(wordTop).not(wordEnd);
 
+    $sameCol.removeClass('xw-inactive');
     nearby.addClass('xw-samecol');
     wordTop.addClass('xw-vtop');
     midWord.addClass('xw-vmid');

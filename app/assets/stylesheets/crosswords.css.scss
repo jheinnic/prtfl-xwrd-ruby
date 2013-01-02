@@ -29,53 +29,14 @@ a {
   }
 }
 
-div {
-  &.field, &.actions {
-    margin-bottom: 10px;
-  }
-  &.xw-cell {
-    position: relative;
-    &.xw-inactive {
-      img.xw-fill {
-        &.xw-dark {
-          visibility:visible;
-        }
-        &.xw-light {
-          visibility:hidden;
-        }
-      }
-    }
-    &.xw-active, &.xw-connected {
-      img.xw-fill {
-        &.xw-dark {
-          visibility:hidden;
-        }
-        &.xw-light {
-          visibility:visible;
-        }
-      }
-    }
-    top: 0px;
-    left: 0px;
-    width: 28px;
-    height: 28px;
-    img {
-    position: absolute;
-      &.xw-fill {
-        z-index: 11;
-      }
-    }
-  }
-}
-
-#notice {
-  color: green;
-}
-
 .field_with_errors {
   padding: 2px;
   background-color: red;
   display: table;
+}
+
+#notice {
+  color: green;
 }
 
 #error_explanation {
@@ -101,26 +62,22 @@ div {
   }
 }
 
+div {
+  &.field, &.actions {
+    margin-bottom: 10px;
+  }
+}
+
+
 // The second layer establishes the constant cell grid.  This could be done with style markup, but a 
 // an image of a 1-pixel border around a transparent center was used instead to enable a marbled effect.
-img.xw-grid  {
-  z-index: 14;
-  visibility: visible;
-}
 
 // The third layer establishes highlighting and contents.  These could be two separate layers, but no pixel in 
 // grid is opaque in both a highlighting sprite and a cursor/content sprite, so a fourth layer is spared.
-img.xw-border {
-  z-index: 16;
-}
 
 // Like xw-grid, cell contents (xw-value) are always visible.  JQuery animations temporarily override this with 
 // animation to cause a cursor flicker to indicate the xwt-active cell--the one exception that where style-sheet 
 // rules are overridden.
-img.xw-value {
-  visibility: visible;
-  z-index: 20
-}
 
 // The background image to display depends on the state of a its parent TD cell.  There are four basic states:
 // Inactive -- Base state--not involved in any current edit activity
@@ -135,16 +92,10 @@ img.xw-value {
 // 7 possible states.  Each state needs two rules: one activating it under its
 // own div parent selector, and a rule hiding it when its matching selector is
 // not present on the parent div.
-div.xw-unit img.xw-unit, div.xw-htop img.xw-htop, div.xw-hmid img.xw-hmid, div.xw-hend img.xw-hend, div.xw-vtop img.xw-vtop, div.xw-vmid img.xw-vmid, div.xw-vend img.xw-vend {
-  visibility: visible;
-}
 
 // Any image tag not explicitly styled as visible by this point is not active
 // under any cell's given state and so this catch-all rule de-activates the
 // rest to avoid writing lots of rules for de-activation.
-img.xw-border, img.xw-fill {
-  visibility: hidden;
-}
 
 
 // The TD elements are given relative positioning so that they can provide an
@@ -155,6 +106,91 @@ table.xwt-grid {
   cell-padding: 0;
   cell-spacing: 0;
   background-color: #19D919;
+  &.xw-horizontal div.xw-cell {
+    &.xw-htop {
+      img.xw-fill.xw-light, img.xw-htop {
+        visibility: visible;
+      }
+    }
+    &.xw-hmid {
+      img.xw-fill.xw-light, img.xw-hmid {
+        visibility: visible;
+      }
+    }
+    &.xw-hend {
+      img.xw-fill.xw-light, img.xw-hend {
+        visibility: visible;
+      }
+    }
+  }
+  &.xw-vertical div.xw-cell {
+    &.xw-vtop {
+      img.xw-fill.xw-light, img.xw-vtop {
+        visibility: visible;
+      }
+    }
+    &.xw-vmid {
+      img.xw-fill.xw-light, img.xw-vmid {
+        visibility: visible;
+      }
+    }
+    &.xw-vend {
+      img.xw-fill.xw-light, img.xw-vend {
+        visibility: visible;
+      }
+    }
+  }
+  div.xw-cell {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    width: 28px;
+    height: 28px;
+    &.samerow, &.samecol {
+      img.xw-fill.xw-light, img.xw-fill.xw-dark {
+        visibility: hidden;
+      }
+    }
+    &.xw-inactive {
+      img.xw-fill {
+        &.xw-dark {
+          visibility:visible;
+        }
+        &.xw-light {
+          visibility:hidden;
+        }
+      }
+    }
+    &.xw-active {
+      img.xw-fill {
+        &.xw-dark {
+          visibility:hidden;
+        }
+        &.xw-light {
+          visibility:visible;
+        }
+      }
+    }
+    img {
+      position: absolute;
+      &.xw-fill {
+        z-index: 11;
+        visibility: hidden;
+      }
+      &.xw-grid  {
+        z-index: 14;
+        visibility: visible;
+      }
+      &.xw-border {
+        z-index: 16;
+        visibility: hidden;
+      }
+      &.xw-value {
+        z-index: 20;
+        visibility: visible;
+      }
+    }
+  }
 }
 
 

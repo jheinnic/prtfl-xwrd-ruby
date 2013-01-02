@@ -33,3 +33,5 @@ pickle-email-*.html
 /learning
 /README.rdoc
 /app/assets/images/rails.png
+Thumbs.db
+*~

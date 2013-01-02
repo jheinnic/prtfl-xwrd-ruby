@@ -30,7 +30,23 @@
     </tr>
     <tr valign="top">
         <td rowspan="2"><img name="yellowcard_01" src="<%= path_to_image 'slice/yellow_card_01.jpg' %>" width="116" height="358" border="0"></td>
-        <td><table id="lettergrid" class="xwt-grid" width="308" height="308" border="0" cellpadding="0" cellspacing="0"></table></td>
+        <td><table id="lettergrid" class="xwt-grid" width="308" height="308" border="0" cellpadding="0" cellspacing="0">
+          <% for ii in (0..10) do %>
+          <tr>
+            <td><div data-rowid="<%= ii %>" data-colid="0" data-content="" class="xw-cell xw-inactive">
+            <td><div data-rowid="<%= ii %>" data-colid="1" data-content="" class="xw-cell xw-inactive">
+            <td><div data-rowid="<%= ii %>" data-colid="2" data-content="" class="xw-cell xw-inactive">
+            <td><div data-rowid="<%= ii %>" data-colid="3" data-content="" class="xw-cell xw-inactive">
+            <td><div data-rowid="<%= ii %>" data-colid="4" data-content="" class="xw-cell xw-inactive">
+            <td><div data-rowid="<%= ii %>" data-colid="5" data-content="" class="xw-cell xw-inactive">
+            <td><div data-rowid="<%= ii %>" data-colid="6" data-content="" class="xw-cell xw-inactive">
+            <td><div data-rowid="<%= ii %>" data-colid="7" data-content="" class="xw-cell xw-inactive">
+            <td><div data-rowid="<%= ii %>" data-colid="8" data-content="" class="xw-cell xw-inactive">
+            <td><div data-rowid="<%= ii %>" data-colid="9" data-content="" class="xw-cell xw-inactive">
+            <td><div data-rowid="<%= ii %>" data-colid="10" data-content="" class="xw-cell xw-inactive">
+          </tr>
+          <% end %>
+        </table></td>
         <td rowspan="2"><img name="yellowcard_03" src="<%= path_to_image 'slice/yellow_card_03.jpg' %>" width="16" height="358" border="0"></td>
     </tr>
     <tr valign="top">
@@ -40,16 +56,15 @@
 </div>
 <script type="text/javascript">
   var $editorCell = null;
-  var $cellStates = [121];
+  var $allCellRows = [];
+  var $allCellCols = []
   var $horizontalMode = true;
   var $rootTable = $('#lettergrid');
   var $wordCount = 0;
-  var $selectRowTmpl = 'div[data-rowid="{row}"]';
-  var $selectColTmpl = 'div[data-colid="{col}"]';
   
   var $valueImages = $( {
     blank: "<%= path_to_image 'slice/blank.png' %>",
-    unk: "<%= path_to_image 'val/unk.png' %>",
+    unk: "<%= path_to_image 'val/qm.png' %>",
     A: "<%= path_to_image 'val/A.png' %>", B: "<%= path_to_image 'val/B.png' %>",
     C: "<%= path_to_image 'val/C.png' %>", D: "<%= path_to_image 'val/D.png' %>",
     E: "<%= path_to_image 'val/E.png' %>", F: "<%= path_to_image 'val/F.png' %>",
@@ -66,169 +81,203 @@
   } );
     
   function initialize() {
-    var tmplt = 
-      '<td><div data-rowid="{row}" data-colid="{col}" data-content="" class="xw-cell xw-inactive"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-border xw-unit" src="<%= path_to_image 'border/unit.png' %>" /><img class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" /><img class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" /><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>" /><img class="xw-fill xw-light" src="<%= path_to_image 'fill/brite1.png' %>" /></div></td>';
-    var selTmpl = "tr:eq({row}) div:eq({col})";
-  
-    var new_html = [];
+    var contentTmpl = 
+      '<img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-border xw-unit" src="<%= path_to_image 'border/unit.png' %>" /><img class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" /><img class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" /><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>" /><img class="xw-fill xw-light" src="<%= path_to_image 'fill/brite1.png' %>" /></div></td>';
+    var selectRowTmpl = 'div[data-rowid="{row}"]';
+    var selectColTmpl = 'div[data-colid="{col}"]';
 
-    for (var row=0,offs=0;row<11;row++) {
-      var toLeft = null;
-      new_html.push('<tr>');
+    // Add navigability in the DOM for neighbors and upstream/downstream word
+    // set identification:
+    for (var row=0;row<11;row++) {
+      $sameRow = $($selectRowTmpl.format( {row: row}, $rootTable );
+      $allRows[row] = $sameRow;
+      var $leftCell = null;
 
-      for (var col=0;col<11;col++,offs++) {
-        var coords = {row: row, col: col};
+      $sameRow.append($contentTmpl);
 
-        new_html.push( tmplt.format(coords) );
-        var cellState = 
-          {
-            row: row, col: col, domNode: selTmpl.format(coords),
-            toLeft: toLeft, toRight: null, toAbove: null, toBelow: null,
-            wordLeft: $(), wordRight: $(), wordAbove: $(), wordBelow: $(),
+      // 
+      $sameRow.each(
+        function( colIdx, nextCell ) { 
+          if( leftCell != null ) {
+            leftCell.toRight = nextCell;
+            nextCell.toLeft = leftCell;
+          }
+          toLeft = nextCell;
 
-            addClass: function(classStr) {
-              this.domNode.addClass(classStr);
-              return this;
-            },
-            removeClass: function(classStr) {
-              this.domNode.removeClass(classStr);
-              return this;
-            },
+          // Iterate through the cells in document order, adding image data to
+          // each cell and building a horizontal doubly linked lists immediate
+          // neighbors and empty collections for upstream/downstream words.
+          this.nextCell.row = row;
+          this.col = this.colIdx;
+          this.domNode = $nextCell;
+),
+          this.toAbove = null;
+          this.toBelow = null,
+          this.wordLeft  = $();
+          this.wordRight = $();
+          this.wordAbove = $();
+          this.wordBelow = $();
 
-            content: function(s) { if( s === undefined ) { return this.domNode.data('content'); } else { return this.domNode.data('content', s); } },
 
-            isBlank: function() { return this.domNode.data('content') == ''; },
-
-            showCursor: function() {
-              $('img.xw-value', this.domNode).attr('src', $valueImages.unk);
-            },
-
-            hideCursor: function() {
-              if( this.isBlank() ) {
-                $('img.xw-value', this.domNode).attr('src', $valueImages.blank);
-              } else {
-                var content = this.content();
-                $('img.xw-value', this.domNode).attr('src', $valueImages.attr(content));
-              }
-            },
-
-            advanceCursorRight: function() {
-              var nbrR = this.toRight;
-              if( nbrR == null ) { return false; }
-
-              if( !nbrR.isBlank() ) {
-                this._moveCursorRight();
-                return false;
-              }
-
-              var nbrRR = nbrR.toRight;
-              if( nbrRR != null && !nbrRR.isBlank() ) { return false; }
-
-              var bnkU = (this.toAbove != null) ? this.toAbove.isBlank() : true;
-              var bnkD = (this.toBelow != null) ? this.toBelow.isBlank() : true;
-
-              if(!bnkU) {
-                if(!bnkD) { return false; }
-
-                if(!this.toAbove.toRight.isBlank()) { return false; }
-              } else {
-                if(!this.toBelow.toRight.isBlank()) { return false; }
-              }
-
-              this._extendCursorRight();
-            },
-
-            advanceCursorDown: function() {
-              if (this.wordBelow.size() > 0) {
-                this._moveCursorBelow();
-                return true;
-              }
-
-              if (this.toBelow == null) { return false; }
-
-              if (this.toBelow.toBelow != null &&
-                 !this.toBelow.toBelow.isBlank()) {
-                return false;
-              }
-
-              if (this.toLeft != null && !this.toLeft.isBlank() ) {
-                if (this.toRight != null && !this.toRight.isBlank() ) {
-                  return false;
-                }
-                if(!this.toLeft.toBelow.isBlank()) {
-                  return false;
-                }
-              } else if (this.toRight != null && !this.toRight.isBlank() ) {
-                if(!this.toRight.toBelow.isBlank()) {
-                  return false;
-                }
-              }
-
-              this._extendCursorBelow();
-              return true;
-            },
-
-            _advanceCursorRight: function() {
-              this.hideCursor();
-              $editorCell = this.toRight;
-              $sameRow    = $($selectRowTmpl.format(this), $rootTable);
-              $sameCol    = $($selectColTmpl.format(this), $rootTable);
-              $editorCell.showCursor();
-            },
-
-            _advanceCursorBelow: function() {
-              this.hideCursor();
-              $editorCell = this.toBelow;
-              $sameRow    = $($selectRowTmpl.format(this), $rootTable);
-              $sameCol    = $($selectColTmpl.format(this), $rootTable);
-              $editorCell.showCursor();
-            },
-
-            _extendCursorRight: function() {
-              this.hideCursor();
-              $editorCell = this.toRight;
-              $sameRow    = $($selectRowTmpl.format(this), $rootTable);
-              $sameCol    = $($selectColTmpl.format(this), $rootTable);
-              $editorCell.showCursor();
-            },
-
-            _extendCursorBelow: function() {
-              this.hideCursor();
-              $editorCell = this.toBelow;
-              $sameRow    = $($selectRowTmpl.format(this), $rootTable);
-              $sameCol    = $($selectColTmpl.format(this), $rootTable);
-              $editorCell.showCursor();
-            },
+          // Augment the DOM node with methods for building, traversing,
+          // validating, and extracting CrossWord Graph's consolidation 
+          // contents.
+          this.addClass = function(classStr) {
+            this.domNode.addClass(classStr);
+            return this;
+          },
+          this.removeClass: function(classStr) {
+            this.domNode.removeClass(classStr);
+            return this;
           };
 
-        if( toLeft != null ) {
-          toLeft.toRight = cellState;
+          // If called with an argument, store it as an HTML5 data attribute
+          // under a previously configured domain owner.  Otherwise, return
+          // data from that location.
+          this.content = function(s) { if( s === undefined ) { return this.domNode.data('content'); } else { return this.domNode.data('content', s); } };
+
+          // Sweet, sweet, sugar.
+          this.isBlank = function() { return this.domNode.data('content') == ''; };
+
+          this.showCursor = function() {
+            $('img.xw-value', this.domNode).attr('src', $valueImages.unk);
+          };
+
+          this.hideCursor = function() {
+            if( this.isBlank() ) {
+              $('img.xw-value', this.domNode).attr('src', $valueImages.blank);
+            } else {
+              var content = this.content();
+              $('img.xw-value', this.domNode).attr('src', $valueImages.attr(content));
+            }
+          };
+
+          this.advanceCursorRight function() {
+            var nbrR = this.toRight;
+            if( nbrR == null ) { return false; }
+
+            if( !nbrR.isBlank() ) {
+              this._moveCursorRight();
+              return false;
+            }
+
+            var nbrRR = nbrR.toRight;
+            if( nbrRR != null && !nbrRR.isBlank() ) { return false; }
+
+            var bnkU = (this.toAbove != null) ? this.toAbove.isBlank() : true;
+            var bnkD = (this.toBelow != null) ? this.toBelow.isBlank() : true;
+
+            if(!bnkU) {
+              if(!bnkD) { return false; }
+
+              if(!this.toAbove.toRight.isBlank()) { return false; }
+            } else {
+              if(!this.toBelow.toRight.isBlank()) { return false; }
+            }
+
+            this._extendCursorRight();
+          };
+
+
+          this.advanceCursorDown = function() {
+            if (this.wordBelow.size() > 0) {
+              this._moveCursorBelow();
+              return true;
+            }
+
+            if (this.toBelow == null) { return false; }
+
+            if (this.toBelow.toBelow != null &&
+               !this.toBelow.toBelow.isBlank()) {
+              return false;
+            }
+
+            if (this.toLeft != null && !this.toLeft.isBlank() ) {
+              if (this.toRight != null && !this.toRight.isBlank() ) {
+                return false;
+              }
+              if(!this.toLeft.toBelow.isBlank()) {
+                return false;
+              }
+            } else if (this.toRight != null && !this.toRight.isBlank() ) {
+              if(!this.toRight.toBelow.isBlank()) {
+                return false;
+              }
+            }
+
+            this._extendCursorBelow();
+            return true;
+          },
+
+          //
+          // Private methods for internal use only.
+          //
+          // As used below, "Advancing" is the act of moving a cursor within a
+          // file's pre-existing allocaed storage shortfall.  "Extending" is
+          // similar insofar as it involves moving a cursor, but only in the
+          // foreward direction and with a user's acknowledgement that the
+          // necessity to allocate storage before moving the cursor exists.
+          //
+          // Finally, "Contracting" refers to a left/up-ward cursor movement
+          // that permits returning the evacuated character as unused and
+          // no longer reserved for the current word's use.
+          _advanceCursorRight: function() {
+            this.hideCursor();
+            $editorCell = this.toRight;
+            $sameRow    = $($selectRowTmpl.format(this), $rootTable);
+            $sameCol    = $($selectColTmpl.format(this), $rootTable);
+            $editorCell.showCursor();
+          },
+
+          _advanceCursorBelow: function() {
+            this.hideCursor();
+            $editorCell = this.toBelow;
+            $sameRow    = $($selectRowTmpl.format(this), $rootTable);
+            $sameCol    = $($selectColTmpl.format(this), $rootTable);
+            $editorCell.showCursor();
+          },
+
+          _extendCursorRight: function() {
+            this.hideCursor();
+            $editorCell = this.toRight;
+            $sameRow    = $($selectRowTmpl.format(this), $rootTable);
+            $sameCol    = $($selectColTmpl.format(this), $rootTable);
+            $editorCell.showCursor();
+          },
+
+          _extendCursorBelow: function() {
+            this.hideCursor();
+            $editorCell = this.toBelow;
+            $sameRow    = $($selectRowTmpl.format(this), $rootTable);
+            $sameCol    = $($selectColTmpl.format(this), $rootTable);
+            $editorCell.showCursor();
+          },
+        }; <!-- DOM modifications in function parameter -->
+      ); <!-- jQuery.each
+    } <!-- First of two "For" loops.
+
+    // Populate the vertical linked list for traversing columns over rows.
+    for (var col=0;col<11;col+=1) {
+      var $aboveCell = null;
+      $sameCol = $($selectColTmpl.format( {col: col}, $rootTable );
+
+      $sameCol.each(
+        function( colIdx, nextCell ) { 
+          if( aboveCell != null ) {
+            nextCell.toAbove = aboveCell;
+            toAbove.toBelow = cellState;
+          }
+          aboveCell = nextCell;
+
+          if(aboveCell != null) {
+            this.toAbove = cellAbove;
+            cellAbove.toBelow = nextCell;
+          }
         }
-        toLeft = cellState;
-        $cellStates[offs] = cellState;
-      }
-
-      new_html.push('</tr>');
-    }
-    $rootTable.html(new_html.join(''));
-
-    // Populate the vertical linked list and evaluate the DOM node lookup 
-    // expressions construted in the previous loop.
-    for (var offs=0;offs<11;offs-=120) {
-      var toAbove = $cellStates[offs];
-      toAbove.domNode = $(toAbove.domNode, $rootTable);
-      for (offs+=11;offs<121;offs+=11) {
-        var cellState = $cellStates[offs];
-        cellState.domNode = $(cellState.domNode, $rootTable);
-
-        cellState.toAbove = toAbove;
-        toAbove.toBelow = cellState;
-        toAbove = cellState;
-      }
+      );
     }
 
     $rootTable.on('click', 'div.xw-cell', onClickCell);
-    // $("#lettergrid div").on('click', onClickCell);
   }
   
   function onClickCell(event) {

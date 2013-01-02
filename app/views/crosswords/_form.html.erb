@@ -24,13 +24,53 @@
     <% end %>
     <%= f.submit %>
   <% end %></div>
-  <div class="span7"><table border="0" cellpadding="0" cellspacing="0" width="440" height="660">
-    <tr valign="top">
-        <td colspan="3"><img name="yellowcard_00" src="<%= path_to_image 'slice/yellow_card_00.jpg' %>" width="440" height="302" border="0"></td>
-    </tr>
-    <tr valign="top">
-        <td rowspan="2"><img name="yellowcard_01" src="<%= path_to_image 'slice/yellow_card_01.jpg' %>" width="116" height="358" border="0"></td>
-        <td><table id="lettergrid" class="xwt-grid" width="308" height="308" border="0" cellpadding="0" cellspacing="0">
+  <div class="span7"><table border="0" cellpadding="0" cellspacing="0" width="440">
+	<!-- Serif DrawPlus X4 -->
+	<tr>
+		<td><img src="shim.gif" width="10" height="1" border="0"></td>
+		<td><img src="shim.gif" width="42" height="1" border="0"></td>
+		<td><img src="shim.gif" width="34" height="1" border="0"></td>
+		<td><img src="shim.gif" width="22" height="1" border="0"></td>
+		<td><img src="shim.gif" width="112" height="1" border="0"></td>
+		<td><img src="shim.gif" width="28" height="1" border="0"></td>
+		<td><img src="shim.gif" width="28" height="1" border="0"></td>
+		<td><img src="shim.gif" width="84" height="1" border="0"></td>
+		<td><img src="shim.gif" width="28" height="1" border="0"></td>
+		<td><img src="shim.gif" width="28" height="1" border="0"></td>
+		<td><img src="shim.gif" width="24" height="1" border="0"></td>
+		<td><img src="shim.gif" width="1" height="1" border="0"></td>
+	</tr>
+	<tr valign="top">
+		<td colspan="11"><img name="card_00" src="<%= path_to_image 'card/card_00.jpg' %>" width="440" height="178" border="0"></td>
+	</tr>
+	<tr valign="top">
+		<td rowspan="5" colspan="2"><img name="card_01" src="<%= path_to_image 'card/card_01.jpg' %>" width="52" height="134" border="0"></td>
+		<td rowspan="3" colspan="3">
+			<table id="reveal" class="xwt-grid" width="168" height="84" border="0" cellpadding="0" cellspacing="0"><tr><td><div width="168" height="84">&nbsp;</div></table>
+		</td>
+		<td rowspan="2" colspan="2"><img name="card_03" src="<%= path_to_image 'card/card_03.jpg' %>" width="56" height="56" border="0"></td>
+		<td>
+			<table id="bonusvalue" class="xwt-grid" width="84" height="28" border="0" cellpadding="0" cellspacing="0"><tr><td><div width="84" height="28">&nbsp;</div></table>
+		</td>
+		<td rowspan="2" colspan="3"><img name="card_05" src="<%= path_to_image 'card/card_05.jpg' %>" width="80" height="56" border="0"></td>
+	</tr>
+	<tr valign="top">
+		<td><img name="card_06" src="<%= path_to_image 'card/card_06.jpg' %>" width="84" height="28" border="0"></td>
+	</tr>
+	<tr valign="top">
+		<td rowspan="2"><img name="card_07" src="<%= path_to_image 'card/card_07.jpg' %>" width="28" height="74" border="0"></td>
+		<td colspan="3">
+			<table id="bonusword" class="xwt-grid" width="140" height="28" border="0" cellpadding="0" cellspacing="0"><tr><td><div width="140" height="28">&nbsp;</div></table>
+		</td>
+		<td rowspan="2" colspan="2"><img name="card_09" src="<%= path_to_image 'card/card_09.jpg' %>" width="52" height="74" border="0"></td>
+	</tr>
+	<tr valign="top">
+		<td colspan="3"><img name="card_10" src="<%= path_to_image 'card/card_10.jpg' %>" width="168" height="46" border="0"></td>
+		<td colspan="3"><img name="card_11" src="<%= path_to_image 'card/card_11.jpg' %>" width="140" height="46" border="0"></td>
+	</tr>
+	<tr valign="top">
+		<td colspan="2"><img name="card_12" src="<%= path_to_image 'card/card_12.jpg' %>" width="56" height="4" border="0"></td>
+		<td rowspan="3" colspan="6"><table id="lettergrid" class="xwt-grid" width="308" height="308" border="0" cellpadding="0" cellspacing="0">
           <% for ii in (0..10) do %>
           <tr>
             <td><div data-rowid="<%= ii %>" data-colid="0" data-content="" class="xw-cell xw-inactive">
@@ -47,12 +87,19 @@
           </tr>
           <% end %>
         </table></td>
-        <td rowspan="2"><img name="yellowcard_03" src="<%= path_to_image 'slice/yellow_card_03.jpg' %>" width="16" height="358" border="0"></td>
-    </tr>
-    <tr valign="top">
-        <td><img name="yellowcard_04" src="<%= path_to_image 'slice/yellow_card_04.jpg' %>" width="308" height="50" border="0"></td>
-    </tr>
-  </table></div>
+		<td rowspan="4"><img name="card_14" src="<%= path_to_image 'card/card_14.jpg' %>" width="24" height="352" border="0"></td>
+	</tr>
+	<tr valign="top">
+		<td rowspan="3"><img name="card_15" src="<%= path_to_image 'card/card_15.jpg' %>" width="10" height="348" border="0"></td>
+		<td colspan="2"><img name="card_16" src="<%= path_to_image 'card/card_16.jpg' %>" width="76" height="300" border="0"></td>
+		<td rowspan="3"><img name="card_17" src="<%= path_to_image 'card/card_17.jpg' %>" width="22" height="348" border="0"></td>
+	</tr>
+	<tr valign="top">
+		<td rowspan="2" colspan="2"><img name="card_18" src="<%= path_to_image 'card/card_18.jpg' %>" width="76" height="48" border="0"></td>
+	</tr>
+	<tr valign="top">
+		<td colspan="6"><img name="card_19" src="<%= path_to_image 'card/card_19.jpg' %>" width="308" height="44" border="0"></td>
+	</tr></table></div>
 </div>
 <script type="text/javascript">
   var $editorCell = null;
@@ -89,7 +136,7 @@
     // Add navigability in the DOM for neighbors and upstream/downstream word
     // set identification:
     for (var row=0;row<11;row++) {
-      $sameRow = $($selectRowTmpl.format( {row: row}, $rootTable );
+      $sameRow = $($selectRowTmpl.format( {row: row}, $rootTable ));
       $allRows[row] = $sameRow;
       var $leftCell = null;
 
@@ -259,7 +306,7 @@
     // Populate the vertical linked list for traversing columns over rows.
     for (var col=0;col<11;col+=1) {
       var $aboveCell = null;
-      $sameCol = $($selectColTmpl.format( {col: col}, $rootTable );
+      $sameCol = $($selectColTmpl.format( {col: col}, $rootTable ));
 
       $sameCol.each(
         function( colIdx, nextCell ) { 

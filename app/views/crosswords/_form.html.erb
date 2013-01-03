@@ -18,7 +18,7 @@
     <%= f.submit %>
   </div>
   <div class="span7">
-    <table id="cardroot" class="xw-grid">
+    <table id="cardroot" class="xw-sliced">
       <tr>
         <td><img src="<%= path_to_image 'card/shim.gif' %>" width="10" height="1" border="0"></td>
         <td><img src="<%= path_to_image 'card/shim.gif' %>" width="42" height="1" border="0"></td>
@@ -39,7 +39,7 @@
       <tr valign="top">
         <td rowspan="5" colspan="2"><img name="card_01" src="<%= path_to_image 'card/card_01.jpg' %>"></td>
         <td rowspan="3" colspan="3">
-          <table id="reveal" class="xwt-grid">
+          <table id="reveal" class="xw-layered">
             <tr>
               <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
               <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
@@ -68,11 +68,11 @@
         </td>
         <td rowspan="2" colspan="2"><img name="card_03" src="<%= path_to_image 'card/card_03.jpg' %>"></td>
         <td>
-          <table id="bonusvalue" class="xwt-grid">
+          <table id="bonusvalue" class="xw-sliced">
             <tr>
-              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
-              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
-              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><img src="<%= path_to_image 'fill/altPath.png' %>"></td>
+              <td><img src="<%= path_to_image 'fill/pink2.png' %>"></td>
+              <td><img src="<%= path_to_image 'fill/imageSrc.png' %>"></td>
             </tr>
           </table>
         </td>
@@ -84,7 +84,7 @@
       <tr valign="top">
         <td rowspan="2"><img name="card_07" src="<%= path_to_image 'card/card_07.jpg' %>"></td>
         <td colspan="3">
-          <table id="bonusword" class="xwt-grid">
+          <table id="bonusword" class="xw-layered">
             <tr>
               <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
               <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
@@ -102,20 +102,20 @@
       </tr>
       <tr valign="top">
         <td colspan="2"><img name="card_12" src="<%= path_to_image 'card/card_12.jpg' %>"></td>
-        <td rowspan="3" colspan="6"><table id="lettergrid">
+        <td rowspan="3" colspan="6"><table id="lettergrid" class="xw-layered xw-horizontal">
               <% for ii in (0..10) do %>
               <tr>
-                <td><div data-rowid="<%= ii %>" data-colid="0" data-content="" class="xw-cell xw-inactive">
-                <td><div data-rowid="<%= ii %>" data-colid="1" data-content="" class="xw-cell xw-inactive">
-                <td><div data-rowid="<%= ii %>" data-colid="2" data-content="" class="xw-cell xw-inactive">
-                <td><div data-rowid="<%= ii %>" data-colid="3" data-content="" class="xw-cell xw-inactive">
-                <td><div data-rowid="<%= ii %>" data-colid="4" data-content="" class="xw-cell xw-inactive">
-                <td><div data-rowid="<%= ii %>" data-colid="5" data-content="" class="xw-cell xw-inactive">
-                <td><div data-rowid="<%= ii %>" data-colid="6" data-content="" class="xw-cell xw-inactive">
-                <td><div data-rowid="<%= ii %>" data-colid="7" data-content="" class="xw-cell xw-inactive">
-                <td><div data-rowid="<%= ii %>" data-colid="8" data-content="" class="xw-cell xw-inactive">
-                <td><div data-rowid="<%= ii %>" data-colid="9" data-content="" class="xw-cell xw-inactive">
-                <td><div data-rowid="<%= ii %>" data-colid="10" data-content="" class="xw-cell xw-inactive">
+                <td><div data-rowid="<%= ii %>" data-colid="0" data-content="" class="xw-cell">
+                <td><div data-rowid="<%= ii %>" data-colid="1" data-content="" class="xw-cell">
+                <td><div data-rowid="<%= ii %>" data-colid="2" data-content="" class="xw-cell">
+                <td><div data-rowid="<%= ii %>" data-colid="3" data-content="" class="xw-cell">
+                <td><div data-rowid="<%= ii %>" data-colid="4" data-content="" class="xw-cell">
+                <td><div data-rowid="<%= ii %>" data-colid="5" data-content="" class="xw-cell">
+                <td><div data-rowid="<%= ii %>" data-colid="6" data-content="" class="xw-cell">
+                <td><div data-rowid="<%= ii %>" data-colid="7" data-content="" class="xw-cell">
+                <td><div data-rowid="<%= ii %>" data-colid="8" data-content="" class="xw-cell">
+                <td><div data-rowid="<%= ii %>" data-colid="9" data-content="" class="xw-cell">
+                <td><div data-rowid="<%= ii %>" data-colid="10" data-content="" class="xw-cell">
               </tr>
               <% end %>
             </table></td>
@@ -123,7 +123,7 @@
       </tr>
       <tr valign="top">
         <td rowspan="3"><img name="card_15" src="<%= path_to_image 'card/card_15.jpg' %>"></td>
-        <td colspan="2"><img name="card_16" src="<%= path_to_image 'card/card_16.jpg' %>"></td>
+        <td colspan="2"><img name="card_16" src="<%= path_to_image 'card/card_16C.jpg' %>"></td>
         <td rowspan="3"><img name="card_17" src="<%= path_to_image 'card/card_17.jpg' %>"></td>
       </tr>
       <tr valign="top">
@@ -160,9 +160,9 @@
   var $rootTable = $('#lettergrid');
   var $wordCount = 0;
   
+  var $blankImage = "<%= path_to_image 'val/blank.png' %>";
+  var $cursorImage = "<%= path_to_image 'val/qm.png' %>";
   var $valueImages = $( {
-    blank: "<%= path_to_image 'slice/blank.png' %>",
-    unk: "<%= path_to_image 'val/qm.png' %>",
     A: "<%= path_to_image 'val/A.png' %>", B: "<%= path_to_image 'val/B.png' %>",
     C: "<%= path_to_image 'val/C.png' %>", D: "<%= path_to_image 'val/D.png' %>",
     E: "<%= path_to_image 'val/E.png' %>", F: "<%= path_to_image 'val/F.png' %>",
@@ -180,7 +180,7 @@
     
   function initialize() {
     var contentTmpl = 
-      '<img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-border xw-unit" src="<%= path_to_image 'border/unit.png' %>" /><img class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" /><img class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" /><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>" /><img class="xw-fill xw-light" src="<%= path_to_image 'fill/brite1.png' %>" /></div></td>';
+      '<img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" /><img class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" /><img class="xw-fill xw-revealed" src="<%= path_to_image 'fill/brite1.png' %>" /><img class="xw-fill xw-selected" src="<%= path_to_image 'fill/selected1.png' %>" /><img class="xw-fill xw-mainpath" src="<%= path_to_image 'fill/imageSrc.png' %>" /><img class="xw-fill xw-altpath" src="<%= path_to_image 'fill/altPath2.png' %>" /><img class="xw-fill xw-initial" src="<%= path_to_image 'fill/pink2.png' %>" /></div></td>';
     var selectRowTmpl = 'div[data-rowid="{row}"]';
     var selectColTmpl = 'div[data-colid="{col}"]';
 
@@ -189,24 +189,24 @@
     // immediate neighbors for horizontal navigability.
     for (var row=0;row<11;row++) {
       var cellLeft = null;
-      var sameRow = $(selectRowTmpl.format( {row: row}, $rootTable ));
-      $allCellRows[row] = sameRow;
+      $allCellRows[row] = $(selectRowTmpl.format( {row: row}, $rootTable ));
 
-      sameRow.append(contentTmpl);
+      $allCellRows[row].append(contentTmpl);
 
-      sameRow.each(
+      $allCellRows[row].each(
         function(colIdx, nextCell) { 
-          nextCell.selfNode = nextCell;
+          nextCell.selfNode = $(nextCell);
+          nextCell.content  = '';
 
-          nextCell.sameRow = sameRow;
-          nextCell.row     = row;
-          nextCell.toLeft  = cellLeft;
-          nextCell.toRight = null;
+          nextCell.sameRow  = $allCellRows[row];
+          nextCell.row      = row;
+          nextCell.toLeft   = cellLeft;
+          nextCell.toRight  = null;
 
-          nextCell.sameCol = null;
-          nextCell.col     = colIdx;
-          nextCell.toAbove = null;
-          nextCell.toBelow = null;
+          nextCell.sameCol  = null;
+          nextCell.col      = colIdx;
+          nextCell.toAbove  = null;
+          nextCell.toBelow  = null;
 
           if (cellLeft != null) { cellLeft.toRight = nextCell; }
           cellLeft = nextCell;
@@ -220,7 +220,7 @@
     // boundary highlighting and cursor position management.
     for (var col=0;col<11;col+=1) {
       var cellAbove = null;
-      sameCol = $(selectColTmpl.format({col: col}, $rootTable));
+      var sameCol = $(selectColTmpl.format({col: col}, $rootTable));
       // $allCellCols[col] = sameCol
 
       sameCol.each(
@@ -230,10 +230,6 @@
 
           if (cellAbove != null) { cellAbove.toBelow = nextCell; }
           cellAbove = nextCell;
-
-          // Validation sanity check
-          if (nextCell.col != col) { alert(nextCell.col + " != " + col); }
-          if (nextCell.row != rowIdx) { alert(nextCell.row + " != " + rowIdx); }
         }
       );
     } <!-- Latter of two intialization "for" loops.
@@ -263,51 +259,52 @@
         return false;
       }
 
-      if (! isBlank(cellState.toLeft)) {
-        if (! isBlank(cellState.toRight)) {
+      if (isFilled(cellState.toLeft)) {
+        if (isFilled(cellState.toRight)) {
           return showHorizontalMergeError(cellState);
-        } else if (! isBlank(cellState.toAbove)) {
-          if (! isBlank(cellState.toBelow)) {
+        } else if (isFilled(cellState.toAbove)) {
+          if (isFilled(cellState.toBelow)) {
             return showVerticalMergeError(cellState);
           }
-          if (! isBlank(cellState.toAbove.toLeft)) {
+          if (isFilled(cellState.toAbove.toLeft)) {
             return showCongestionError(
               cellState, cellState.toLeft, cellState.toAbove);
           }
-        } else if (! isBlank(cellState.toBelow)) {
-          if (! isBlank(cellState.toBelow.toLeft)) {
+        } else if (isFilled(cellState.toBelow)) {
+          if (isFilled(cellState.toBelow.toLeft)) {
             return showCongestionError(
               cellState, cellState.toLeft, cellState.toBelow);
           }
         }
-      } else if (! isBlank(cellState.toRight)) {
-        if (! isBlank(cellState.toAbove)) {
-          if (! isBlank(cellState.toBelow)) {
+      } else if (isFilled(cellState.toRight)) {
+        if (isFilled(cellState.toAbove)) {
+          if (isFilled(cellState.toBelow)) {
             return showVerticalMergeError(cellState);
           }
-          if (! isBlank(cellState.toAbove.toRight)) {
+          if (isFilled(cellState.toAbove.toRight)) {
             return showCongestionError(
               cellState, cellState.toRight, cellState.toAbove);
           }
-        } else if (! isBlank(cellState.toBelow)) {
-          if (! isBlank(cellState.toBelow.toRight)) {
+        } else if (isFilled(cellState.toBelow)) {
+          if (isFilled(cellState.toBelow.toRight)) {
             return showCongestionError(
               cellState, cellState.toRight, cellState.toBelow);
           }
         }
-      } else if ((! isBlank(cellState.toAbove)) &&
-                 (! isBlank(cellState.toBelow))) {
+      } else if ((isFilled(cellState.toAbove)) &&
+                 (isFilled(cellState.toBelow))) {
         return showVerticalMergeError(cellState);
       }
+
+      // TODO: Account for clicks at the end of a word in the same orientation
+      // TODO: Account for clicks at the head of a word in either orientation
+      // TODO: Account for clicks at the end of a word in the alt direction
+      // TODO: Remove the hack that follows!
+      cellState.selfNode.addClass('xw-htop xw-hend xw-vtop xw-vend');
     }
   
     $editorCell = cellState;
-  
-    addRowHighlighting();
-    addColumnHighlighting();
-  
-    $editorCell.showCursor();
-    $(document).on('keydown', onKeyboardInput);
+    enableEditor();
   }
   
   function onKeyboardInput(event) {
@@ -334,7 +331,7 @@
       // <SPACE> marks a tripling multiplier TODO
     } else if (keyValue == 9 ) {
       toggleDirectionMode(); // <TAB> toggles horiz/vert direction modes
-    } else if (keyValue == 8 || keyValue == 13 ) {
+    } else if (keyValue == 27 || keyValue == 13 ) {
       closeWordEditor();  // <ESC> or <RETURN> to stop editting
     } else if (keyValue = 37 && $horizontalMode ) {
       moveCursorLeft();   // <LEFT> moves the cursor left
@@ -361,15 +358,128 @@
     if( $horizontalMode ) {
       $rootTable.removeClass('xw-horizontal').addClass('xw-vertical');
       $horizontalMode = false;
+
+      $mainStrategy = $verticalStrategy;
+      $altStrategy  = $horizontalStrategy;
     } else {
       $rootTable.removeClass('xw-vertical').addClass('xw-horizontal');
       $horizontalMode = true;
+
+      $mainStrategy = $horizontalStrategy;
+      $altStrategy  = $verticalStrategy;
     }
   }
   
   //
-  // Navigation assistants.  Sweet, sweet, sugar.
+  // Orientation-agnostic navigation interface.
+  // -- Exposes orientation-dependent properties (e.g. Left/Right/Above/Below)
+  //    through an orientation-agnostic dialect (e.g. Head/Tail Main/Alt,
+  //    Next/Prev) with $orientationMode gating which behavior to implement.
   //
+
+  var $horizontalStrategy = {
+    unit: '.xw-htop .xw-hend',          mid: '.xw-hmid',
+    head: '.xw-htop',                  tail: '.xw-hend',
+    altUnit: '.xw-vtop .xw-vend',    altMid: '.xw-vmid',
+    altHead: '.xw-vtop',            altTail: '.xw-vend',
+
+    nextCell: function(fromCell) {
+      return fromCell.toRight;
+    },
+    prevCell: function(fromCell) {
+      return fromCell.toLeft;
+    },
+    isHead: function(checkCell) {
+      return checkCell.selfNode.hasClass('xw-htop');
+    },
+    isTail: function(checkCell) {
+      return checkCell.selfNode.hasClass('xw-hend');
+    }
+  };
+  var $verticalStrategy = {
+    unit: '.xw-htop .xw-hend',          mid: '.xw-hmid',
+    head: '.xw-htop',                  tail: '.xw-hend',
+    altUnit: '.xw-vtop .xw-vend',    altMid: '.xw-vmid',
+    altHead: '.xw-vtop',            altTail: '.xw-vend',
+
+    nextCell: function(fromCell) {
+      return fromCell.toBelow;
+    },
+    prevCell: function(fromCell) {
+      return fromCell.toAbove;
+    },
+    isHead: function(checkCell) {
+      return checkCell.selfNode.hasClass('xw-vtop');
+    },
+    isTail: function(checkCell) {
+      return checkCell.selfNode.hasClass('xw-vend');
+    }
+  };
+    
+  var $mainStrategy = $horizontalStrategy;
+  var $altStrategy  = $verticalStrategy;
+
+  function mainNextCell(ofCell) { return $mainStrategy.nextCell(ofCell); }
+  function altNextCell(ofCell) { return $altStrategy.nextCell(ofCell); }
+
+  function mainPrevCell(ofCell) { return $mainStrategy.prevCell(ofCell); }
+  function altPrevCell(ofCell) { return $altStrategy.prevCell(ofCell); }
+
+  function mainIsHead(ofCell) { return $mainStrategy.isHead(ofCell); }
+  function altIsHead(ofCell) { return $altStrategy.isHead(ofCell); }
+
+  function mainIsTail(ofCell) { return $mainStrategy.isTail(ofCell); }
+  function altIsTail(ofCell) { return $altStrategy.isTail(ofCell); }
+
+  //
+  // Word navigation helpers
+  // -- Includes helpers for "If Not Null And Check X" comparisons
+  //
+
+  function mainWord(ofCell) {
+    var retVal = $(ofCell);
+    var currentCell = ofCell;
+    while (currentCell != null && ! mainIsTail(currentCell)) {
+      retVal = retVal.add(currentCell)
+      currentCell = mainNextCell(currentCell);
+    }
+
+    currentCell = ofCell;
+    while (currentCell != null && ! mainIsHead(currentCell)) {
+      retVal = retVal.add(currentCell)
+      currentCell = mainPrevCell(currentCell);
+    }
+
+    return retVal;
+  }
+
+  function altWord(ofCell) {
+    var retVal = $(ofCell);
+    var currentCell = ofCell;
+    while (currentCell != null && ! altIsTail(currentCell)) {
+      retVal = retVal.add(currentCell)
+      currentCell = altNextCell(currentCell);
+    }
+    currentCell = ofCell;
+
+    while (currentCell != null && ! altIsHead(currentCell)) {
+      retVal = retVal.add(currentCell)
+      currentCell = altPrevCell(currentCell);
+    }
+
+    return retVal;
+  }
+
+  // Finds the end of a word of the current orientation mode from the given
+  // parameter cell.  It is the callers responsibility that the argument cell
+  // is part of a word--no error checking is provided.
+  function mainWordEnd(fromCell) {
+    var nextCell = fromCell;
+    while (!mainIsTail(nextCell)) {
+      nextCell = mainNextCell(nextCell);
+    }
+    return nextCell;
+  }
 
   // isBlank() and isFilled() each return false on null input.  Depending on
   // how null is expected to be handled, it may be favorible to negate the
@@ -394,73 +504,24 @@
     return ((checkCell != null) && (checkCell.content != ''));
   }
 
-  function wordLeft(ofCell) {
-    var retVal = $();
-    var nextCell = ofCell.toLeft;
-    while (nextCell != null && !nextCell.isBlank()) {
-      retVal = retVal.add(nextCell)
-      nextCell = nextCell.toLeft;
-    }
-
-    return retVal;
-  }
-
-  function wordRight(ofCell) {
-    var retVal = $();
-    var nextCell = this.toRight;
-    while (nextCell != null && !nextCell.isBlank()) {
-      retVal = retVal.add(nextCell)
-      nextCell = nextCell.toRight;
-    }
-
-    return retVal;
-  }
-
-  function wordAbove(ofCell) {
-    var retVal = $();
-    var nextCell = this.toAbove;
-    while (nextCell != null && !nextCell.isBlank()) {
-      retVal = retVal.add(nextCell)
-      nextCell = nextCell.toAbove;
-    }
-
-    return retVal;
-  }
-
-  function wordBelow(ofCell) {
-    var retVal = $();
-    var nextCell = this.toBelow;
-    while (nextCell != null && !nextCell.isBlank()) {
-      retVal = retVal.add(nextCell)
-      nextCell = nextCell.toBelow;
-    }
-
-    return retVal;
-  }
-
-  function wordEndHorizontal(ofCell) {
-    wordRight(ofCell).filter(".xw-hend").get()[0];
-  }
-
-  function wordEndVertical(ofCell) {
-    wordDown(ofCell).filter(".xw-vend").get()[0];
-  }
-
   //
   // Cursor enable/disable methods
   //
 
   function showCursor() {
-    $('img.xw-value', $editorCell.selfNode).attr('src', $valueImages.unk);
-  };
+    $('img.xw-value', $editorCell.selfNode).attr('src', $cursorImage);
+  }
 
   function hideCursor() {
-    if (this.isBlank()) {
-      $('img.xw-value', $editCell.selfNode).attr('src', $valueImages.blank);
+    var cursorReplacement;
+
+    if (isBlank($editorCell)) {
+      cursorReplacement = $blankImage
     } else {
-      var content = this.content();
-      $('img.xw-value', $editorCell.selfNode).attr('src', $valueImages.attr($editorCell.content));
+      cursorReplacement = $valueImages.attr($editorCell.content);
     }
+
+    $('img.xw-value', $editorCell.selfNode).attr('src', cursorReplacement);
   }
 
   //
@@ -482,7 +543,7 @@
   }
 
   function moveCursorLeft() {
-    if (this.selfNode.hasClass('xw-htop')) { return false; }
+    if ($editorCell.selfNode.hasClass('xw-htop')) { return false; }
 
     _stepHorizontal($editorCell.toLeft);
     return true;
@@ -513,17 +574,17 @@
   // by moving the start-of-word marker, respectively.
   function _stepHorizontal(nextCell) {
     hideCursor();
-    dropColumnHighlighting();
+    $editorCell.sameCol.removeClass('xw-samecol');
     $editorCell = nextCell;
-    addColumnHighlighting();
+    $editorCell.sameCol.not($editorCell).addClass('xw-samecol');
     showCursor();
   }
 
   function _stepVertical(nextCell) {
     hideCursor();
-    dropRowHighlighting();
+    $editorCell.sameRow.removeClass('xw-samerow');
     $editorCell = nextCell;
-    addRowHighlighting();
+    $editorCell.sameRow.not($editorCell).addClass('xw-samerow');
     showCursor();
   };
 
@@ -534,12 +595,22 @@
       fromEnd.selfNode.removeClass('xw-hend').addClass('xw-hmid');
     }
     
-    var nextCell = fromEnd.toRight;
-    while (! isBlank(nextCell)) {
-      nextCell.removeClass('xw-samerow').addClass('xw-hmid');
+    var thisCell = fromEnd.toRight;
+    var nextCell = thisCell.toRight;
+    var midClassStr, endClassStr;
+    if ($horizontalMode) { 
+      midClassStr = 'xw-hsel xw-hmid';
+      endClassStr = 'xw-hsel xw-hend';
+    } else {
+      midClassStr = 'xw-hmid';
+      endClassStr = 'xw-hend';
+    }
+    while (isFilled(nextCell)) {
+      thisCell.selfNode.removeClass('xw-samerow').addClass(midClassStr);
+      thisCell = nextCell;
       nextCell = nextCell.toRight;
     }
-    nextCell.removeClass('xw-samerow').addClass('xw-hend');
+    thisCell.selfNode.removeClass('xw-samerow').addClass(endClassStr);
   }
 
   function _extendVertical(fromEnd) {
@@ -549,12 +620,22 @@
       fromEnd.selfNode.removeClass('xw-vend').addClass('xw-vmid');
     }
     
-    var nextCell = fromEnd.toBelow;
-    while (! isBlank(nextCell)) {
-      nextCell.removeClass('xw-samecol').addClass('xw-vmid');
+    var thisCell = fromEnd.toBelow;
+    var nextCell = thisCell.toBelow;
+    var midClassStr, endClassStr;
+    if ($horizontalMode) { 
+      midClassStr = 'xw-vsel xw-vmid';
+      endClassStr = 'xw-vsel xw-vend';
+    } else {
+      midClassStr = 'xw-vmid';
+      endClassStr = 'xw-vend';
+    }
+    while (isFilled(nextCell)) {
+      thisCell.selfNode.removeClass('xw-samecol').addClass(midClassStr);
+      thisCell = nextCell;
       nextCell = nextCell.toBelow;
     }
-    nextCell.removeClass('xw-samecol').addClass('xw-vend');
+    thisCell.selfNode.removeClass('xw-samecol').addClass(endClassStr);
   }
 
   function _shrinkHorizontal(fromEnd) {
@@ -574,12 +655,14 @@
       fromTop.selfNode.removeClass('xw-htop').addClass('xw-hmid');
     }
     
-    var nextCell = fromTop.toRight;
-    while (! isBlank(nextCell)) {
+    var thisCell = fromTop.toRight;
+    var nextCell = thisCell.toRight;
+    while (isFilled(nextCell)) {
       nextCell.removeClass('xw-samerow').addClass('xw-hmid');
+      thisCell = nextCell;
       nextCell = nextCell.toRight;
     }
-    nextCell.removeClass('xw-samerow').addClass('xw-htop');
+    thisCell.removeClass('xw-samerow').addClass('xw-htop');
   }
 
   function _backfillVertical(fromTop) {
@@ -589,12 +672,14 @@
       fromTop.selfNode.removeClass('xw-vtop').addClass('xw-vmid');
     }
     
-    var nextCell = fromTop.toBelow;
-    while (! isBlank(nextCell)) {
+    var thisCell = fromTop.toBelow;
+    var nextCell = thisCell.toBelow;
+    while (isFilled(nextCell)) {
       nextCell.removeClass('xw-samecol').addClass('xw-vmid');
+      thisCell = nextCell;
       nextCell = nextCell.toBelow;
     }
-    nextCell.removeClass('xw-samecol').addClass('xw-vtop');
+    thisCell.removeClass('xw-samecol').addClass('xw-vtop');
   }
 
   function _collapseHorizontal(fromTop) {
@@ -630,7 +715,47 @@
     
     // Mid-word edits are easy--no expansion to consider, just advance the 
     // cursor within the active word region as tho' <RIGHT ARROW> were struck.
-    if (!$editorCell.hasClass('xw-hend')) { _stepHorizontal(nextCell); return; }
+    if (!$editorCell.selfNode.hasClass('xw-hend')) { _stepHorizontal(nextCell); return; }
+
+    // TODO: Error modal!
+    // Check conditions that block expansion.  If any of these hold, leave
+    // the cursor where it is.
+    // -- Reaching a border (there is no next cell to expand into)
+    // -- Closing a gap that would join two other words
+    // -- Populating all four cells of a 2x2 group
+    if (nextCell == null) { return; }
+
+    // Would cause this word to become adjacent to a another parallel word
+    // that begin's to the right of the next cell.
+    if ((isFilled(nextCell.toRight)) &&
+        (isFilled(nextCell.toRight.toRight))) { return; }
+
+    // Would join two vertical words
+    if ((isFilled(nextCell.toAbove)) &&
+        (isFilled(nextCell.toBelow)) &&
+        ((isFilled(nextCell.toAbove.toAbove)) ||
+         (isFilled(nextCell.toBelow.toBelow)))) { return; }
+
+    // Would complete a 2x2 congestion grid.
+    if (((isFilled($editorCell.toBelow)) &&
+         (isFilled(nextCell.toBelow))) || 
+        ((isFilled($editorCell.toAbove)) &&
+         (isFilled(nextCell.toAbove)))) { return; }
+
+    // If we reach this point, expand the edit region and step the cursor.
+    _extendHorizontal($editorCell);
+    _stepHorizontal($editorCell.toRight);
+  }
+
+  function setCharacterVertical(c) {
+    // Perform the assignment.
+    var nextCell = $editorCell.toBelow;
+    $editorCell.content = c;
+    
+    // Mid-word edits are easy--no expansion to consider, just advance the 
+    // cursor within the active word region as tho' <RIGHT ARROW> were struck.
+    if (!$editorCell.hasClass('xw-vend')) { _stepVertical(nextCell); return; }
+    $editorCell.toRight.selfNode.addClass('xw-hsel');
 
     // Check conditions that block expansion.  If any of these hold, leave
     // the cursor where it is.
@@ -638,28 +763,26 @@
     // -- Closing a gap that would join two other words
     // -- Populating all four cells of a 2x2 group
     if (nextCell == null) { return; }
-    if ((nextCell.toAbove != null) && (nextCell.toBelow != null) &&
-        (nextCell.toAbove.selfNode.hasClass('xw-vend')) &&
-        (nextCell.toBelow.selfNode.hasClass('xw-vtop'))) {
-      return;   // Would join two vertical words
-    }
-    if ((nextCell.toRight != null) &&
-        (nextCell.toRight.selfNode.hasClass('xw-htop'))) {
-      return;  // Would join active word to another adjacent to next cell.
-    }
-    if (($editorCell.toBelow != null) && (nextCell.toBelow != null) &&
-        (!isBlank($editorCell.toBelow)) &&
-        (!isBlank(nextCell.toBelow))) { return; }
-    if (($editorCell.toAbove != null) && (nextCell.toAbove != null) &&
-        (!isBlank($editorCell.toAbove)) &&
-        (!isBlank(nextCell.toAbove))) { return; }
+
+    // Would cause this word to become adjacent to a another parallel word
+    // that begin's to the right of the next cell.
+    if ((isFilled(nextCell.toBelow)) &&
+        (isFilled(nextCell.toBelow.toBelow))) { return; }
+
+    // Would join two perpendicular (horizontal) words
+    if ((isFilled(nextCell.toLeft)) &&
+        (isFilled(nextCell.toRight)) &&
+        ((isFilled(nextCell.toLeft.toLeft)) ||
+         (isFilled(nextCell.toRight.toRight)))) { return; }
+
+    // Would complete a 2x2 congestion grid.
+    if (((isFilled($editorCell.toRight)) &&
+         (isFilled(nextCell.toRight))) || 
+        ((isFilled($editorCell.toLeft)) &&
+         (isFilled(nextCell.toLeft)))) { return; }
 
     // If we reach this point, expand the edit region and step the cursor.
-    _expandHorizontal($editorCell);
-    _stepHorizontal($editorCell);
-  }
 
-  function setCharacterVertical(c) {
     // Relocate the borders of any vertical words adjacent to the changed
     // cell if it was previously blank.
     if (isBlank($editorCell)) {
@@ -672,39 +795,9 @@
       }
     }
 
-    // Perform the assignment.
-    var nextCell = $editorCell.toBelow;
-    $editorCell.content = c;
-    
-    // Mid-word edits are easy--no expansion to consider, just advance the 
-    // cursor within the active word region as tho' <RIGHT ARROW> were struck.
-    if (!$editorCell.hasClass('xw-vend')) { _stepVertical(nextCell); return; }
-
-    // Check conditions that block expansion.  If any of these hold, leave
-    // the cursor where it is.
-    // -- Reaching a border (there is no next cell to expand into)
-    // -- Closing a gap that would join two other words
-    // -- Populating all four cells of a 2x2 group
-    if (nextCell == null) { return; }
-    if ((nextCell.toLeft != null) && (nextCell.toRight != null) &&
-        (nextCell.toLeft.selfNode.hasClass('xw-hend')) &&
-        (nextCell.toRight.selfNode.hasClass('xw-htop'))) {
-      return;   // Would join two vertical words
-    }
-    if ((nextCell.toBelow != null) &&
-        (nextCell.toBelow.selfNode.hasClass('xw-vtop'))) {
-      return;  // Would join active word to another adjacent to next cell.
-    }
-    if (($editorCell.toRight != null) && (nextCell.toRight != null) &&
-        (!isBlank($editorCell.toRight)) &&
-        (!isBlank(nextCell.toRight))) { return; }
-    if (($editorCell.toLeft != null) && (nextCell.toLeft != null) &&
-        (!isBlank($editorCell.toLeft)) &&
-        (!isBlank(nextCell.toLeft))) { return; }
-
-    // If we reach this point, expand the edit region and step the cursor.
-    _expandVertical($editorCell);
-    _stepVertical($editorCell);
+    $editorCell.toBelow.selfNode.addClass('xw-vsel');
+    _extendVertical($editorCell);
+    _stepVertical($editorCell.toBelow);
   }
 
   function clearCharacterHorizontal() {
@@ -718,7 +811,7 @@
     // action and prevent any word from being reduced to a single cell.
     // Words may not be split in two since the editor is not allowed to
     // glue them back together afterwards.
-    var pruneCell  = wordEndHorizontal($editorCell);
+    var pruneCell  = mainWordEnd($editorCell);
     if (isFilled(pruneCell.toAbove)) {
       if ((pruneCell.toAbove.selfNode.hasClass('xw-vtop')) ||
           (pruneCell.toAbove.toAbove.selfNode.hasClass('xw-vtop'))) {
@@ -770,7 +863,7 @@
     // action and prevent any word from being reduced to a single cell.
     // Words may not be split in two since the editor is not allowed to
     // glue them back together afterwards.
-    var pruneCell  = wordEndVertical($editorCell);
+    var pruneCell  = mainWordEnd($editorCell);
     if (isFilled(pruneCell.toLeft)) {
       if ((pruneCell.toLeft.selfNode.hasClass('xw-htop')) ||
           (pruneCell.toLeft.toLeft.selfNode.hasClass('xw-htop'))) {
@@ -811,52 +904,23 @@
     _shrinkVertical(pruneCell);
   }
 
-//
-// Active/Inactive/Same(Row|Col) Highlight Manipulation
-//
+  //
+  // Active/Inactive/Same(Row|Col) Highlight Manipulation
+  //
 
-  function addRowHighlighting() {
-    var wordLeft  = $editorCell.wordLeft();
-    var wordRight = $editorCell.wordRight();
-    var sameRow   = $editorCell.sameRow;
+  function enableEditor() {
+    var wordCells;
+    $(document).on('keydown', onKeyboardInput);
 
-    var wordTop = wordLeft.first();
-    var wordEnd = wordRight.last();
+    wordCells = mainWord($editorCell);
+    $editorCell.sameRow.not(wordCells).addClass('xw-samerow');
+    wordCells.addClass('xw-hsel');
 
-    sameRow.removeClass('xw-inactive');
-    sameRow.not(wordLeft).not(wordRight).addClass('xw-samerow');
+    wordCells = altWord($editorCell);
+    $editorCell.sameCol.not(wordCells).addClass('xw-samecol');
+    wordCells.addClass('xw-vsel');
 
-    wordTop.addClass('xw-htop');
-    wordLeft.not(wordTop).addClass('xw-hmid');
-    wordRight.not(wordEnd).addClass('xw-hmid');
-    wordEnd.addClass('xw-hend');
-    $editorCell.addClass('xw-active');
-  }
-
-  function dropRowHighlighting() {
-    $sameRow.removeClass('xw-active xw-samerow xw-htop xw-hmid xw-hend').addClass('xw-inactive');
-  }
-
-  function addColumnHighlighting() {
-    var wordAbove  = $editorCell.wordLeft();
-    var wordBelow = $editorCell.wordRight();
-    var sameCol   = $editorCell.sameRow;
-
-    var wordTop = wordAbove.first();
-    var wordEnd = wordBelow.last();
-
-    sameCol.removeClass('xw-inactive');
-    sameCol.not(wordAbove).not(wordBelow).addClass('xw-samerow');
-
-    wordTop.addClass('xw-vtop');
-    wordAbove.not(wordTop).addClass('xw-vmid');
-    wordBelow.not(wordEnd).addClass('xw-vmid');
-    wordEnd.addClass('xw-vend');
-    $editorCell.addClass('xw-active');
-  }
-
-  function dropColumnHighlighting() {
-    $sameCol.removeClass('xw-active xw-samecol xw-vtop xw-vmid xw-vend').addClass('xw-inactive');
+    showCursor();
   }
 
   function closeWordEditor() {
@@ -864,8 +928,8 @@
 
     // Remove any trailing blank space and then check for minimum word length.
     // Remove words that are too short with an error.
+    var wordEnd = mainWordEnd($editorCell);
     if ($horizontalMode) {
-      var wordEnd = WordEndHorizontal($editorCell);
       if (isBlank(wordEnd)) {
         _shrinkHorizontal(wordEnd);
       }
@@ -875,7 +939,7 @@
         wordEnd.content = '';
 
         $('img.xw-value', wordEnd.selfNode
-        ).attr('src', $valueImages.blank);
+        ).attr('src', $blankImage);
 
         showShortWordError();
       } else if( wordEnd.toLeft.selfNode.hasClass('xw-htop')) {
@@ -886,12 +950,11 @@
         wordEnd.toLeft.selfNode.removeClass('xw-htop');
 
         $('img.xw-value', wordEnd.selfNode.add(wordEnd.toLeft.selfNode)
-        ).attr('src', $valueImages.blank);
+        ).attr('src', $blankImage);
 
         showShortWordError();
       }
     } else {
-      var wordEnd = WordEndVertical($editorCell);
       if (isBlank(wordEnd)) {
         _shrinkVertical(wordEnd);
       }
@@ -901,7 +964,7 @@
         wordEnd.content = '';
 
         $('img.xw-value', wordEnd.selfNode
-        ).attr('src', $valueImages.blank);
+        ).attr('src', $blankImage);
 
         showShortWordError();
       } else if (wordEnd.toAbove.selfNode.hasClass('xw-vtop')) {
@@ -912,15 +975,15 @@
         wordEnd.toAbove.selfNode.removeClass('xw-vtop');
 
         $('img.xw-value', wordEnd.selfNode.add(wordEnd.toAbove.selfNode)
-        ).attr('src', $valueImages.blank);
+        ).attr('src', $blankImage);
 
         showShortWordError();
       }
     }
       
-    dropRowHighlighting();
-    dropColumnHighlighting();
-    $editorCell.hideCursor();
+    $editorCell.sameRow.removeClass('xw-hsel xw-samerow');
+    $editorCell.sameCol.removeClass('xw-vsel xw-samecol');
+    hideCursor();
 
     $editorCell = null;
   }

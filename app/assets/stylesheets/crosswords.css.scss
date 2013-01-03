@@ -68,6 +68,63 @@ div {
   }
 }
 
+table.xw-grid {
+  padding: 0;
+  line-height: 0px;
+  border: 0;
+  border-collapse: collapse;
+  border-spacing: 0px;
+  img {
+    min-height: 100%;
+    min-width: 100%;
+    height: auto;
+  }
+  td {
+    padding: 0;
+  }
+  div.xw-cell {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    width: 28px;
+    height: 28px;
+    img {
+      position: absolute;
+      &.xw-fill {
+        z-index: 11;
+      }
+      &.xw-grid  {
+        z-index: 14;
+      }
+      &.xw-border {
+        z-index: 16;
+      }
+      &.xw-value {
+        z-index: 20;
+      }
+    }
+  }
+}
+
+table#cardroot {
+  height: 660px;
+  width: 440px;
+}
+
+table#lettergrid {
+  height: 84px;
+  width: 168px;
+}
+
+table#bonusword {
+  height: 28px;
+  width: 140px;
+}
+
+table#bonusvalue {
+  height: 28px;
+  width: 84px;
+}
 
 // The second layer establishes the constant cell grid.  This could be done with style markup, but a 
 // an image of a 1-pixel border around a transparent center was used instead to enable a marbled effect.
@@ -101,10 +158,9 @@ div {
 // The TD elements are given relative positioning so that they can provide an
 // anchor for absolutely positiong the layering of images used to compose the
 // crossword grid's graphical elements.
-table.xwt-grid {
-  border: 0;
-  cell-padding: 0;
-  cell-spacing: 0;
+table#lettergrid {
+  width: 308px;
+  height: 308px;
   background-color: #19D919;
   &.xw-horizontal div.xw-cell {
     &.xw-htop {
@@ -141,11 +197,6 @@ table.xwt-grid {
     }
   }
   div.xw-cell {
-    position: relative;
-    top: 0px;
-    left: 0px;
-    width: 28px;
-    height: 28px;
     &.samerow, &.samecol {
       img.xw-fill.xw-light, img.xw-fill.xw-dark {
         visibility: hidden;
@@ -172,21 +223,16 @@ table.xwt-grid {
       }
     }
     img {
-      position: absolute;
       &.xw-fill {
-        z-index: 11;
         visibility: hidden;
       }
       &.xw-grid  {
-        z-index: 14;
         visibility: visible;
       }
       &.xw-border {
-        z-index: 16;
         visibility: hidden;
       }
       &.xw-value {
-        z-index: 20;
         visibility: visible;
       }
     }

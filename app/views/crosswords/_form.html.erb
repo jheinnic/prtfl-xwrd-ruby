@@ -1,5 +1,5 @@
 <div class="row">
-  <div class="span5"><%= form_for(@crossword) do |f| %>
+  <%= form_for(@crossword) do |f| %><div class="span5">
     <% if @crossword.errors.any? %>
       <div id="error_explanation">
         <h2><%= pluralize(@crossword.errors.count, "error") %> prohibited this crossword from being saved:</h2>
@@ -10,102 +10,153 @@
         </ul>
       </div>
     <% end %>
-    <div class="field">
-      <%= f.label :bonus_value %><br />
-      <%= f.number_field :bonus_value %>
-    </div>
-    <div class="field">
-      <%= f.label :bonus_word %><br />
-      <%= f.text_field :bonus_word %>
-    </div>
+    <%= f.hidden_field :bonus_value %>
+    <%= f.hidden_field :bonus_word %>
     <%= f.fields_for :word_items do |w| %>
-      <%= w.hidden_field :text_value %><%= w.hidden_field :triple_letter_index %>
-      <%= w.hidden_field :x_coordinate %><%= w.hidden_field :y_coordinate %><%= w.hidden_field :is_horizontal %>
+      <%= w.hidden_field :text_value %><%= w.hidden_field :triple_letter_index %><%= w.hidden_field :x_coordinate %><%= w.hidden_field :y_coordinate %><%= w.hidden_field :is_horizontal %>
     <% end %>
     <%= f.submit %>
+  </div>
+  <div class="span7">
+    <table id="cardroot" class="xw-grid">
+      <tr>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="10" height="1" border="0"></td>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="42" height="1" border="0"></td>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="34" height="1" border="0"></td>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="22" height="1" border="0"></td>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="112" height="1" border="0"></td>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1" border="0"></td>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1" border="0"></td>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="84" height="1" border="0"></td>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1" border="0"></td>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1" border="0"></td>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="24" height="1" border="0"></td>
+        <td><img src="<%= path_to_image 'card/shim.gif' %>" width="1" height="1" border="0"></td>
+      </tr>
+      <tr valign="top">
+        <td colspan="11"><img name="card_00" src="<%= path_to_image 'card/card_00.jpg' %>"></td>
+      </tr>
+      <tr valign="top">
+        <td rowspan="5" colspan="2"><img name="card_01" src="<%= path_to_image 'card/card_01.jpg' %>"></td>
+        <td rowspan="3" colspan="3">
+          <table id="reveal" class="xwt-grid">
+            <tr>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+            </tr>
+            <tr>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+            </tr>
+            <tr>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+            </tr>
+          </table>
+        </td>
+        <td rowspan="2" colspan="2"><img name="card_03" src="<%= path_to_image 'card/card_03.jpg' %>"></td>
+        <td>
+          <table id="bonusvalue" class="xwt-grid">
+            <tr>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+            </tr>
+          </table>
+        </td>
+        <td rowspan="2" colspan="3"><img name="card_05" src="<%= path_to_image 'card/card_05.jpg' %>"></td>
+      </tr>
+      <tr valign="top">
+        <td><img name="card_06" src="<%= path_to_image 'card/card_06.jpg' %>"></td>
+      </tr>
+      <tr valign="top">
+        <td rowspan="2"><img name="card_07" src="<%= path_to_image 'card/card_07.jpg' %>"></td>
+        <td colspan="3">
+          <table id="bonusword" class="xwt-grid">
+            <tr>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div class="xw-cell"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+            </tr>
+          </table>
+        </td>
+        <td rowspan="2" colspan="2"><img name="card_09" src="<%= path_to_image 'card/card_09.jpg' %>"></td>
+      </tr>
+      <tr valign="top">
+        <td colspan="3"><img name="card_10" src="<%= path_to_image 'card/card_10.jpg' %>"></td>
+        <td colspan="3"><img name="card_11" src="<%= path_to_image 'card/card_11.jpg' %>"></td>
+      </tr>
+      <tr valign="top">
+        <td colspan="2"><img name="card_12" src="<%= path_to_image 'card/card_12.jpg' %>"></td>
+        <td rowspan="3" colspan="6"><table id="lettergrid">
+              <% for ii in (0..10) do %>
+              <tr>
+                <td><div data-rowid="<%= ii %>" data-colid="0" data-content="" class="xw-cell xw-inactive">
+                <td><div data-rowid="<%= ii %>" data-colid="1" data-content="" class="xw-cell xw-inactive">
+                <td><div data-rowid="<%= ii %>" data-colid="2" data-content="" class="xw-cell xw-inactive">
+                <td><div data-rowid="<%= ii %>" data-colid="3" data-content="" class="xw-cell xw-inactive">
+                <td><div data-rowid="<%= ii %>" data-colid="4" data-content="" class="xw-cell xw-inactive">
+                <td><div data-rowid="<%= ii %>" data-colid="5" data-content="" class="xw-cell xw-inactive">
+                <td><div data-rowid="<%= ii %>" data-colid="6" data-content="" class="xw-cell xw-inactive">
+                <td><div data-rowid="<%= ii %>" data-colid="7" data-content="" class="xw-cell xw-inactive">
+                <td><div data-rowid="<%= ii %>" data-colid="8" data-content="" class="xw-cell xw-inactive">
+                <td><div data-rowid="<%= ii %>" data-colid="9" data-content="" class="xw-cell xw-inactive">
+                <td><div data-rowid="<%= ii %>" data-colid="10" data-content="" class="xw-cell xw-inactive">
+              </tr>
+              <% end %>
+            </table></td>
+        <td rowspan="4"><img name="card_14" src="<%= path_to_image 'card/card_14.jpg' %>"></td>
+      </tr>
+      <tr valign="top">
+        <td rowspan="3"><img name="card_15" src="<%= path_to_image 'card/card_15.jpg' %>"></td>
+        <td colspan="2"><img name="card_16" src="<%= path_to_image 'card/card_16.jpg' %>"></td>
+        <td rowspan="3"><img name="card_17" src="<%= path_to_image 'card/card_17.jpg' %>"></td>
+      </tr>
+      <tr valign="top">
+        <td rowspan="2" colspan="2"><img name="card_18" src="<%= path_to_image 'card/card_18.jpg' %>"></td>
+      </tr>
+      <tr valign="top">
+        <td colspan="6"><img name="card_19" src="<%= path_to_image 'card/card_19.jpg' %>"></td>
+      </tr>
+    </table>
   <% end %></div>
-  <div class="span7"><table border="0" cellpadding="0" cellspacing="0" width="440">
-	<!-- Serif DrawPlus X4 -->
-	<tr>
-		<td><img src="shim.gif" width="10" height="1" border="0"></td>
-		<td><img src="shim.gif" width="42" height="1" border="0"></td>
-		<td><img src="shim.gif" width="34" height="1" border="0"></td>
-		<td><img src="shim.gif" width="22" height="1" border="0"></td>
-		<td><img src="shim.gif" width="112" height="1" border="0"></td>
-		<td><img src="shim.gif" width="28" height="1" border="0"></td>
-		<td><img src="shim.gif" width="28" height="1" border="0"></td>
-		<td><img src="shim.gif" width="84" height="1" border="0"></td>
-		<td><img src="shim.gif" width="28" height="1" border="0"></td>
-		<td><img src="shim.gif" width="28" height="1" border="0"></td>
-		<td><img src="shim.gif" width="24" height="1" border="0"></td>
-		<td><img src="shim.gif" width="1" height="1" border="0"></td>
-	</tr>
-	<tr valign="top">
-		<td colspan="11"><img name="card_00" src="<%= path_to_image 'card/card_00.jpg' %>" width="440" height="178" border="0"></td>
-	</tr>
-	<tr valign="top">
-		<td rowspan="5" colspan="2"><img name="card_01" src="<%= path_to_image 'card/card_01.jpg' %>" width="52" height="134" border="0"></td>
-		<td rowspan="3" colspan="3">
-			<table id="reveal" class="xwt-grid" width="168" height="84" border="0" cellpadding="0" cellspacing="0"><tr><td><div width="168" height="84">&nbsp;</div></table>
-		</td>
-		<td rowspan="2" colspan="2"><img name="card_03" src="<%= path_to_image 'card/card_03.jpg' %>" width="56" height="56" border="0"></td>
-		<td>
-			<table id="bonusvalue" class="xwt-grid" width="84" height="28" border="0" cellpadding="0" cellspacing="0"><tr><td><div width="84" height="28">&nbsp;</div></table>
-		</td>
-		<td rowspan="2" colspan="3"><img name="card_05" src="<%= path_to_image 'card/card_05.jpg' %>" width="80" height="56" border="0"></td>
-	</tr>
-	<tr valign="top">
-		<td><img name="card_06" src="<%= path_to_image 'card/card_06.jpg' %>" width="84" height="28" border="0"></td>
-	</tr>
-	<tr valign="top">
-		<td rowspan="2"><img name="card_07" src="<%= path_to_image 'card/card_07.jpg' %>" width="28" height="74" border="0"></td>
-		<td colspan="3">
-			<table id="bonusword" class="xwt-grid" width="140" height="28" border="0" cellpadding="0" cellspacing="0"><tr><td><div width="140" height="28">&nbsp;</div></table>
-		</td>
-		<td rowspan="2" colspan="2"><img name="card_09" src="<%= path_to_image 'card/card_09.jpg' %>" width="52" height="74" border="0"></td>
-	</tr>
-	<tr valign="top">
-		<td colspan="3"><img name="card_10" src="<%= path_to_image 'card/card_10.jpg' %>" width="168" height="46" border="0"></td>
-		<td colspan="3"><img name="card_11" src="<%= path_to_image 'card/card_11.jpg' %>" width="140" height="46" border="0"></td>
-	</tr>
-	<tr valign="top">
-		<td colspan="2"><img name="card_12" src="<%= path_to_image 'card/card_12.jpg' %>" width="56" height="4" border="0"></td>
-		<td rowspan="3" colspan="6"><table id="lettergrid" class="xwt-grid" width="308" height="308" border="0" cellpadding="0" cellspacing="0">
-          <% for ii in (0..10) do %>
-          <tr>
-            <td><div data-rowid="<%= ii %>" data-colid="0" data-content="" class="xw-cell xw-inactive">
-            <td><div data-rowid="<%= ii %>" data-colid="1" data-content="" class="xw-cell xw-inactive">
-            <td><div data-rowid="<%= ii %>" data-colid="2" data-content="" class="xw-cell xw-inactive">
-            <td><div data-rowid="<%= ii %>" data-colid="3" data-content="" class="xw-cell xw-inactive">
-            <td><div data-rowid="<%= ii %>" data-colid="4" data-content="" class="xw-cell xw-inactive">
-            <td><div data-rowid="<%= ii %>" data-colid="5" data-content="" class="xw-cell xw-inactive">
-            <td><div data-rowid="<%= ii %>" data-colid="6" data-content="" class="xw-cell xw-inactive">
-            <td><div data-rowid="<%= ii %>" data-colid="7" data-content="" class="xw-cell xw-inactive">
-            <td><div data-rowid="<%= ii %>" data-colid="8" data-content="" class="xw-cell xw-inactive">
-            <td><div data-rowid="<%= ii %>" data-colid="9" data-content="" class="xw-cell xw-inactive">
-            <td><div data-rowid="<%= ii %>" data-colid="10" data-content="" class="xw-cell xw-inactive">
-          </tr>
-          <% end %>
-        </table></td>
-		<td rowspan="4"><img name="card_14" src="<%= path_to_image 'card/card_14.jpg' %>" width="24" height="352" border="0"></td>
-	</tr>
-	<tr valign="top">
-		<td rowspan="3"><img name="card_15" src="<%= path_to_image 'card/card_15.jpg' %>" width="10" height="348" border="0"></td>
-		<td colspan="2"><img name="card_16" src="<%= path_to_image 'card/card_16.jpg' %>" width="76" height="300" border="0"></td>
-		<td rowspan="3"><img name="card_17" src="<%= path_to_image 'card/card_17.jpg' %>" width="22" height="348" border="0"></td>
-	</tr>
-	<tr valign="top">
-		<td rowspan="2" colspan="2"><img name="card_18" src="<%= path_to_image 'card/card_18.jpg' %>" width="76" height="48" border="0"></td>
-	</tr>
-	<tr valign="top">
-		<td colspan="6"><img name="card_19" src="<%= path_to_image 'card/card_19.jpg' %>" width="308" height="44" border="0"></td>
-	</tr></table></div>
 </div>
 <script type="text/javascript">
+// TODO LIST:
+// P1:
+// -- Rudimentary Bonus, Tripling, Your Letter Fields
+// -- Reading hidden form fields in during initialize for edit
+// -- AJAX call to load different card state without page reload
+// -- AJAX call to wait on payout stats update on save
+// -- AJAX call to save and update payout stats on edit
+// P2:
+// -- Bonus word UI
+// -- Your Letters UI
+// -- Tripling Modifier UI
+// P3:
+// -- Check for cell clicks that cannot grow out to 3 characters
+// -- Check for direction toggle capability on cursor movement
+// -- Bootstrap dialogs
+// -- Cursor blinking
   var $editorCell = null;
   var $allCellRows = [];
-  var $allCellCols = []
+  // var $allCellCols = [];
   var $horizontalMode = true;
+  var $directionChangeOk = true;
   var $rootTable = $('#lettergrid');
   var $wordCount = 0;
   
@@ -133,246 +184,152 @@
     var selectRowTmpl = 'div[data-rowid="{row}"]';
     var selectColTmpl = 'div[data-colid="{col}"]';
 
-    // Add navigability in the DOM for neighbors and upstream/downstream word
-    // set identification:
+    // Iterate through the cells in document order, adding image data to
+    // each cell and building a horizontal doubly linked lists connecting
+    // immediate neighbors for horizontal navigability.
     for (var row=0;row<11;row++) {
-      $sameRow = $($selectRowTmpl.format( {row: row}, $rootTable ));
-      $allRows[row] = $sameRow;
-      var $leftCell = null;
+      var cellLeft = null;
+      var sameRow = $(selectRowTmpl.format( {row: row}, $rootTable ));
+      $allCellRows[row] = sameRow;
 
-      $sameRow.append($contentTmpl);
+      sameRow.append(contentTmpl);
 
-      // 
-      $sameRow.each(
-        function( colIdx, nextCell ) { 
-          if( leftCell != null ) {
-            leftCell.toRight = nextCell;
-            nextCell.toLeft = leftCell;
-          }
-          toLeft = nextCell;
+      sameRow.each(
+        function(colIdx, nextCell) { 
+          nextCell.selfNode = nextCell;
 
-          // Iterate through the cells in document order, adding image data to
-          // each cell and building a horizontal doubly linked lists immediate
-          // neighbors and empty collections for upstream/downstream words.
-          this.nextCell.row = row;
-          this.col = this.colIdx;
-          this.domNode = $nextCell;
-),
-          this.toAbove = null;
-          this.toBelow = null,
-          this.wordLeft  = $();
-          this.wordRight = $();
-          this.wordAbove = $();
-          this.wordBelow = $();
+          nextCell.sameRow = sameRow;
+          nextCell.row     = row;
+          nextCell.toLeft  = cellLeft;
+          nextCell.toRight = null;
 
+          nextCell.sameCol = null;
+          nextCell.col     = colIdx;
+          nextCell.toAbove = null;
+          nextCell.toBelow = null;
 
-          // Augment the DOM node with methods for building, traversing,
-          // validating, and extracting CrossWord Graph's consolidation 
-          // contents.
-          this.addClass = function(classStr) {
-            this.domNode.addClass(classStr);
-            return this;
-          },
-          this.removeClass: function(classStr) {
-            this.domNode.removeClass(classStr);
-            return this;
-          };
-
-          // If called with an argument, store it as an HTML5 data attribute
-          // under a previously configured domain owner.  Otherwise, return
-          // data from that location.
-          this.content = function(s) { if( s === undefined ) { return this.domNode.data('content'); } else { return this.domNode.data('content', s); } };
-
-          // Sweet, sweet, sugar.
-          this.isBlank = function() { return this.domNode.data('content') == ''; };
-
-          this.showCursor = function() {
-            $('img.xw-value', this.domNode).attr('src', $valueImages.unk);
-          };
-
-          this.hideCursor = function() {
-            if( this.isBlank() ) {
-              $('img.xw-value', this.domNode).attr('src', $valueImages.blank);
-            } else {
-              var content = this.content();
-              $('img.xw-value', this.domNode).attr('src', $valueImages.attr(content));
-            }
-          };
-
-          this.advanceCursorRight function() {
-            var nbrR = this.toRight;
-            if( nbrR == null ) { return false; }
-
-            if( !nbrR.isBlank() ) {
-              this._moveCursorRight();
-              return false;
-            }
-
-            var nbrRR = nbrR.toRight;
-            if( nbrRR != null && !nbrRR.isBlank() ) { return false; }
-
-            var bnkU = (this.toAbove != null) ? this.toAbove.isBlank() : true;
-            var bnkD = (this.toBelow != null) ? this.toBelow.isBlank() : true;
-
-            if(!bnkU) {
-              if(!bnkD) { return false; }
-
-              if(!this.toAbove.toRight.isBlank()) { return false; }
-            } else {
-              if(!this.toBelow.toRight.isBlank()) { return false; }
-            }
-
-            this._extendCursorRight();
-          };
-
-
-          this.advanceCursorDown = function() {
-            if (this.wordBelow.size() > 0) {
-              this._moveCursorBelow();
-              return true;
-            }
-
-            if (this.toBelow == null) { return false; }
-
-            if (this.toBelow.toBelow != null &&
-               !this.toBelow.toBelow.isBlank()) {
-              return false;
-            }
-
-            if (this.toLeft != null && !this.toLeft.isBlank() ) {
-              if (this.toRight != null && !this.toRight.isBlank() ) {
-                return false;
-              }
-              if(!this.toLeft.toBelow.isBlank()) {
-                return false;
-              }
-            } else if (this.toRight != null && !this.toRight.isBlank() ) {
-              if(!this.toRight.toBelow.isBlank()) {
-                return false;
-              }
-            }
-
-            this._extendCursorBelow();
-            return true;
-          },
-
-          //
-          // Private methods for internal use only.
-          //
-          // As used below, "Advancing" is the act of moving a cursor within a
-          // file's pre-existing allocaed storage shortfall.  "Extending" is
-          // similar insofar as it involves moving a cursor, but only in the
-          // foreward direction and with a user's acknowledgement that the
-          // necessity to allocate storage before moving the cursor exists.
-          //
-          // Finally, "Contracting" refers to a left/up-ward cursor movement
-          // that permits returning the evacuated character as unused and
-          // no longer reserved for the current word's use.
-          _advanceCursorRight: function() {
-            this.hideCursor();
-            $editorCell = this.toRight;
-            $sameRow    = $($selectRowTmpl.format(this), $rootTable);
-            $sameCol    = $($selectColTmpl.format(this), $rootTable);
-            $editorCell.showCursor();
-          },
-
-          _advanceCursorBelow: function() {
-            this.hideCursor();
-            $editorCell = this.toBelow;
-            $sameRow    = $($selectRowTmpl.format(this), $rootTable);
-            $sameCol    = $($selectColTmpl.format(this), $rootTable);
-            $editorCell.showCursor();
-          },
-
-          _extendCursorRight: function() {
-            this.hideCursor();
-            $editorCell = this.toRight;
-            $sameRow    = $($selectRowTmpl.format(this), $rootTable);
-            $sameCol    = $($selectColTmpl.format(this), $rootTable);
-            $editorCell.showCursor();
-          },
-
-          _extendCursorBelow: function() {
-            this.hideCursor();
-            $editorCell = this.toBelow;
-            $sameRow    = $($selectRowTmpl.format(this), $rootTable);
-            $sameCol    = $($selectColTmpl.format(this), $rootTable);
-            $editorCell.showCursor();
-          },
-        }; <!-- DOM modifications in function parameter -->
-      ); <!-- jQuery.each
-    } <!-- First of two "For" loops.
-
-    // Populate the vertical linked list for traversing columns over rows.
-    for (var col=0;col<11;col+=1) {
-      var $aboveCell = null;
-      $sameCol = $($selectColTmpl.format( {col: col}, $rootTable ));
-
-      $sameCol.each(
-        function( colIdx, nextCell ) { 
-          if( aboveCell != null ) {
-            nextCell.toAbove = aboveCell;
-            toAbove.toBelow = cellState;
-          }
-          aboveCell = nextCell;
-
-          if(aboveCell != null) {
-            this.toAbove = cellAbove;
-            cellAbove.toBelow = nextCell;
-          }
+          if (cellLeft != null) { cellLeft.toRight = nextCell; }
+          cellLeft = nextCell;
         }
       );
     }
 
+    // Populate a second double linked list between cells in the same column
+    // for vertical navigability, and add functions for use by the click and
+    // keyboard event handlers that derive subsets of connected cells for word
+    // boundary highlighting and cursor position management.
+    for (var col=0;col<11;col+=1) {
+      var cellAbove = null;
+      sameCol = $(selectColTmpl.format({col: col}, $rootTable));
+      // $allCellCols[col] = sameCol
+
+      sameCol.each(
+        function(rowIdx, nextCell) { 
+          nextCell.sameCol = sameCol;
+          nextCell.toAbove = cellAbove;
+
+          if (cellAbove != null) { cellAbove.toBelow = nextCell; }
+          cellAbove = nextCell;
+
+          // Validation sanity check
+          if (nextCell.col != col) { alert(nextCell.col + " != " + col); }
+          if (nextCell.row != rowIdx) { alert(nextCell.row + " != " + rowIdx); }
+        }
+      );
+    } <!-- Latter of two intialization "for" loops.
+
+    // Set a handler for the table, setup to recieve calls from 
     $rootTable.on('click', 'div.xw-cell', onClickCell);
   }
-  
+
+  //
+  // Javascript Event Handlers
+  //
+
   function onClickCell(event) {
     // If another word is already active, close it out.
-    if( $editorCell != null ) { closeWordEditor(); }
-
+    if ($editorCell != null) { closeWordEditor(); }
+  
     var wrap = $(this); // $(event.target).parent();
     var row = wrap.data('rowid');
     var col = wrap.data('colid');
-    var cellState = getCellState(row, col);
-
-    if (cellState.isBlank()) {
-      if (isUnavailable(cellState)) {
-        // If assigning a value would violate the 2x2 congestion rule, we
-        // cannot allow the selection.
-        showUnavailableDialog();
-        return false;
-      } else if( $wordCount >= 22 ) {
-        // If no more words remain, we cannot allow the selection.
-        showMaxWordsDialog();
+    var cellState = $allCellRows[row].eq(col).get()[0];
+  
+    if (isBlank(cellState)) {
+      if ($wordCount >= 22) {
+        // If no more words remain, disallow selections that would increase
+        // the word count.
+        showMaxWordsError();
         return false;
       }
+
+      if (! isBlank(cellState.toLeft)) {
+        if (! isBlank(cellState.toRight)) {
+          return showHorizontalMergeError(cellState);
+        } else if (! isBlank(cellState.toAbove)) {
+          if (! isBlank(cellState.toBelow)) {
+            return showVerticalMergeError(cellState);
+          }
+          if (! isBlank(cellState.toAbove.toLeft)) {
+            return showCongestionError(
+              cellState, cellState.toLeft, cellState.toAbove);
+          }
+        } else if (! isBlank(cellState.toBelow)) {
+          if (! isBlank(cellState.toBelow.toLeft)) {
+            return showCongestionError(
+              cellState, cellState.toLeft, cellState.toBelow);
+          }
+        }
+      } else if (! isBlank(cellState.toRight)) {
+        if (! isBlank(cellState.toAbove)) {
+          if (! isBlank(cellState.toBelow)) {
+            return showVerticalMergeError(cellState);
+          }
+          if (! isBlank(cellState.toAbove.toRight)) {
+            return showCongestionError(
+              cellState, cellState.toRight, cellState.toAbove);
+          }
+        } else if (! isBlank(cellState.toBelow)) {
+          if (! isBlank(cellState.toBelow.toRight)) {
+            return showCongestionError(
+              cellState, cellState.toRight, cellState.toBelow);
+          }
+        }
+      } else if ((! isBlank(cellState.toAbove)) &&
+                 (! isBlank(cellState.toBelow))) {
+        return showVerticalMergeError(cellState);
+      }
     }
-    
+  
     $editorCell = cellState;
-
-    $sameRow = $('div[data-rowid="' + row + '"]', $rootTable);
-    $sameCol = $('div[data-colid="' + col + '"]', $rootTable);
-
+  
     addRowHighlighting();
     addColumnHighlighting();
-
+  
     $editorCell.showCursor();
     $(document).on('keydown', onKeyboardInput);
   }
   
   function onKeyboardInput(event) {
     if ($editorCell == null) { return true; }
-
+  
     if (!event) var event = window.event;
     var keyValue = event.keyCode;
     if( keyValue == null ) { return true; }
-
+  
     // Accept DEL, RETURN, TAB, arrows, and letters.
     if (keyValue >= 65 && keyValue <= 90) { 
-      setCharacter( String.fromCharCode(keyValue) );
-    } else if (keyValue == 8 ) {
-      clearCharacter();   // <BACKSPACE> unsets a character
+      if ($horizontalMode) {
+        setCharacterHorizontal(String.fromCharCode(keyValue));
+      } else {
+        setCharacterVertical(String.fromCharCode(keyValue));
+      }
+    } else if (keyValue == 8) {
+      if ($horizontalMode) {
+        clearCharacterHorizontal();   // <BACKSPACE> unsets a character
+      } else {
+        clearCharacterVertical();   // <BACKSPACE> unsets a character
+      }
     } else if (keyValue == 999) {
       // <SPACE> marks a tripling multiplier TODO
     } else if (keyValue == 9 ) {
@@ -380,15 +337,15 @@
     } else if (keyValue == 8 || keyValue == 13 ) {
       closeWordEditor();  // <ESC> or <RETURN> to stop editting
     } else if (keyValue = 37 && $horizontalMode ) {
-      moveCursorBack();   // <LEFT> moves the cursor left in horizontal mode
+      moveCursorLeft();   // <LEFT> moves the cursor left
     } else if (keyValue = 38 && !$horizonalMode ) {
-      moveCursorBack();   // <UP> moves the cursor up in vertical mode
+      moveCursorAbove();   // <UP> moves the cursor up
     } else if (keyValue = 39 && $horizontalMode ) {
-      moveCursorAhead();  // <RIGHT> moves the cursor right in horizontal mode
+      moveCursorRight();  // <RIGHT> moves the cursor right
     } else if (keyValue = 40 && !$horizontalMode ) {
-      moveCursorAhead();  // <DOWN> moves the cursor down in veritcal mode
+      moveCursorBelow();  // <DOWN> moves the cursor down
     }
-    
+  
     return true;
   }
   
@@ -396,9 +353,9 @@
     return false;
   }
   
-  function getCellState(row, col) {
-    return $cellStates[row*11 + col];
-  }
+  //
+  // Keystroke handlers
+  //
 
   function toggleDirectionMode() {
     if( $horizontalMode ) {
@@ -409,243 +366,469 @@
       $horizontalMode = true;
     }
   }
-
-  function setCharacter(c) {
-    // $editorCell.content.data('content', c)
-    $editorCell.content(c);
-    moveCursorAhead();
-  }
-
-  function clearCharacter() {
-    // $editorCell.domNode.data('content', '')
-    $editorCell.content('');
-    moveCursorBack();
-  }
-
-  // Note: This method accounts directly for reducing end/mid tags when the
-  //       word boundary contracts, but it indirectly delegates the active
-  //       cell class tag swap to the column highlighting methods.  It would
-  //       still be correct to apply the active tag here, but this approach
-  //       is still correct and requires less code.
-  function moveCursorBack() {
-    if( $horizontalMode ) {
-      if( $editorCell.wordLeft.size() > 0 ) {
-        var cellLeft = $editorCell.toLeft
-        dropColumnHighlighting();
-        $editorCell.hideCursor();
-
-        if( $editorCell.isBlank() && $editorCell.wordRight.size() == 0 ) {
-          $editorCell.removeClass('xw-hend').addClass('xw-samerow');
-          cellLeft.removeClass('xw-hmid').addClass('xw-hend');
-
-          $editorCell.wordLeft.each(
-            function(i, c) { c.wordRight = c.wordRight.not($editorCell.domNode); }
-          );
-          cellLeft.wordRight = $();
-          $editorCell.wordLeft = $();
-        }
-
-        $editorCell = cellLeft;
-        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
-        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
-        $editorCell.showCursor();
-        addColumnHighlighting();
-      }
-    } else {
-      if( $editorCell.wordAbove.size() > 0 ) {
-        var cellAbove = $editorCell.toAbove
-        dropRowHighlighting();
-        $editorCell.hideCursor();
-
-        if( $editorCell.isBlank() && $editorCell.wordBelow.size() == 0 ) {
-          $editorCell.removeClass('xw-vend').addClass('xw-samecol');
-          cellAbove.removeClass('xw-vmid').addClass('xw-vend');
-
-          $editorCell.wordAbove.each(
-            function(i, c) { c.wordBelow = c.wordBelow.not($editorCell); }
-          );
-          cellAbove.wordBelow = $();
-          $editorCell.wordAbove = $();
-        }
-
-        $editorCell = cellAbove;
-        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
-        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
-        $editorCell.showCursor();
-        addRowHighlighting();
-      }
-    }
-  }
-
-  function moveCursorAhead() {
-    if( $horizontalMode ) {
-      var cellRight = $editorCell.toRight
-      if( $editorCell.wordRight.size() > 0 ) {
-        dropColumnHighlighting();
-        $editorCell.hideCursor();
-        $editorCell = cellRight;
-        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
-        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
-        $editorCell.showCursor();
-        addColumnHighlighting();
-      } else if( cellRight != null && !$editorCell.isBlank() && !isUnavailable(cellRight) ) {
-        dropColumnHighlighting();
-        $editorCell.hideCursor();
-
-        if( $editorCell.wordLeft.size() > 0 ) {
-          $editorCell.removeClass('xw-hend').addClass('xw-hmid');
-          $editorCell.wordLeft.each(
-            function(i, c) { c.wordRight = c.wordRight.add(cellRight.domNode); }
-          );
-          cellRight.wordLeft = $editorCell.wordLeft.add($editorCell);
-        } else {
-          $editorCell.removeClass('xw-hend');
-          $editorCell.wordRight = cellRight.domNode;
-          cellRight.wordLeft = $editorCell.domNode;
-        }
-
-        cellRight.removeClass('xw-samerow').addClass('xw-hend');
-        $editorCell = cellRight;
-        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
-        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
-        addColumnHighlighting();
-        $editorCell.showCursor();
-      }
-    } else {
-      var cellBelow = $editorCell.toBelow
-      if( $editorCell.wordBelow.size() > 0 ) {
-        dropRowHighlighting();
-        $editorCell.hideCursor();
-        $editorCell = cellBelow;
-        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
-        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
-        $editorCell.showCursor();
-        addRowHighlighting();
-      } else if( cellBelow != null && !$editorCell.isBlank() && !isUnavailable(cellBelow) ) {
-        dropRowHighlighting();
-        $editorCell.hideCursor();
-
-        if( $editorCell.wordAbove.size() > 0 ) {
-          $editorCell.removeClass('xw-vend').addClass('xw-vmid');
-          $editorCell.wordAbove.each(
-            function(i, c) { c.wordBelow = c.wordBelow.add(cellBelow.domNode); }
-          );
-          cellBelow.wordAbove = $editorCell.wordAbove.add($editorCell);
-        } else {
-          $editorCell.removeClass('xw-vend');
-          $editorCell.wordBelow = cellBelow.domNode;
-          cellBelow.wordAbove = $editorCell.domNode;
-        }
-
-        cellBelow.removeClass('xw-samecol').addClass('xw-hend');
-        $editorCell = cellBelow;
-        $sameRow    = $($selectRowTmpl.format($editorCell), $rootTable);
-        $sameCol    = $($selectColTmpl.format($editorCell), $rootTable);
-        addRowHighlighting();
-        $editorCell.showCursor();
-      }
-    }
-  }
-
-  function isUnavailable(cellToCheck) {
-    var row = cellToCheck.row;
-    var col = cellToCheck.col;
-
-    // A cell is available iff it is on the grid (0..10),(0..10) and does not
-    // cause any 2x2 block of squares to become fully occupied.
-    //
-    // Appending an available cell may cause one or two pairs of words to
-    // become merged.  The 2x2 constraint effectively limits the number of
-    // potential word joins to one horizontal and one vertical.  Words that
-    // would get merged by a cell addition do not become merged until the cell
-    // actually recieves a keyValue.
-    // Canceling the concatenation by striking <ESC> or clicking in a different
-    // cell effectively prevents the potential merge by preventing the cell
-    // from acquiring a keyValue.
-    //
-    // A "triad" is any L-shaped group of three cells consisting of a pair of
-    // cells that touch corners on a diagonal and one of their two shared
-    // adjacencies.  For the sake of this test, only the cell under 
-    // consideration forms one, two, or four triads.  In every case, the other
-    // triad formed with each of the candidate's cell's triad-formming cell
-    // pairs must not exist.
-
-    if( row > 10 || row < 0 || col > 10 || col < 0 ) { return true; }
-
-    if( row == 0 ) {
-      if( col == 0 ) {
-        // Corner 1 of 4--only one 2x2 block to check.
-        if( isFullTriad( 0, 1, 1, 0, 1, 1 ) ) { return true; }
-      } else if( col == 10 ) {
-        // Corner 2 of 4--only one 2x2 block to check.
-        if( isFullTriad( 0, 9, 1, 10, 1, 9 ) ) { return true; }
-      } else {
-        // Edge 1 of 4--Only two 2x2 blocks to check.
-        if( isFullTriad( 0, col+1, 1, col, 1, col+1 ) ) { return true; }
-        if( isFullTriad( 0, col-1, 1, col, 1, col-1 ) ) { return true; }
-      }
-    } else if( row == 10 ) {
-      if( col == 0 ) {
-        // Corner 3 of 4--only one 2x2 block to check.
-        if( isFullTriad( 10, 1, 9, 0, 9, 1 ) ) { return true; }
-      } else if( col == 10 ) {
-        // Corner 4 of 4--only one 2x2 block to check.
-        if( isFullTriad( 10, 9, 9, 10, 9, 9 ) ) { return true; }
-      } else {
-        // Edge 2 of 4--Only two 2x2 blocks to check.
-        // Edge 1 of 4--Only two 2x2 blocks to check.
-        if( isFullTriad( 10, col+1, 9, col, 9, col+1 ) ) { return true; }
-        if( isFullTriad( 10, col-1, 9, col, 9, col-1 ) ) { return true; }
-      }
-    } else if( col == 0 ) {
-      // Edge 3 of 4--Only two 2x2 blocks to check.
-      if( isFullTriad( row+1, 0, row, 1, row+1, 1 ) ) { return true; }
-      if( isFullTriad( row-1, 0, row, 1, row-1, 1 ) ) { return true; }
-    } else if( col == 10 ) {
-      // Edge 4 of 4--Only two 2x2 blocks to check.
-      if( isFullTriad( row+1, 10, row, 9, row+1, 9 ) ) { return true; }
-      if( isFullTriad( row-1, 10, row, 9, row-1, 9 ) ) { return true; }
-    } else {
-      // Non-boundary case.  All four 2x2 blocks to check.
-      if( isFullTriad( row+1, col, row, col+1, row+1, col+1 ) ) { return true; }
-      if( isFullTriad( row+1, col, row, col-1, row+1, col-1 ) ) { return true; }
-      if( isFullTriad( row-1, col, row, col+1, row-1, col+1 ) ) { return true; }
-      if( isFullTriad( row-1, col, row, col-1, row-1, col-1 ) ) { return true; }
-    }
   
-    return false;
+  //
+  // Navigation assistants.  Sweet, sweet, sugar.
+  //
+
+  // isBlank() and isFilled() each return false on null input.  Depending on
+  // how null is expected to be handled, it may be favorible to negate the
+  // result of the check opposite what is desired.
+  //
+  // e.g. (cell != null && isBlank(cell)) can be written more succintly as
+  //      (! isFilled(cell)) without loss of correct null handling, whereas
+  //      (isBlank(cell)) would cause bugs on null input.
+  //
+  // +=======+===========+============+
+  // | INPUT | isBlank() | isFilled() |
+  // +=======+===========+============+
+  // | null  |   FALSE   |    FALSE   |
+  // |  'c'  |   FALSE   |    TRUE    |
+  // |  ''   |   TRUE    |    FALSE   |
+  // +=======+===========+============+
+  function isBlank(checkCell) {
+    return ((checkCell != null) && (checkCell.content == ''));
   }
 
-  function isFullTriad( aRow, aCol, bRow, bCol, cRow, cCol ) {
-    var aCell = getCellState(aRow, aCol);
-    if( aCell.isBlank() ) { return false; }
-    
-    var bCell = getCellState(bRow, bCol);
-    if( bCell.isBlank() ) { return false; }
-    
-    var cCell = getCellState(cRow, cCol);
-    if( cCell.isBlank() ) { return false; }
-    
+  function isFilled(checkCell) {
+    return ((checkCell != null) && (checkCell.content != ''));
+  }
+
+  function wordLeft(ofCell) {
+    var retVal = $();
+    var nextCell = ofCell.toLeft;
+    while (nextCell != null && !nextCell.isBlank()) {
+      retVal = retVal.add(nextCell)
+      nextCell = nextCell.toLeft;
+    }
+
+    return retVal;
+  }
+
+  function wordRight(ofCell) {
+    var retVal = $();
+    var nextCell = this.toRight;
+    while (nextCell != null && !nextCell.isBlank()) {
+      retVal = retVal.add(nextCell)
+      nextCell = nextCell.toRight;
+    }
+
+    return retVal;
+  }
+
+  function wordAbove(ofCell) {
+    var retVal = $();
+    var nextCell = this.toAbove;
+    while (nextCell != null && !nextCell.isBlank()) {
+      retVal = retVal.add(nextCell)
+      nextCell = nextCell.toAbove;
+    }
+
+    return retVal;
+  }
+
+  function wordBelow(ofCell) {
+    var retVal = $();
+    var nextCell = this.toBelow;
+    while (nextCell != null && !nextCell.isBlank()) {
+      retVal = retVal.add(nextCell)
+      nextCell = nextCell.toBelow;
+    }
+
+    return retVal;
+  }
+
+  function wordEndHorizontal(ofCell) {
+    wordRight(ofCell).filter(".xw-hend").get()[0];
+  }
+
+  function wordEndVertical(ofCell) {
+    wordDown(ofCell).filter(".xw-vend").get()[0];
+  }
+
+  //
+  // Cursor enable/disable methods
+  //
+
+  function showCursor() {
+    $('img.xw-value', $editorCell.selfNode).attr('src', $valueImages.unk);
+  };
+
+  function hideCursor() {
+    if (this.isBlank()) {
+      $('img.xw-value', $editCell.selfNode).attr('src', $valueImages.blank);
+    } else {
+      var content = this.content();
+      $('img.xw-value', $editorCell.selfNode).attr('src', $valueImages.attr($editorCell.content));
+    }
+  }
+
+  //
+  // Cursor movement methods
+  //
+
+  function moveCursorRight() {
+    if ($editorCell.selfNode.hasClass('xw-hend')) { return false; }
+
+    _stepHorizontal($editorCell.toRight);
     return true;
   }
 
+  function moveCursorBelow() {
+    if ($editorCell.selfNode.hasClass('xw-vend')) { return false; }
+
+    _stepVertical($editorCell.toBelow);
+    return true;
+  }
+
+  function moveCursorLeft() {
+    if (this.selfNode.hasClass('xw-htop')) { return false; }
+
+    _stepHorizontal($editorCell.toLeft);
+    return true;
+  }
+
+  function moveCursorBelow() {
+    if ($editorCell.selfNode.hasClass('xw-vtop')) { return false; }
+
+    _stepVertical($editorCell.toAbove);
+    return true;
+  }
+
+  // Private methods for internal use only.
+  // 
+  // "Stepping" moves the cursor without changing the fill space to
+  // a cell that is given as a parameter.  It is the caller's 
+  // responsibility to ensure that parameter value is within the 
+  // active word's fill region.
+  //
+  // "Extending" and "Shrinking" are used to describe movement that
+  // also requires changing the active word region's fill space.
+  // Neither requires a parameter because both kinds of movement can
+  // only occur at the end of the present fill region.
+  // "Extending" increases the fill region by one cell.
+  // "Shrinking" decreases the fill region by one cell.
+  //
+  // "Backfilling" and "Collapsing" describe extension and reduction
+  // by moving the start-of-word marker, respectively.
+  function _stepHorizontal(nextCell) {
+    hideCursor();
+    dropColumnHighlighting();
+    $editorCell = nextCell;
+    addColumnHighlighting();
+    showCursor();
+  }
+
+  function _stepVertical(nextCell) {
+    hideCursor();
+    dropRowHighlighting();
+    $editorCell = nextCell;
+    addRowHighlighting();
+    showCursor();
+  };
+
+  function _extendHorizontal(fromEnd) {
+    if (fromEnd.selfNode.hasClass('xw-htop')) {
+      fromEnd.selfNode.removeClass('xw-hend');
+    } else {
+      fromEnd.selfNode.removeClass('xw-hend').addClass('xw-hmid');
+    }
+    
+    var nextCell = fromEnd.toRight;
+    while (! isBlank(nextCell)) {
+      nextCell.removeClass('xw-samerow').addClass('xw-hmid');
+      nextCell = nextCell.toRight;
+    }
+    nextCell.removeClass('xw-samerow').addClass('xw-hend');
+  }
+
+  function _extendVertical(fromEnd) {
+    if (fromEnd.selfNode.hasClass('xw-vtop')) {
+      fromEnd.selfNode.removeClass('xw-vend');
+    } else {
+      fromEnd.selfNode.removeClass('xw-vend').addClass('xw-vmid');
+    }
+    
+    var nextCell = fromEnd.toBelow;
+    while (! isBlank(nextCell)) {
+      nextCell.removeClass('xw-samecol').addClass('xw-vmid');
+      nextCell = nextCell.toBelow;
+    }
+    nextCell.removeClass('xw-samecol').addClass('xw-vend');
+  }
+
+  function _shrinkHorizontal(fromEnd) {
+    fromEnd.selfNode.removeClass('xw-hend').addClass('xw-samerow');
+    fromEnd.toLeft.selfNode.removeClass('xw-hmid').addClass('xw-hend');
+  }
+
+  function _shrinkVertical(fromEnd) {
+    fromEnd.selfNode.removeClass('xw-vend').addClass('xw-samecol');
+    fromEnd.toAbove.selfNode.removeClass('xw-vmid').addClass('xw-vend');
+  }
+
+  function _backfillHorizontal(fromTop) {
+    if (fromTop.selfNode.hasClass('xw-hend')) {
+      fromTop.selfNode.removeClass('xw-htop');
+    } else {
+      fromTop.selfNode.removeClass('xw-htop').addClass('xw-hmid');
+    }
+    
+    var nextCell = fromTop.toRight;
+    while (! isBlank(nextCell)) {
+      nextCell.removeClass('xw-samerow').addClass('xw-hmid');
+      nextCell = nextCell.toRight;
+    }
+    nextCell.removeClass('xw-samerow').addClass('xw-htop');
+  }
+
+  function _backfillVertical(fromTop) {
+    if (fromTop.selfNode.hasClass('xw-vend')) {
+      fromTop.selfNode.removeClass('xw-vtop');
+    } else {
+      fromTop.selfNode.removeClass('xw-vtop').addClass('xw-vmid');
+    }
+    
+    var nextCell = fromTop.toBelow;
+    while (! isBlank(nextCell)) {
+      nextCell.removeClass('xw-samecol').addClass('xw-vmid');
+      nextCell = nextCell.toBelow;
+    }
+    nextCell.removeClass('xw-samecol').addClass('xw-vtop');
+  }
+
+  function _collapseHorizontal(fromTop) {
+    fromTop.selfNode.removeClass('xw-htop').addClass('xw-samerow');
+    fromEnd.toRight.selfNode.removeClass('xw-hmid').addClass('xw-htop');
+  }
+
+  function _collapseVertical(fromTop) {
+    fromEnd.selfNode.removeClass('xw-vtop').addClass('xw-samecol');
+    fromEnd.toRight.selfNode.removeClass('xw-vmid').addClass('xw-vtop');
+  }
+
+//
+// Content manipulation -- setCharacter() and clearCharacter()
+//
+
+  function setCharacterHorizontal(c) {
+    // Relocate the borders of any vertical words adjacent to the changed
+    // cell if it was previously blank.
+    if (isBlank($editorCell)) {
+      if (($editorCell.toAbove != null) &&
+          ($editorCell.toAbove.selfNode.hasClass('xw-vend'))) {
+        _extendVertical($editorCell.toAbove);
+      } else if (($editorCell.toBelow != null) &&
+                 ($editorCell.toBelow.selfNode.hasClass('xw-vtop'))) {
+        _backfillVertical($editorCell.toBelow);
+      }
+    }
+
+    // Perform the assignment.
+    var nextCell = $editorCell.toRight;
+    $editorCell.content = c;
+    
+    // Mid-word edits are easy--no expansion to consider, just advance the 
+    // cursor within the active word region as tho' <RIGHT ARROW> were struck.
+    if (!$editorCell.hasClass('xw-hend')) { _stepHorizontal(nextCell); return; }
+
+    // Check conditions that block expansion.  If any of these hold, leave
+    // the cursor where it is.
+    // -- Reaching a border (there is no next cell to expand into)
+    // -- Closing a gap that would join two other words
+    // -- Populating all four cells of a 2x2 group
+    if (nextCell == null) { return; }
+    if ((nextCell.toAbove != null) && (nextCell.toBelow != null) &&
+        (nextCell.toAbove.selfNode.hasClass('xw-vend')) &&
+        (nextCell.toBelow.selfNode.hasClass('xw-vtop'))) {
+      return;   // Would join two vertical words
+    }
+    if ((nextCell.toRight != null) &&
+        (nextCell.toRight.selfNode.hasClass('xw-htop'))) {
+      return;  // Would join active word to another adjacent to next cell.
+    }
+    if (($editorCell.toBelow != null) && (nextCell.toBelow != null) &&
+        (!isBlank($editorCell.toBelow)) &&
+        (!isBlank(nextCell.toBelow))) { return; }
+    if (($editorCell.toAbove != null) && (nextCell.toAbove != null) &&
+        (!isBlank($editorCell.toAbove)) &&
+        (!isBlank(nextCell.toAbove))) { return; }
+
+    // If we reach this point, expand the edit region and step the cursor.
+    _expandHorizontal($editorCell);
+    _stepHorizontal($editorCell);
+  }
+
+  function setCharacterVertical(c) {
+    // Relocate the borders of any vertical words adjacent to the changed
+    // cell if it was previously blank.
+    if (isBlank($editorCell)) {
+      if (($editorCell.toLeft != null) &&
+          ($editorCell.toLeft.selfNode.hasClass('xw-hend'))) {
+        _extendHorizontal($editorCell.toLeft);
+      } else if (($editorCell.toRight != null) &&
+                 ($editorCell.toRight.selfNode.hasClass('xw-htop'))) {
+        _backfillHorizontal($editorCell.toRight);
+      }
+    }
+
+    // Perform the assignment.
+    var nextCell = $editorCell.toBelow;
+    $editorCell.content = c;
+    
+    // Mid-word edits are easy--no expansion to consider, just advance the 
+    // cursor within the active word region as tho' <RIGHT ARROW> were struck.
+    if (!$editorCell.hasClass('xw-vend')) { _stepVertical(nextCell); return; }
+
+    // Check conditions that block expansion.  If any of these hold, leave
+    // the cursor where it is.
+    // -- Reaching a border (there is no next cell to expand into)
+    // -- Closing a gap that would join two other words
+    // -- Populating all four cells of a 2x2 group
+    if (nextCell == null) { return; }
+    if ((nextCell.toLeft != null) && (nextCell.toRight != null) &&
+        (nextCell.toLeft.selfNode.hasClass('xw-hend')) &&
+        (nextCell.toRight.selfNode.hasClass('xw-htop'))) {
+      return;   // Would join two vertical words
+    }
+    if ((nextCell.toBelow != null) &&
+        (nextCell.toBelow.selfNode.hasClass('xw-vtop'))) {
+      return;  // Would join active word to another adjacent to next cell.
+    }
+    if (($editorCell.toRight != null) && (nextCell.toRight != null) &&
+        (!isBlank($editorCell.toRight)) &&
+        (!isBlank(nextCell.toRight))) { return; }
+    if (($editorCell.toLeft != null) && (nextCell.toLeft != null) &&
+        (!isBlank($editorCell.toLeft)) &&
+        (!isBlank(nextCell.toLeft))) { return; }
+
+    // If we reach this point, expand the edit region and step the cursor.
+    _expandVertical($editorCell);
+    _stepVertical($editorCell);
+  }
+
+  function clearCharacterHorizontal() {
+    // Backspace removes a character left of the current cell and therefore
+    // does not apply to the top cell of a word.
+    if ($editorCell.selfNode.hasClass('xw-htop')) {
+      return showBackspaceAtWordTopError($editorCell);
+    }
+  
+    // Check whether any vertical words will split or be truncated by this
+    // action and prevent any word from being reduced to a single cell.
+    // Words may not be split in two since the editor is not allowed to
+    // glue them back together afterwards.
+    var pruneCell  = wordEndHorizontal($editorCell);
+    if (isFilled(pruneCell.toAbove)) {
+      if ((pruneCell.toAbove.selfNode.hasClass('xw-vtop')) ||
+          (pruneCell.toAbove.toAbove.selfNode.hasClass('xw-vtop'))) {
+        return showShortTruncateError(pruneCell);
+      } else if (! pruneCell.selfNode.hasClass('xw-vend')) {
+        return showIllegalSplitError(pruneCell);
+      }
+  
+      _shrinkVertical(pruneCell);
+    } else if (isFilled(pruneCell.toRight)) {
+      if ((pruneCell.toBelow.selfNode.hasClass('xw-vend')) ||
+          (pruneCell.toBelow.toBelow.selfNode.hasClass('xw-vend'))) {
+        return showShortTruncateError(pruneCell);
+      } else if (! pruneCell.selfNode.hasClass('xw-vtop')) {
+        return showIllegalSplitError(pruneCell);
+      }
+
+      _collapseVertical(pruneCell);
+    }
+    
+    // The edit is approved.  Shift all content down by one cell, then shrink
+    // the active region by one.
+    var thisCell = $editorCell.toLeft;
+    var thisImg  = $('img.xw-value', thisCell.selfNode);
+    var nextCell = $editorCell;
+    var nextImg  = null;
+    while (thisCell != pruneCell) {
+      thisCell.content = nextCell.content;
+  
+      nextImg  = $('img.xw-value', nextCell.selfNode);
+      thisImg.attr('src', nextImg.attr('src'));
+      
+      thisCell = nextCell;
+      thisImg  = nextImg;
+      nextCell = thisCell.toRight;
+    }
+  
+    _shrinkHorizontal(pruneCell);
+  }
+
+  function clearCharacterVertical() {
+    // Backspace removes a character left of the current cell and therefore
+    // does not apply to the top cell of a word.
+    if ($editorCell.selfNode.hasClass('xw-vtop')) {
+      return showBackspaceAtWordTopError($editorCell);
+    }
+  
+    // Check whether any vertical words will split or be truncated by this
+    // action and prevent any word from being reduced to a single cell.
+    // Words may not be split in two since the editor is not allowed to
+    // glue them back together afterwards.
+    var pruneCell  = wordEndVertical($editorCell);
+    if (isFilled(pruneCell.toLeft)) {
+      if ((pruneCell.toLeft.selfNode.hasClass('xw-htop')) ||
+          (pruneCell.toLeft.toLeft.selfNode.hasClass('xw-htop'))) {
+        return showShortTruncateError(pruneCell);
+      } else if (! pruneCell.selfNode.hasClass('xw-hend')) {
+        return showIllegalSplitError(pruneCell);
+      }
+  
+      _shrinkHorizontal(pruneCell);
+    } else if (isFilled(pruneCell.toRight)) {
+      if ((pruneCell.toRight.selfNode.hasClass('xw-hend')) ||
+          (pruneCell.toRight.toRight.selfNode.hasClass('xw-hend'))) {
+        return showShortTruncateError(pruneCell);
+      } else if (! pruneCell.selfNode.hasClass('xw-htop')) {
+        return showIllegalSplitError(pruneCell);
+      }
+  
+      _collapseHorizontal(pruneCell);
+    }
+    
+    // The edit is approved.  Shift all content down by one cell, then shrink
+    // the active region by one.
+    var thisCell = $editorCell.toAbove;
+    var thisImg  = $('img.xw-value', thisCell.selfNode);
+    var nextCell = $editorCell;
+    var nextImg  = null;
+    while (thisCell != pruneCell) {
+      thisCell.content = nextCell.content;
+  
+      nextImg  = $('img.xw-value', nextCell.selfNode);
+      thisImg.attr('src', nextImg.attr('src'));
+      
+      thisCell = nextCell;
+      thisImg  = nextImg;
+      nextCell = thisCell.toBelow;
+    }
+  
+    _shrinkVertical(pruneCell);
+  }
+
+//
+// Active/Inactive/Same(Row|Col) Highlight Manipulation
+//
+
   function addRowHighlighting() {
-    var midWord =
-      $editorCell.wordLeft.add($editorCell.wordRight).add($editorCell.domNode);
-    var nearby = $sameRow.not(midWord);
+    var wordLeft  = $editorCell.wordLeft();
+    var wordRight = $editorCell.wordRight();
+    var sameRow   = $editorCell.sameRow;
 
-    var wordTop = $editorCell.wordLeft.first();
-    if( wordTop.size() == 0 ) { wordTop = $editorCell.domNode; }
+    var wordTop = wordLeft.first();
+    var wordEnd = wordRight.last();
 
-    var wordEnd = $editorCell.wordRight.last();
-    if( wordEnd.size() == 0 ) { wordEnd = $editorCell.domNode; }
+    sameRow.removeClass('xw-inactive');
+    sameRow.not(wordLeft).not(wordRight).addClass('xw-samerow');
 
-    midWord = midWord.not(wordTop).not(wordEnd);
-
-    $sameRow.removeClass('xw-inactive');
-    nearby.addClass('xw-samerow');
     wordTop.addClass('xw-htop');
-    midWord.addClass('xw-hmid');
+    wordLeft.not(wordTop).addClass('xw-hmid');
+    wordRight.not(wordEnd).addClass('xw-hmid');
     wordEnd.addClass('xw-hend');
     $editorCell.addClass('xw-active');
   }
@@ -655,22 +838,19 @@
   }
 
   function addColumnHighlighting() {
-    var midWord =
-      $editorCell.wordAbove.add($editorCell.wordBelow).add($editorCell.domNode);
-    var nearby = $sameCol.not(midWord);
+    var wordAbove  = $editorCell.wordLeft();
+    var wordBelow = $editorCell.wordRight();
+    var sameCol   = $editorCell.sameRow;
 
-    var wordTop = $editorCell.wordAbove.first();
-    if( wordTop.size() == 0 ) { wordTop = $editorCell.domNode; }
+    var wordTop = wordAbove.first();
+    var wordEnd = wordBelow.last();
 
-    var wordEnd = $editorCell.wordBelow.last();
-    if( wordEnd.size() == 0 ) { wordEnd = $editorCell.domNode; }
+    sameCol.removeClass('xw-inactive');
+    sameCol.not(wordAbove).not(wordBelow).addClass('xw-samerow');
 
-    midWord = midWord.not(wordTop).not(wordEnd);
-
-    $sameCol.removeClass('xw-inactive');
-    nearby.addClass('xw-samecol');
     wordTop.addClass('xw-vtop');
-    midWord.addClass('xw-vmid');
+    wordAbove.not(wordTop).addClass('xw-vmid');
+    wordBelow.not(wordEnd).addClass('xw-vmid');
     wordEnd.addClass('xw-vend');
     $editorCell.addClass('xw-active');
   }
@@ -682,14 +862,116 @@
   function closeWordEditor() {
     $(document).off('keydown', onKeyboardInput);
 
+    // Remove any trailing blank space and then check for minimum word length.
+    // Remove words that are too short with an error.
+    if ($horizontalMode) {
+      var wordEnd = WordEndHorizontal($editorCell);
+      if (isBlank(wordEnd)) {
+        _shrinkHorizontal(wordEnd);
+      }
+
+      if (wordEnd.selfNode.hasClass('xw-htop')) {
+        wordEnd.selfNode.removeClass( 'xw-htop xw-hend' )
+        wordEnd.content = '';
+
+        $('img.xw-value', wordEnd.selfNode
+        ).attr('src', $valueImages.blank);
+
+        showShortWordError();
+      } else if( wordEnd.toLeft.selfNode.hasClass('xw-htop')) {
+        wordEnd.selfNode.removeClass('xw-hend');
+        wordEnd.content = '';
+
+        wordEnd.toLeft.content = '';
+        wordEnd.toLeft.selfNode.removeClass('xw-htop');
+
+        $('img.xw-value', wordEnd.selfNode.add(wordEnd.toLeft.selfNode)
+        ).attr('src', $valueImages.blank);
+
+        showShortWordError();
+      }
+    } else {
+      var wordEnd = WordEndVertical($editorCell);
+      if (isBlank(wordEnd)) {
+        _shrinkVertical(wordEnd);
+      }
+
+      if (wordEnd.selfNode.hasClass('xw-vtop')) {
+        wordEnd.selfNode.removeClass('xw-vtop xw-vend');
+        wordEnd.content = '';
+
+        $('img.xw-value', wordEnd.selfNode
+        ).attr('src', $valueImages.blank);
+
+        showShortWordError();
+      } else if (wordEnd.toAbove.selfNode.hasClass('xw-vtop')) {
+        wordEnd.selfNode.removeClass('xw-vend');
+        wordEnd.content = '';
+
+        wordEnd.toAbove.content = '';
+        wordEnd.toAbove.selfNode.removeClass('xw-vtop');
+
+        $('img.xw-value', wordEnd.selfNode.add(wordEnd.toAbove.selfNode)
+        ).attr('src', $valueImages.blank);
+
+        showShortWordError();
+      }
+    }
+      
     dropRowHighlighting();
     dropColumnHighlighting();
-
     $editorCell.hideCursor();
 
     $editorCell = null;
-    $sameRow = null;
-    $sameCol = null;
+  }
+
+  //
+  // Error Modal Displays
+  //
+
+  function showShortWordError() {
+    alert('Pruning editor result because it is too short');
+
+    return false;
+  }
+
+  function showMaxWordsError() { alert('Max Words'); return false; }
+
+  function showHorizontalMergeError(mergeCell) {
+    alert('Horizontal merge error at ({row},{col})'.format(mergeCell));
+
+    return false; 
+  }
+
+  function showVerticalMergeError(mergeCell) {
+    alert('Vertical merge error at ({row},{col})'.format(mergeCell));
+
+    return false;
+  }
+
+  function showCongesionError(hPeer, vPeer) {
+    alert( '2x2 congestion error at [ ({hrow},{vcol}); ({hrow},{hcol}); ({vrow},{vcol}); ({vrow},{hcol}) ]'.format({ hrow: hPeer.row, hcol: hPeer.col, vrow: vPeer.row, vcol: vPeer.col })
+    );
+
+    return false;
+  }
+
+  function showBackspaceAtWordTopError(pruneCell) {
+    alert('Cannot backspace from word starting at ({row},{col})'.format(pruneCell));
+
+    return false;
+  }
+
+  function showShortTruncateError(pruneCell) {
+    alert('Cannot truncate intersecting word at ({row},{col})'.format(pruneCell));
+
+    return false;
+  }
+
+  function showIllegalSplitError(pruneCell) {
+    alert('Cannot split intersecting word at ({row},{col})'.format(pruneCell));
+
+    return false;
   }
 
   initialize();

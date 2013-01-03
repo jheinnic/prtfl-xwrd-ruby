@@ -68,7 +68,7 @@ div {
   }
 }
 
-table.xw-grid {
+table.xw-sliced {
   padding: 0;
   line-height: 0px;
   border: 0;
@@ -77,11 +77,14 @@ table.xw-grid {
   img {
     min-height: 100%;
     min-width: 100%;
-    height: auto;
+    height: 0;
   }
   td {
     padding: 0;
   }
+}
+
+table.xw-layered {
   div.xw-cell {
     position: relative;
     top: 0px;
@@ -163,78 +166,58 @@ table#lettergrid {
   height: 308px;
   background-color: #19D919;
   &.xw-horizontal div.xw-cell {
-    &.xw-htop {
-      img.xw-fill.xw-light, img.xw-htop {
+    &.xw-hsel {
+      img.xw-fill.xw-selected {
+        visibility: visible;
+      }
+      &.xw-htop img.xw-border.xw-htop {
+        visibility: visible;
+      }
+      &.xw-hmid img.xw-border.xw-hmid {
+        visibility: visible;
+      }
+      &.xw-hend img.xw-border.xw-hend {
         visibility: visible;
       }
     }
-    &.xw-hmid {
-      img.xw-fill.xw-light, img.xw-hmid {
-        visibility: visible;
-      }
+    &.xw-samerow img.xw-fill.xw-mainpath {
+      visibility: visible;
     }
-    &.xw-hend {
-      img.xw-fill.xw-light, img.xw-hend {
-        visibility: visible;
-      }
+    &.xw-samecol img.xw-fill.xw-altpath {
+      visibility: visible;
     }
   }
   &.xw-vertical div.xw-cell {
-    &.xw-vtop {
-      img.xw-fill.xw-light, img.xw-vtop {
+    &.xw-vsel {
+      img.xw-fill.xw-selected {
+        visibility: visible;
+      }
+      &.xw-vtop img.xw-border.xw-vtop {
+        visibility: visible;
+      }
+      &.xw-vmid img.xw-border.xw-vmid {
+        visibility: visible;
+      }
+      &.xw-vend img.xw-border.xw-vend {
         visibility: visible;
       }
     }
-    &.xw-vmid {
-      img.xw-fill.xw-light, img.xw-vmid {
-        visibility: visible;
-      }
+    &.xw-samerow img.xw-fill.xw-altpath {
+      visibility: visible;
     }
-    &.xw-vend {
-      img.xw-fill.xw-light, img.xw-vend {
-        visibility: visible;
-      }
+    &.xw-samecol img.xw-fill.xw-mainpath {
+      visibility: visible;
     }
   }
-  div.xw-cell {
-    &.samerow, &.samecol {
-      img.xw-fill.xw-light, img.xw-fill.xw-dark {
-        visibility: hidden;
-      }
+  div.xw-cell img {
+    visibility: hidden;
+
+    &.xw-fill.xw-initial {
+      visibility:visible;
+      z-index: 8;
     }
-    &.xw-inactive {
-      img.xw-fill {
-        &.xw-dark {
-          visibility:visible;
-        }
-        &.xw-light {
-          visibility:hidden;
-        }
-      }
-    }
-    &.xw-active {
-      img.xw-fill {
-        &.xw-dark {
-          visibility:hidden;
-        }
-        &.xw-light {
-          visibility:visible;
-        }
-      }
-    }
-    img {
-      &.xw-fill {
-        visibility: hidden;
-      }
-      &.xw-grid  {
-        visibility: visible;
-      }
-      &.xw-border {
-        visibility: hidden;
-      }
-      &.xw-value {
-        visibility: visible;
-      }
+    &.xw-grid, &.xw-value {
+      visibility: visible;
     }
   }
 }

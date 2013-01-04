@@ -316,11 +316,7 @@
   
     // Accept DEL, RETURN, TAB, arrows, and letters.
     if (keyValue >= 65 && keyValue <= 90) { 
-      if ($horizontalMode) {
-        setCharacterHorizontal(String.fromCharCode(keyValue));
-      } else {
-        setCharacterVertical(String.fromCharCode(keyValue));
-      }
+      setCharacter(String.fromCharCode(keyValue));
     } else if (keyValue == 8) {
       if ($horizontalMode) {
         clearCharacterHorizontal();   // <BACKSPACE> unsets a character
@@ -696,45 +692,62 @@
 // Content manipulation -- setCharacter() and clearCharacter()
 //
 
-  function setCharacterHorizontal(c) {
-    // Relocate the borders of any vertical words adjacent to the changed
-    // cell if it was previously blank.
-    if (isBlank($editorCell)) {
-      if (($editorCell.toAbove != null) &&
-          ($editorCell.toAbove.selfNode.hasClass('xw-vend'))) {
-        _extendVertical($editorCell.toAbove);
-      } else if (($editorCell.toBelow != null) &&
-                 ($editorCell.toBelow.selfNode.hasClass('xw-vtop'))) {
-        _backfillVertical($editorCell.toBelow);
+  function setCharacter(c) {
+    var nextCell = mainNextCell($editorCell);
+
+    if (isFilled($editorCell)) {
+      // There is at most one blank cell in the active edit region.  The cell
+      // just changed was not it, so there is no need to consider expanding
+      // the active selection.
+      $editorCell.content = c;
+      _stepHorizontal($editorCell.toRight);
+      return true;
+    }
+
+    // Relocate the borders of any perpendicular words adjacent to the 
+    // changed cell if it was previously blank.  Presume that this edit is
+    // at extending a word on one side or the other, but not joining two 
+    // words since the editor is supposed to prevent the cursor from even 
+    // advancing into a space such that that was possible.
+    var tempCellOne = altPrevCell($editorCell);
+
+    if (altIsTail(tempCellOne)) {
+      altExtend(tempCellOne);
+    } else { 
+      tempCellOne = altNextCell($editorCell);
+
+      if (altIsHead(tempCellOne)) {
+        _backfillVertical(tempCellOne);
       }
     }
 
-    // Perform the assignment.
-    var nextCell = $editorCell.toRight;
     $editorCell.content = c;
-    
-    // Mid-word edits are easy--no expansion to consider, just advance the 
-    // cursor within the active word region as tho' <RIGHT ARROW> were struck.
-    if (!$editorCell.selfNode.hasClass('xw-hend')) { _stepHorizontal(nextCell); return; }
 
-    // TODO: Error modal!
+    // If there is no next cell, progression is moot.
+    if (nextCell == null) { return; }
+    
     // Check conditions that block expansion.  If any of these hold, leave
-    // the cursor where it is.
+    // the cursor where it is.  The edit is still valid, but it would invite
+    // an illegal edit to progress automatically to the next cell.
     // -- Reaching a border (there is no next cell to expand into)
     // -- Closing a gap that would join two other words
     // -- Populating all four cells of a 2x2 group
-    if (nextCell == null) { return; }
+    // TODO: Error modals?
 
     // Would cause this word to become adjacent to a another parallel word
     // that begin's to the right of the next cell.
-    if ((isFilled(nextCell.toRight)) &&
-        (isFilled(nextCell.toRight.toRight))) { return; }
+    tempCellOne = mainNextCell(nextCell);
+    if ((isFilled(tempCell)) && (mainIsHead(tempCell))) { return; } 
 
-    // Would join two vertical words
-    if ((isFilled(nextCell.toAbove)) &&
-        (isFilled(nextCell.toBelow)) &&
-        ((isFilled(nextCell.toAbove.toAbove)) ||
-         (isFilled(nextCell.toBelow.toBelow)))) { return; }
+    // Would join two cross segments not in the edit path.  This may be legal,
+    // but its error prone to allow this way.  If the segments are meant to be
+    // joined, more explicit interaction is required.  A context menu option
+    // to permit this may be appropriate.
+    tempCellOne = altPrevCell(nextCell);
+    if (isFilled(tempCellOne)) {
+      tempCellOne = altNextCell(nextCell);
+      tempCellOne = altNextCell(nextCell);
+      if (isFilled(tempCellOne)) { return false; }
 
     // Would complete a 2x2 congestion grid.
     if (((isFilled($editorCell.toBelow)) &&
@@ -1035,6 +1048,42 @@
     alert('Cannot split intersecting word at ({row},{col})'.format(pruneCell));
 
     return false;
+  }
+
+  
+  function findWords( ) {
+     for( var row=0; row<11; row++ ) {
+       for( var col=0; col<11; col++ ) {
+isFilled(row*11)
+  }
+  function doThing(dir, strips) {
+    var colCounter = [];
+    for(var ii=0; ii<11; ii++) {
+      colCount[ii] = 0;
+    }
+
+    var offs = 0;
+    var row = 0;
+    var col = 0;
+    var words = [];
+
+    var tempCell = allCells[offs];
+    while(offs < 121) {
+      if( isBlank(tempCell) ) {
+        offs++;
+        tempCell = allCells[offs];
+        while( isBlank(tempCell) ) {
+          offs++;
+        }
+      
+
+    for(var row=0, offs=0; row<10; row++ ) {
+      for( var col=0, col<10; col++, offs++ ) {
+        
+    
+      var nextStrip = strips[ii];
+      nextStrip.each( dir.markStatus );
+    }
   }
 
   initialize();

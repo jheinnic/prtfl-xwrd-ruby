@@ -165,48 +165,39 @@ table#lettergrid {
   width: 308px;
   height: 308px;
   background-color: #19D919;
-  &.xw-horizontal div.xw-cell {
-    &.xw-hsel {
-      img.xw-fill.xw-selected {
-        visibility: visible;
-      }
-      &.xw-htop img.xw-border.xw-htop {
-        visibility: visible;
-      }
-      &.xw-hmid img.xw-border.xw-hmid {
-        visibility: visible;
-      }
-      &.xw-hend img.xw-border.xw-hend {
-        visibility: visible;
-      }
-    }
-    &.xw-samerow img.xw-fill.xw-mainpath {
+  div.xw-cell {
+    &.xw-open img.xw-fill.xw-selected {
       visibility: visible;
     }
-    &.xw-samecol img.xw-fill.xw-altpath {
-      visibility: visible;
-    }
-  }
-  &.xw-vertical div.xw-cell {
-    &.xw-vsel {
-      img.xw-fill.xw-selected {
+    &.xw-asrow {
+      &.xw-wordhead img.xw-border.xw-htop {
         visibility: visible;
       }
-      &.xw-vtop img.xw-border.xw-vtop {
+      &.xw-midword img.xw-border.xw-hmid {
         visibility: visible;
       }
-      &.xw-vmid img.xw-border.xw-vmid {
-        visibility: visible;
-      }
-      &.xw-vend img.xw-border.xw-vend {
+      &.xw-wordtail img.xw-border.xw-hend {
         visibility: visible;
       }
     }
-    &.xw-samerow img.xw-fill.xw-altpath {
-      visibility: visible;
+    &.xw-ascol {
+      &.xw-wordhead img.xw-border.xw-vtop {
+        visibility: visible;
+      }
+      &.xw-midword img.xw-border.xw-vmid {
+        visibility: visible;
+      }
+      &.xw-wordtail img.xw-border.xw-vend {
+        visibility: visible;
+      }
     }
-    &.xw-samecol img.xw-fill.xw-mainpath {
-      visibility: visible;
+    &.xw-astabrow, &.xw-astabcol {
+      &.xw-tabword img.xw-fill.xw-mainpath {
+        visibility: visible;
+      }
+      &.xw-tabopen img.xw-fill.xw-altpath {
+        visibility: visible;
+      }
     }
   }
   div.xw-cell img {

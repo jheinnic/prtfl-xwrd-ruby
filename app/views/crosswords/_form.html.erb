@@ -102,7 +102,7 @@
       </tr>
       <tr valign="top">
         <td colspan="2"><img name="card_12" src="<%= path_to_image 'card/card_12.jpg' %>"></td>
-        <td rowspan="3" colspan="6"><table id="lettergrid" class="xw-layered xw-horizontal">
+        <td rowspan="3" colspan="6"><table id="lettergrid" class="xw-layered">
               <% for ii in (0..10) do %>
               <tr>
                 <td><div data-rowid="<%= ii %>" data-colid="0" data-content="" class="xw-cell">
@@ -153,12 +153,22 @@
 // -- Bootstrap dialogs
 // -- Cursor blinking
   var $editorCell = null;
-  var $allCellRows = [];
-  // var $allCellCols = [];
-  var $horizontalMode = true;
-  var $directionChangeOk = true;
-  var $rootTable = $('#lettergrid');
+  var $hasAltDir = true;
   var $wordCount = 0;
+
+  var $wordRange = null;
+  var $openRange = null;
+
+  var $horizontalCells = [];
+  var $verticalCells = [];
+  var $physicalGrid = $horizontalCells;
+
+  var $horizontalRows = [];
+  var $verticalRows = [];
+  var $logicalGrid = $horizontalRows;
+  var $altLogicalGrid = $verticalRows;
+
+  var $rootTable  = $('#lettergrid');
   
   var $blankImage = "<%= path_to_image 'val/blank.png' %>";
   var $cursorImage = "<%= path_to_image 'val/qm.png' %>";
@@ -187,29 +197,84 @@
     // Iterate through the cells in document order, adding image data to
     // each cell and building a horizontal doubly linked lists connecting
     // immediate neighbors for horizontal navigability.
-    for (var row=0;row<11;row++) {
-      var cellLeft = null;
-      $allCellRows[row] = $(selectRowTmpl.format( {row: row}, $rootTable ));
+    for (var row=0; row<11; row++) {
+      var lastHCell = null;
+      var lastVCell = null;
+      $horizontalCells[row] = [];
+      $verticalCells[row]   = [];
+      $horizontalRows[row]  = [];
 
-      $allCellRows[row].append(contentTmpl);
+      var thisRow   = $(selectRowTmpl.format( {row: row}, $rootTable ));
+      thisRow.append(contentTmpl);
 
-      $allCellRows[row].each(
-        function(colIdx, nextCell) { 
-          nextCell.selfNode = $(nextCell);
-          nextCell.content  = '';
+      thisRow.each(
+        function(col, nextElement) { 
+          var thisHCell = {
+            row: row,
+            col: col,
+            selfNode: $(nextElement),
+            sameRow: thisRow,
+            sameCol: null,
+            content: {
+              current: '', previous: ''
+            },
+            hasTriple: {
+              current: false, previous: false
+            },
+            open: {
+              parallel: { head: 0, tail: 10, length: 11 },
+              crossing: { head: 0, tail: 10, length: 11 }
+            },
+            word: {
+              parallel: { head: row, tail: col, length: 1 },
+              crossing: { head: col, tail: row, length: 1 }
+            },
+            toLeft: lastHCell,
+            toRight: null,
+            toAbove: null,
+            toBelow: null
+          };
+          var thisVCell = {
+            row: col,
+            col: row,
+            selfNode: thisHCell.selfNode,
+            sameRow: null,
+            sameCol: thisRow,
+            content: thisHCell.content,
+            hasTriple: thisHCell.hasTriple,
+            open: {
+              parallel: thisHCell.open.crossing,
+              crossing: thisHCell.open.parallel
+            },
+            word: {
+              parallel: thisHCell.word.crossing,
+              crossing: thisHCell.word.parallel
+            },
+            toLeft: null,
+            toRight: null,
+            toAbove: thisHCell,
+            toBelow: null
+          };
 
-          nextCell.sameRow  = $allCellRows[row];
-          nextCell.row      = row;
-          nextCell.toLeft   = cellLeft;
-          nextCell.toRight  = null;
+          if(col != 0) {
+            lastHCell.toRight = thisHCell;
+            lastVCell.toBelow = thisVCell;
+          }
+  
+          // Cell coordinates are inverted within the objects to support
+          // dimension toggling, but the lookup arrays are not inverted
+          // because they are accessed using the physical coordinates on
+          // each cell's <dim> tag, which do not change when the edit
+          // dimension is toggled.
+          lastHCell = thisHCell;
+          lastVCell = thisVCell;
+          $horizontalCells[row][col] = thisHCell;
+          $verticalCells[row][col] = thisVCell;
 
-          nextCell.sameCol  = null;
-          nextCell.col      = colIdx;
-          nextCell.toAbove  = null;
-          nextCell.toBelow  = null;
-
-          if (cellLeft != null) { cellLeft.toRight = nextCell; }
-          cellLeft = nextCell;
+          // The "Rows" arrays are used for logical lookup when cleaning up
+          // bookkeeping info using logical objects rather than selected
+          // <div> objects.
+          $horizontalRows[row][col] = thisHCell;
         }
       );
     }
@@ -218,21 +283,35 @@
     // for vertical navigability, and add functions for use by the click and
     // keyboard event handlers that derive subsets of connected cells for word
     // boundary highlighting and cursor position management.
-    for (var col=0;col<11;col+=1) {
-      var cellAbove = null;
-      var sameCol = $(selectColTmpl.format({col: col}, $rootTable));
-      // $allCellCols[col] = sameCol
+    for (var col=0; col<11; col++) {
+      var lastHCell = null;
+      var lastVCell = null;
+      $verticalRows[col]   = [];
 
-      sameCol.each(
-        function(rowIdx, nextCell) { 
-          nextCell.sameCol = sameCol;
-          nextCell.toAbove = cellAbove;
+      var thisCol = $(selectColTmpl.format({col: col}, $rootTable));
 
-          if (cellAbove != null) { cellAbove.toBelow = nextCell; }
-          cellAbove = nextCell;
+      thisCol.each(
+        function(row, nextCell) { 
+          var thisHCell = $horizontalCells[row][col];
+          var thisVCell = $verticalCells[row][col];
+
+          thisHCell.sameCol = thisCol;
+          thisVCell.sameRow = thisCol;
+  
+          thisHCell.toAbove = lastHCell;
+          thisVCell.toLeft  = lastVCell;
+  
+          if(row != 0) {
+            lastHCell.toBelow = thisHCell;
+            lastVCell.toRight = thisVCell;
+          }
+  
+          lastHCell = thisHCell;
+          lastVCell = thisVCell;
+          $verticalRows[col][row] = thisVCell;
         }
       );
-    } <!-- Latter of two intialization "for" loops.
+    } // Latter of two intialization "for" loops.
 
     // Set a handler for the table, setup to recieve calls from 
     $rootTable.on('click', 'div.xw-cell', onClickCell);
@@ -243,74 +322,59 @@
   //
 
   function onClickCell(event) {
-    // If another word is already active, close it out.
+    // If another word is already active accept its changes and release its
+    // interests in the cell grid's decoration state.
     if ($editorCell != null) { closeWordEditor(); }
   
     var wrap = $(this); // $(event.target).parent();
     var row = wrap.data('rowid');
     var col = wrap.data('colid');
-    var cellState = $allCellRows[row].eq(col).get()[0];
+    var cellState = $physicalGrid[row][col];
   
-    if (isBlank(cellState)) {
-      if ($wordCount >= 22) {
-        // If no more words remain, disallow selections that would increase
-        // the word count.
-        showMaxWordsError();
+    // If all 22 words are accounted for, disallow selections that are not 
+    // contiguous with an existing word.
+    // if (isBlank(cellState) && ($wordCount >= 22)) {
+    //   showMaxWordsError();
+    //   return false;
+    // }
+
+    if(cellState.open.parallel.length < 3) {
+      if(cellState.open.crossing.length < 3) {
+        showLockedOutCellError(cellState);
         return false;
       }
 
-      if (isFilled(cellState.toLeft)) {
-        if (isFilled(cellState.toRight)) {
-          return showHorizontalMergeError(cellState);
-        } else if (isFilled(cellState.toAbove)) {
-          if (isFilled(cellState.toBelow)) {
-            return showVerticalMergeError(cellState);
-          }
-          if (isFilled(cellState.toAbove.toLeft)) {
-            return showCongestionError(
-              cellState, cellState.toLeft, cellState.toAbove);
-          }
-        } else if (isFilled(cellState.toBelow)) {
-          if (isFilled(cellState.toBelow.toLeft)) {
-            return showCongestionError(
-              cellState, cellState.toLeft, cellState.toBelow);
-          }
-        }
-      } else if (isFilled(cellState.toRight)) {
-        if (isFilled(cellState.toAbove)) {
-          if (isFilled(cellState.toBelow)) {
-            return showVerticalMergeError(cellState);
-          }
-          if (isFilled(cellState.toAbove.toRight)) {
-            return showCongestionError(
-              cellState, cellState.toRight, cellState.toAbove);
-          }
-        } else if (isFilled(cellState.toBelow)) {
-          if (isFilled(cellState.toBelow.toRight)) {
-            return showCongestionError(
-              cellState, cellState.toRight, cellState.toBelow);
-          }
-        }
-      } else if ((isFilled(cellState.toAbove)) &&
-                 (isFilled(cellState.toBelow))) {
-        return showVerticalMergeError(cellState);
-      }
+      toggleDirectionMode();
 
-      // TODO: Account for clicks at the end of a word in the same orientation
-      // TODO: Account for clicks at the head of a word in either orientation
-      // TODO: Account for clicks at the end of a word in the alt direction
-      // TODO: Remove the hack that follows!
-      cellState.selfNode.addClass('xw-htop xw-hend xw-vtop xw-vend');
+      $hasAltDir  = false;
+      $editorCell = $physicalGrid[row][col];
+    } else {
+      if(cellState.open.crossing.length < 3) {
+        $hasAltDir  = false;
+      } else {
+        $hasAltDir  = true;
+      }
+      $editorCell = cellState;
     }
-  
-    $editorCell = cellState;
-    enableEditor();
+
+    $openRange = $editorCell.open.parallel;
+    $wordRange =
+      bootstrapWordRange(
+        $editorCell, $editorCell.word.parallel,
+        $editorCell.toLeft, $editorCell.toLeft.word.parallel,
+        $editorCell.toRight, $editorCell.toRight.word.parallel
+      );
+
+    $(document).on('keydown', onKeyboardInput);
+    addEditorDecorations();
+    showCursor();
   }
   
   function onKeyboardInput(event) {
     if ($editorCell == null) { return true; }
   
     if (!event) var event = window.event;
+
     var keyValue = event.keyCode;
     if( keyValue == null ) { return true; }
   
@@ -318,25 +382,29 @@
     if (keyValue >= 65 && keyValue <= 90) { 
       setCharacter(String.fromCharCode(keyValue));
     } else if (keyValue == 8) {
-      if ($horizontalMode) {
-        clearCharacterHorizontal();   // <BACKSPACE> unsets a character
-      } else {
-        clearCharacterVertical();   // <BACKSPACE> unsets a character
-      }
+      clearCharacter();   // <BACKSPACE> unsets a character
     } else if (keyValue == 999) {
       // <SPACE> marks a tripling multiplier TODO
-    } else if (keyValue == 9 ) {
-      toggleDirectionMode(); // <TAB> toggles horiz/vert direction modes
-    } else if (keyValue == 27 || keyValue == 13 ) {
-      closeWordEditor();  // <ESC> or <RETURN> to stop editting
-    } else if (keyValue = 37 && $horizontalMode ) {
+    } else if (keyValue == 9) {
+      if ($hasAltDir) { 
+        commitActiveChanges();
+        toggleDirectionMode();   // <TAB> toggles horiz/vert direction modes
+      } else {                   // and accepts changes. (TODO only accept 
+        // showBadToggleError(); // changes after the first change in a toggled
+      }                          // direction).
+    } else if (keyValue == 13) {
+      // TODO:
+      // abortWordEditor();  // <ESC> stops editting and rolls back changes
+    } else if (keyValue == 27 ) {
+      closeWordEditor();  // <RETURN> stops editting and accepts changes
+    } else if (keyValue = 37) {
       moveCursorLeft();   // <LEFT> moves the cursor left
-    } else if (keyValue = 38 && !$horizonalMode ) {
-      moveCursorAbove();   // <UP> moves the cursor up
-    } else if (keyValue = 39 && $horizontalMode ) {
+    } else if (keyValue = 38) {
+      moveCursorLeft();   // <UP> moves the cursor up
+    } else if (keyValue = 39) {
       moveCursorRight();  // <RIGHT> moves the cursor right
-    } else if (keyValue = 40 && !$horizontalMode ) {
-      moveCursorBelow();  // <DOWN> moves the cursor down
+    } else if (keyValue = 40) {
+      moveCursorRight();  // <DOWN> moves the cursor down
     }
   
     return true;
@@ -347,135 +415,320 @@
   }
   
   //
-  // Keystroke handlers
-  //
+  // Change-of-context cleanup methods
+  // 
 
-  function toggleDirectionMode() {
-    if( $horizontalMode ) {
-      $rootTable.removeClass('xw-horizontal').addClass('xw-vertical');
-      $horizontalMode = false;
+  function bootstrapWordRange(midCell, midWord, leftCell, leftWord, rightCell, rightWord) {
 
-      $mainStrategy = $verticalStrategy;
-      $altStrategy  = $horizontalStrategy;
-    } else {
-      $rootTable.removeClass('xw-vertical').addClass('xw-horizontal');
-      $horizontalMode = true;
+    if (isFilled(midCell)) {
+      // Intentionally empty.  The result is the same as if it is not filled
+      // and neither as left nor right.  Use this case to short circuit out
+      // to the post-conditional branch block.
+    } else if (isFilled(leftCell)) {
+      return({
+        current: {
+          head:   leftWord.head,
+          tail:   midWord.tail,
+          length: leftWord.length + 1
+        },
+        previous: leftWord
+      });
+    } else if(isFilled(rightCell)) {
+      return({
+        current: {
+          head:   midWord.head,
+          tail:   rightWord.tail,
+          length: rightWord.length + 1
+        },
+        previous: rightWord
+      });
+    }
 
-      $mainStrategy = $horizontalStrategy;
-      $altStrategy  = $verticalStrategy;
+    return({
+      current: {
+        head:   midWord.head,
+        tail:   midWord.tail,
+        length: midWord.length
+      },
+      previous: midWord
+    });
+  }
+
+  function closeWordEditor() {
+    $(document).off('keydown', onKeyboardInput);
+
+    commitActiveChanges();
+
+    hideCursor();
+    removeEditorDecorations();
+
+    $editorCell = null;
+  }
+
+  function commitActiveChanges() {
+    // var open = cells.slice(openRange.openHead, openRange.openTail);
+    var row = $editorCell.row;
+    var wrc = $wordRange.current;
+    var wrp = $wordRange.previous;
+
+    // Apply changes to cells in the open range first.
+    var first;
+    if( wrc.head < wrp.head ) { first = wrc.head; } else { first = wrp.head; }
+
+    var last;
+    if( wrc.tail > wrp.tail ) { last = wrc.tail; } else { last = wrp.tail; }
+
+    for( var ii=first; ii<=last; ii++ ) {
+      var currentCell = $logicalGrid[row][ii];
+
+      if( ii >= wrc.head && ii <= wrc.tail ) {
+        currentCell.word.head = $wordRange.current.head;
+        currentCell.word.tail = $wordRange.current.tail;
+        currentCell.word.length = $wordRange.current.length;
+      } else {
+        currentCell.word.head = currentCell.col;
+        currentCell.word.tail = currentCell.col;
+        currentCell.word.length = 1;
+      }
+
+      currentCell.content.previous = currentCell.content.current;
+      currentCell.hasTriple.previous = currentCell.hasTriple.current;
+    }
+    
+    // Re-evaluate the open ranges of logical rows above and below
+    // only if there were any changes that could affect them.  If the
+    // head or tail moved and the length did not remain unity, the changes
+    // have an impact.
+    if ((wrc.head != wrp.head || wrc.tail != wrp.tail) &&
+        (wrc.length != 1 || wrp.length != 1)) {
+      if(row > 0) { checkOpenRanges(row - 1, $logicalGrid); }
+      checkOpenRanges(row, $logicalGrid);
+      if(row < 10) { checkOpenRanges(row + 1, $logicalGrid); }
+
+      if(first > 0) { checkOpenRanges(first - 1, $altLogicalGrid); }
+      for( var ii=first; ii<=last; ii++ ) {
+        checkOpenRanges(ii, $altLogicalGrid);
+      }
+      if(last < 10) { checkOpenRanges(last + 1, $altLogicalGrid); }
     }
   }
-  
+
+
+  function checkOpenRanges(idx, orientation) {
+    var openStart = 0;
+
+    // Check down the row.  If a cell is populated, it must be in an unlocked
+    // space by definition.  If a cell is blank, check its corner adjacencies,
+    // and if none are full, it is unlocked.
+    //
+    // When a locked cell is found, openStart has the index of the first 
+    // preceding unlocked cell.  Set every cell between it and the present with
+    // the open region bounds discovered, then increment openStart and keep 
+    // on searching.
+    for( var ii=0; ii<11; ii++ ) {
+      var thisCell = orientation[idx][ii];
+      if (! isFilled(thisCell)) {
+        if (((isFilled(thisCell.toAbove)) &&
+             ((isFilled(thisCell.toRight)) &&
+              (isFilled(thisCell.toRight.toAbove))) ||
+             ((isFilled(thisCell.toLeft)) &&
+              (isFilled(thisCell.toLeft.toAbove)))) ||
+            ((isFilled(thisCell.toBelow)) &&
+             ((isFilled(thisCell.toRight)) &&
+              (isFilled(thisCell.toRight.toBelow))) ||
+             ((isFilled(thisCell.toLeft)) &&
+              (isFilled(thisCell.toLeft.toBelow))))) {
+              // Illegal 2x2 if this cell is used.  Its locked.
+              markOpenRange(idx, openStart, ii - 1, orientation);
+              markOpenUnit(thisCell);
+              openStart = ii+1;
+        }
+      }
+    }
+  }
+
+  function markOpenUnit(cell) {
+    cell.open.head = cell.open.tail = cell.col;
+    cell.open.length = 1;
+  }
+
+  function markOpenRange(idx, head, tail, orientation) {
+    var regionCell;
+    var rangeLen = tail - head + 1;
+    for( var ii=head; ii<=tail; ii++ ) {
+      regionCell = orientation[idx][ii];
+      regionCell.open.head = head;
+      regionCell.open.tail = tail;
+      regionCell.open.length = rangeLen;
+    }
+  }
+
   //
-  // Orientation-agnostic navigation interface.
-  // -- Exposes orientation-dependent properties (e.g. Left/Right/Above/Below)
-  //    through an orientation-agnostic dialect (e.g. Head/Tail Main/Alt,
-  //    Next/Prev) with $orientationMode gating which behavior to implement.
+  // Orientation-aware cell decoration.  Not a public interface
   //
 
   var $horizontalStrategy = {
-    unit: '.xw-htop .xw-hend',          mid: '.xw-hmid',
-    head: '.xw-htop',                  tail: '.xw-hend',
-    altUnit: '.xw-vtop .xw-vend',    altMid: '.xw-vmid',
-    altHead: '.xw-vtop',            altTail: '.xw-vend',
+    toggleDirectionMode: function() {
+      $dirModeStrategy = $verticalStrategy;
+      $physicalGrid = $verticalCells;
+      $altLogicalGrid = $logicalGrid;
+      $logicalGrid = $verticalRows;
+      
+      if($editorCell != null) {
+        $editorCell = $physicalGrid[$editorCell.row][$editorCell.col];
+      }
+    },
 
-    nextCell: function(fromCell) {
-      return fromCell.toRight;
+    decorateParallel: function(open, word) {
+      open.addClass('xw-open xw-asrow');
+      word.addClass('xw-word xw-asrow');
     },
-    prevCell: function(fromCell) {
-      return fromCell.toLeft;
-    },
-    isHead: function(checkCell) {
-      return checkCell.selfNode.hasClass('xw-htop');
-    },
-    isTail: function(checkCell) {
-      return checkCell.selfNode.hasClass('xw-hend');
+
+    decorateCrossing: function(open, word) {
+      open.not($editorCell.selfNode).addClass('xw-tabopen xw-astabcol');
+      word.not($editorCell.selfNode).addClass('xw-tabword xw-astabcol');
     }
   };
+
   var $verticalStrategy = {
-    unit: '.xw-htop .xw-hend',          mid: '.xw-hmid',
-    head: '.xw-htop',                  tail: '.xw-hend',
-    altUnit: '.xw-vtop .xw-vend',    altMid: '.xw-vmid',
-    altHead: '.xw-vtop',            altTail: '.xw-vend',
+    toggleDirectionMode: function() {
+      $dirModeStrategy = $horizontalStrategy;
+      $physicalGrid = $horizontalCells;
+      $altLogicalGrid = $logicalGrid;
+      $logicalGrid = $horizontalRows;
 
-    nextCell: function(fromCell) {
-      return fromCell.toBelow;
+      if( $editorCell != null ) {
+        $editorCell = $physicalGrid[$editorCell.col][$editorCell.row];
+      }
     },
-    prevCell: function(fromCell) {
-      return fromCell.toAbove;
+
+    decorateParallel: function(open, word) {
+      open.addClass('xw-open xw-ascol');
+      word.addClass('xw-word xw-ascol');
     },
-    isHead: function(checkCell) {
-      return checkCell.selfNode.hasClass('xw-vtop');
-    },
-    isTail: function(checkCell) {
-      return checkCell.selfNode.hasClass('xw-vend');
+
+    decorateCrossing: function(open, word) {
+      open.not($editorCell.selfNode).addClass('xw-tabopen xw-astabrow');
+      word.not($editorCell.selfNode).addClass('xw-tabword xw-astabrow');
     }
   };
-    
-  var $mainStrategy = $horizontalStrategy;
-  var $altStrategy  = $verticalStrategy;
 
-  function mainNextCell(ofCell) { return $mainStrategy.nextCell(ofCell); }
-  function altNextCell(ofCell) { return $altStrategy.nextCell(ofCell); }
+  var $dirModeStrategy = $horizontalStrategy
 
-  function mainPrevCell(ofCell) { return $mainStrategy.prevCell(ofCell); }
-  function altPrevCell(ofCell) { return $altStrategy.prevCell(ofCell); }
+  function toggleDirectionMode() {
+    $dirModeStrategy.toggleDirectionMode();
 
-  function mainIsHead(ofCell) { return $mainStrategy.isHead(ofCell); }
-  function altIsHead(ofCell) { return $altStrategy.isHead(ofCell); }
+    if ($editorCell != null) {
+      $openRange = $editorCell.open.parallel;
+      $wordRange = bootstrapWordRange(
+        $editorCell, $editorCell.word.parallel,
+        $editorCell.toLeft, $editorCell.toLeft.word.parallel,
+        $editorCell.toRight, $editorCell.toRight.word.parallel
+      );
+    }
+  }
 
-  function mainIsTail(ofCell) { return $mainStrategy.isTail(ofCell); }
-  function altIsTail(ofCell) { return $altStrategy.isTail(ofCell); }
+  function removeEditorDecorations() {
+    $('div.xw-cell', $rootTable).removeClass(
+      'xw-openhead xw-opentail xw-midopen xw-open xw-wordhead xw-wordtail xw-midword xw-word xw-tabopenhead xw-tabopentail xw-midtabopen xw-tabopen xw-tabwordhead xw-tabwordtail xw-midtabword xw-tabword xw-asrow xw-ascol xw-astabrow xw-astabcol');
+  }
+
+  function addEditorDecorations() {
+    decorateDimension(
+      $editorCell.sameRow, $openRange, $wordRange.current,
+      $dirModeStrategy.decorateParallel,
+      'xw-openhead', 'xw-opentail', 'xw-midopen',
+      'xw-wordhead', 'xw-wordtail', 'xw-midword'
+    );
+
+    if($hasAltDir) {
+      var altWordRange = bootstrapWordRange(
+        $editorCell, $editorCell.word.crossing,
+        $editorCell.toAbove, $editorCell.toAbove.word.crossing,
+        $editorCell.toBelow, $editorCell.toBelow.word.crossing
+      );
+      decorateDimension(
+        $editorCell.sameCol, $openRange, altWordRange.current,
+        $dirModeStrategy.decorateCrossing,
+        'xw-tabopenhead', 'xw-tabopentail', 'xw-midtabopen',
+        'xw-tabwordhead', 'xw-tabwordtail', 'xw-midtabword'
+      );
+    }
+  }
+
+  function decorateDimension(cells, openRange, wordRange, dimMethod, openhead, opentail, midopen, wordhead, wordtail, midword) {
+    var open = cells.slice(openRange.head, openRange.tail + 1);
+    var word = cells.slice(wordRange.head, wordRange.tail + 1);
+
+    dimMethod(open, word);
+
+    open.first().addClass(openhead);
+    open.last().addClass(opentail);
+    open.slice(1, openRange.length - 1).addClass(midopen);
+
+    word.first().addClass(wordhead);
+    word.last().addClass(wordtail);
+    word.slice(1, wordRange.length - 1).addClass(midword);
+  }
+      
+  function moveWordHead(fromCell, toCell) {
+    if (isWordTail(toCell)) {
+      fromCell.selfNode.removeClass('xw-wordhead');
+      toCell.selfNode.addClass('xw-wordhead');
+    } else {
+      fromCell.selfNode.removeClass('xw-wordhead');
+      toCell.selfNode.removeClass('xw-midword').addClass('xw-wordhead');
+    }
+  }
+
+  function moveWordTail(fromCell, toCell) {
+    if (isWordHead(toCell)) {
+      fromCell.selfNode.removeClass('xw-wordtail');
+      toCell.selfNode.addClass('xw-wordtail');
+    } else {
+      fromCell.selfNode.removeClass('xw-wordtail');
+      toCell.selfNode.removeClass('xw-midword').addClass('xw-wordtail');
+    }
+
+    $wordRow.add(toCell);
+  }
+
+  function moveCursor(fromCell, toCell) {
+    var cursorReplacement
+    if (isBlank(fromCell)) {
+      cursorReplacement = $blankImage
+    } else {
+      cursorReplacement = $valueImages.attr($editorCell.content.current);
+    }
+    $('img.xw-value', fromCell.selfNode).attr('src', cursorReplacement);
+
+    fromCell.sameCol.removeClass(
+      'xw-tabopenhead xw-tabopentail xw-midtabopen xw-tabopen xw-tabwordhead xw-tabwordtail xw-midtabword xw-tabword xw-astabrow xw-astabcol');
+
+    if(toCell.open.crossing.length < 3) {
+      $hasAltDir  = false;
+    } else {
+      $hasAltDir  = true;
+
+      var altWordRange = bootstrapWordRange(
+        $editorCell, $editorCell.word.crossing,
+        $editorCell.toAbove, $editorCell.toAbove.word.crossing,
+        $editorCell.toBelow, $editorCell.toBelow.word.crossing
+      );
+      decorateDimension(
+        $editorCell.sameCol, $editorCell.open.crossing, altWordRange.current,
+        $dirModeStrategy.decorateCrossing,
+        'xw-tabopenhead', 'xw-tabopentail', 'xw-midtabopen',
+        'xw-tabwordhead', 'xw-tabwordtail', 'xw-midtabword'
+      );
+    }
+
+    $('img.xw-value', toCell.selfNode).attr('src', $cursorImage);
+  }
 
   //
-  // Word navigation helpers
-  // -- Includes helpers for "If Not Null And Check X" comparisons
+  // Content If Not Null Helpers
   //
-
-  function mainWord(ofCell) {
-    var retVal = $(ofCell);
-    var currentCell = ofCell;
-    while (currentCell != null && ! mainIsTail(currentCell)) {
-      retVal = retVal.add(currentCell)
-      currentCell = mainNextCell(currentCell);
-    }
-
-    currentCell = ofCell;
-    while (currentCell != null && ! mainIsHead(currentCell)) {
-      retVal = retVal.add(currentCell)
-      currentCell = mainPrevCell(currentCell);
-    }
-
-    return retVal;
-  }
-
-  function altWord(ofCell) {
-    var retVal = $(ofCell);
-    var currentCell = ofCell;
-    while (currentCell != null && ! altIsTail(currentCell)) {
-      retVal = retVal.add(currentCell)
-      currentCell = altNextCell(currentCell);
-    }
-    currentCell = ofCell;
-
-    while (currentCell != null && ! altIsHead(currentCell)) {
-      retVal = retVal.add(currentCell)
-      currentCell = altPrevCell(currentCell);
-    }
-
-    return retVal;
-  }
-
-  // Finds the end of a word of the current orientation mode from the given
-  // parameter cell.  It is the callers responsibility that the argument cell
-  // is part of a word--no error checking is provided.
-  function mainWordEnd(fromCell) {
-    var nextCell = fromCell;
-    while (!mainIsTail(nextCell)) {
-      nextCell = mainNextCell(nextCell);
-    }
-    return nextCell;
-  }
 
   // isBlank() and isFilled() each return false on null input.  Depending on
   // how null is expected to be handled, it may be favorible to negate the
@@ -492,16 +745,74 @@
   // |  'c'  |   FALSE   |    TRUE    |
   // |  ''   |   TRUE    |    FALSE   |
   // +=======+===========+============+
-  function isBlank(checkCell) {
-    return ((checkCell != null) && (checkCell.content == ''));
+  function isBlank(cell) {
+    return ((cell != null) && (cell.content.current == ''));
   }
 
-  function isFilled(checkCell) {
-    return ((checkCell != null) && (checkCell.content != ''));
+  function isFilled(cell) {
+    return ((cell != null) && (cell.content.current != ''));
+  }
+
+  function isOpen(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-open')));
+  }
+
+  function isOpenHead(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-openhead')));
+  }
+
+  function isOpenTail(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-opentail')));
+  }
+
+  function isWord(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-word')));
+  }
+
+  function isWordHead(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-wordhead')));
+  }
+
+  function isWordTail(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-wordtail')));
+  }
+
+  function isTabOpen(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-tabopen')));
+  }
+
+  function isTabOpenHead(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-tabopenhead')));
+  }
+
+  function isTabOpenTail(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-tabopentail')));
+  }
+
+  function isTabWord(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-tabword')));
+  }
+
+  function isTabWordHead(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-tabwordhead')));
+  }
+
+  function isTabWordTail(cell) {
+    return ((cell != null) && (cell.selfNode.hasClass('xw-tabwordtail')));
+  }
+
+  function getWordEnd() {
+    var nextCell = $editorCell;
+
+    while (! isWordTail(nextCell)) {
+      nextCell = nextCell.toRight;
+    }
+
+    return nextCell;
   }
 
   //
-  // Cursor enable/disable methods
+  // Cursor management interface
   //
 
   function showCursor() {
@@ -514,345 +825,86 @@
     if (isBlank($editorCell)) {
       cursorReplacement = $blankImage
     } else {
-      cursorReplacement = $valueImages.attr($editorCell.content);
+      cursorReplacement = $valueImages.attr($editorCell.content.current);
     }
 
     $('img.xw-value', $editorCell.selfNode).attr('src', cursorReplacement);
   }
 
-  //
-  // Cursor movement methods
-  //
-
   function moveCursorRight() {
-    if ($editorCell.selfNode.hasClass('xw-hend')) { return false; }
+    if (isOpenTail($editorCell)) { return }
 
-    _stepHorizontal($editorCell.toRight);
-    return true;
-  }
+    var rightCell = $editorCell.toRight;
 
-  function moveCursorBelow() {
-    if ($editorCell.selfNode.hasClass('xw-vend')) { return false; }
+    if ((! isWord(rightCell)) &&
+        ((! isWord($editorCell)) || isBlank($editorCell))) { return }
 
-    _stepVertical($editorCell.toBelow);
-    return true;
+    if (isBlank($editorCell) && isWordHead($editorCell)) {
+      moveCursor($editorCell, rightCell);
+      moveWordHead($editorCell, rightCell);
+    } else {
+      moveCursor($editorCell, rightCell);
+    }
+
+    $editorCell = rightCell;
   }
 
   function moveCursorLeft() {
-    if ($editorCell.selfNode.hasClass('xw-htop')) { return false; }
+    if (isOpenHead($editorCell)) { return }
 
-    _stepHorizontal($editorCell.toLeft);
-    return true;
+    var leftCell = $editorCell.toLeft;
+
+    if ((! isWord(leftCell)) &&
+        ((! isWord($editorCell)) || isBlank($editorCell))) { return }
+
+    if (isBlank($editorCell) && isWordTail($editorCell)) {
+      moveCursor($editorCell, leftCell);
+      moveWordTail($editorCell, leftCell);
+    } else {
+      moveCursor($editorCell, leftCell);
+    }
+
+    $editorCell = leftCell;
   }
 
-  function moveCursorBelow() {
-    if ($editorCell.selfNode.hasClass('xw-vtop')) { return false; }
-
-    _stepVertical($editorCell.toAbove);
-    return true;
-  }
-
-  // Private methods for internal use only.
-  // 
-  // "Stepping" moves the cursor without changing the fill space to
-  // a cell that is given as a parameter.  It is the caller's 
-  // responsibility to ensure that parameter value is within the 
-  // active word's fill region.
   //
-  // "Extending" and "Shrinking" are used to describe movement that
-  // also requires changing the active word region's fill space.
-  // Neither requires a parameter because both kinds of movement can
-  // only occur at the end of the present fill region.
-  // "Extending" increases the fill region by one cell.
-  // "Shrinking" decreases the fill region by one cell.
+  // Content manipulation -- setCharacter() and clearCharacter()
   //
-  // "Backfilling" and "Collapsing" describe extension and reduction
-  // by moving the start-of-word marker, respectively.
-  function _stepHorizontal(nextCell) {
-    hideCursor();
-    $editorCell.sameCol.removeClass('xw-samecol');
-    $editorCell = nextCell;
-    $editorCell.sameCol.not($editorCell).addClass('xw-samecol');
-    showCursor();
-  }
-
-  function _stepVertical(nextCell) {
-    hideCursor();
-    $editorCell.sameRow.removeClass('xw-samerow');
-    $editorCell = nextCell;
-    $editorCell.sameRow.not($editorCell).addClass('xw-samerow');
-    showCursor();
-  };
-
-  function _extendHorizontal(fromEnd) {
-    if (fromEnd.selfNode.hasClass('xw-htop')) {
-      fromEnd.selfNode.removeClass('xw-hend');
-    } else {
-      fromEnd.selfNode.removeClass('xw-hend').addClass('xw-hmid');
-    }
-    
-    var thisCell = fromEnd.toRight;
-    var nextCell = thisCell.toRight;
-    var midClassStr, endClassStr;
-    if ($horizontalMode) { 
-      midClassStr = 'xw-hsel xw-hmid';
-      endClassStr = 'xw-hsel xw-hend';
-    } else {
-      midClassStr = 'xw-hmid';
-      endClassStr = 'xw-hend';
-    }
-    while (isFilled(nextCell)) {
-      thisCell.selfNode.removeClass('xw-samerow').addClass(midClassStr);
-      thisCell = nextCell;
-      nextCell = nextCell.toRight;
-    }
-    thisCell.selfNode.removeClass('xw-samerow').addClass(endClassStr);
-  }
-
-  function _extendVertical(fromEnd) {
-    if (fromEnd.selfNode.hasClass('xw-vtop')) {
-      fromEnd.selfNode.removeClass('xw-vend');
-    } else {
-      fromEnd.selfNode.removeClass('xw-vend').addClass('xw-vmid');
-    }
-    
-    var thisCell = fromEnd.toBelow;
-    var nextCell = thisCell.toBelow;
-    var midClassStr, endClassStr;
-    if ($horizontalMode) { 
-      midClassStr = 'xw-vsel xw-vmid';
-      endClassStr = 'xw-vsel xw-vend';
-    } else {
-      midClassStr = 'xw-vmid';
-      endClassStr = 'xw-vend';
-    }
-    while (isFilled(nextCell)) {
-      thisCell.selfNode.removeClass('xw-samecol').addClass(midClassStr);
-      thisCell = nextCell;
-      nextCell = nextCell.toBelow;
-    }
-    thisCell.selfNode.removeClass('xw-samecol').addClass(endClassStr);
-  }
-
-  function _shrinkHorizontal(fromEnd) {
-    fromEnd.selfNode.removeClass('xw-hend').addClass('xw-samerow');
-    fromEnd.toLeft.selfNode.removeClass('xw-hmid').addClass('xw-hend');
-  }
-
-  function _shrinkVertical(fromEnd) {
-    fromEnd.selfNode.removeClass('xw-vend').addClass('xw-samecol');
-    fromEnd.toAbove.selfNode.removeClass('xw-vmid').addClass('xw-vend');
-  }
-
-  function _backfillHorizontal(fromTop) {
-    if (fromTop.selfNode.hasClass('xw-hend')) {
-      fromTop.selfNode.removeClass('xw-htop');
-    } else {
-      fromTop.selfNode.removeClass('xw-htop').addClass('xw-hmid');
-    }
-    
-    var thisCell = fromTop.toRight;
-    var nextCell = thisCell.toRight;
-    while (isFilled(nextCell)) {
-      nextCell.removeClass('xw-samerow').addClass('xw-hmid');
-      thisCell = nextCell;
-      nextCell = nextCell.toRight;
-    }
-    thisCell.removeClass('xw-samerow').addClass('xw-htop');
-  }
-
-  function _backfillVertical(fromTop) {
-    if (fromTop.selfNode.hasClass('xw-vend')) {
-      fromTop.selfNode.removeClass('xw-vtop');
-    } else {
-      fromTop.selfNode.removeClass('xw-vtop').addClass('xw-vmid');
-    }
-    
-    var thisCell = fromTop.toBelow;
-    var nextCell = thisCell.toBelow;
-    while (isFilled(nextCell)) {
-      nextCell.removeClass('xw-samecol').addClass('xw-vmid');
-      thisCell = nextCell;
-      nextCell = nextCell.toBelow;
-    }
-    thisCell.removeClass('xw-samecol').addClass('xw-vtop');
-  }
-
-  function _collapseHorizontal(fromTop) {
-    fromTop.selfNode.removeClass('xw-htop').addClass('xw-samerow');
-    fromEnd.toRight.selfNode.removeClass('xw-hmid').addClass('xw-htop');
-  }
-
-  function _collapseVertical(fromTop) {
-    fromEnd.selfNode.removeClass('xw-vtop').addClass('xw-samecol');
-    fromEnd.toRight.selfNode.removeClass('xw-vmid').addClass('xw-vtop');
-  }
-
-//
-// Content manipulation -- setCharacter() and clearCharacter()
-//
 
   function setCharacter(c) {
-    var nextCell = mainNextCell($editorCell);
-
-    if (isFilled($editorCell)) {
-      // There is at most one blank cell in the active edit region.  The cell
-      // just changed was not it, so there is no need to consider expanding
-      // the active selection.
-      $editorCell.content = c;
-      _stepHorizontal($editorCell.toRight);
-      return true;
-    }
+    $editorCell.content.current = c;
+    moveCursorRight();
 
     // Relocate the borders of any perpendicular words adjacent to the 
     // changed cell if it was previously blank.  Presume that this edit is
     // at extending a word on one side or the other, but not joining two 
     // words since the editor is supposed to prevent the cursor from even 
     // advancing into a space such that that was possible.
-    var tempCellOne = altPrevCell($editorCell);
-
-    if (altIsTail(tempCellOne)) {
-      altExtend(tempCellOne);
-    } else { 
-      tempCellOne = altNextCell($editorCell);
-
-      if (altIsHead(tempCellOne)) {
-        _backfillVertical(tempCellOne);
-      }
-    }
-
-    $editorCell.content = c;
-
-    // If there is no next cell, progression is moot.
-    if (nextCell == null) { return; }
-    
-    // Check conditions that block expansion.  If any of these hold, leave
-    // the cursor where it is.  The edit is still valid, but it would invite
-    // an illegal edit to progress automatically to the next cell.
-    // -- Reaching a border (there is no next cell to expand into)
-    // -- Closing a gap that would join two other words
-    // -- Populating all four cells of a 2x2 group
-    // TODO: Error modals?
-
-    // Would cause this word to become adjacent to a another parallel word
-    // that begin's to the right of the next cell.
-    tempCellOne = mainNextCell(nextCell);
-    if ((isFilled(tempCell)) && (mainIsHead(tempCell))) { return; } 
-
-    // Would join two cross segments not in the edit path.  This may be legal,
-    // but its error prone to allow this way.  If the segments are meant to be
-    // joined, more explicit interaction is required.  A context menu option
-    // to permit this may be appropriate.
-    tempCellOne = altPrevCell(nextCell);
-    if (isFilled(tempCellOne)) {
-      tempCellOne = altNextCell(nextCell);
-      tempCellOne = altNextCell(nextCell);
-      if (isFilled(tempCellOne)) { return false; }
-
-    // Would complete a 2x2 congestion grid.
-    if (((isFilled($editorCell.toBelow)) &&
-         (isFilled(nextCell.toBelow))) || 
-        ((isFilled($editorCell.toAbove)) &&
-         (isFilled(nextCell.toAbove)))) { return; }
-
-    // If we reach this point, expand the edit region and step the cursor.
-    _extendHorizontal($editorCell);
-    _stepHorizontal($editorCell.toRight);
+//    var tempCellOne = altPrevCell($editorCell);
+//    if (altIsTail(tempCellOne)) {
+//      altExtend(tempCellOne);
+//    } else { 
+//      tempCellOne = altNextCell($editorCell);
+//
+//      if (altIsHead(tempCellOne)) {
+//        _backfillVertical(tempCellOne);
+//      }
+//    }
   }
 
-  function setCharacterVertical(c) {
-    // Perform the assignment.
-    var nextCell = $editorCell.toBelow;
-    $editorCell.content = c;
-    
-    // Mid-word edits are easy--no expansion to consider, just advance the 
-    // cursor within the active word region as tho' <RIGHT ARROW> were struck.
-    if (!$editorCell.hasClass('xw-vend')) { _stepVertical(nextCell); return; }
-    $editorCell.toRight.selfNode.addClass('xw-hsel');
-
-    // Check conditions that block expansion.  If any of these hold, leave
-    // the cursor where it is.
-    // -- Reaching a border (there is no next cell to expand into)
-    // -- Closing a gap that would join two other words
-    // -- Populating all four cells of a 2x2 group
-    if (nextCell == null) { return; }
-
-    // Would cause this word to become adjacent to a another parallel word
-    // that begin's to the right of the next cell.
-    if ((isFilled(nextCell.toBelow)) &&
-        (isFilled(nextCell.toBelow.toBelow))) { return; }
-
-    // Would join two perpendicular (horizontal) words
-    if ((isFilled(nextCell.toLeft)) &&
-        (isFilled(nextCell.toRight)) &&
-        ((isFilled(nextCell.toLeft.toLeft)) ||
-         (isFilled(nextCell.toRight.toRight)))) { return; }
-
-    // Would complete a 2x2 congestion grid.
-    if (((isFilled($editorCell.toRight)) &&
-         (isFilled(nextCell.toRight))) || 
-        ((isFilled($editorCell.toLeft)) &&
-         (isFilled(nextCell.toLeft)))) { return; }
-
-    // If we reach this point, expand the edit region and step the cursor.
-
-    // Relocate the borders of any vertical words adjacent to the changed
-    // cell if it was previously blank.
-    if (isBlank($editorCell)) {
-      if (($editorCell.toLeft != null) &&
-          ($editorCell.toLeft.selfNode.hasClass('xw-hend'))) {
-        _extendHorizontal($editorCell.toLeft);
-      } else if (($editorCell.toRight != null) &&
-                 ($editorCell.toRight.selfNode.hasClass('xw-htop'))) {
-        _backfillHorizontal($editorCell.toRight);
-      }
-    }
-
-    $editorCell.toBelow.selfNode.addClass('xw-vsel');
-    _extendVertical($editorCell);
-    _stepVertical($editorCell.toBelow);
-  }
-
-  function clearCharacterHorizontal() {
+  function clearCharacter() {
     // Backspace removes a character left of the current cell and therefore
     // does not apply to the top cell of a word.
-    if ($editorCell.selfNode.hasClass('xw-htop')) {
-      return showBackspaceAtWordTopError($editorCell);
-    }
+    if (isWordHead($editorCell)) { return false; }
   
-    // Check whether any vertical words will split or be truncated by this
-    // action and prevent any word from being reduced to a single cell.
-    // Words may not be split in two since the editor is not allowed to
-    // glue them back together afterwards.
-    var pruneCell  = mainWordEnd($editorCell);
-    if (isFilled(pruneCell.toAbove)) {
-      if ((pruneCell.toAbove.selfNode.hasClass('xw-vtop')) ||
-          (pruneCell.toAbove.toAbove.selfNode.hasClass('xw-vtop'))) {
-        return showShortTruncateError(pruneCell);
-      } else if (! pruneCell.selfNode.hasClass('xw-vend')) {
-        return showIllegalSplitError(pruneCell);
-      }
-  
-      _shrinkVertical(pruneCell);
-    } else if (isFilled(pruneCell.toRight)) {
-      if ((pruneCell.toBelow.selfNode.hasClass('xw-vend')) ||
-          (pruneCell.toBelow.toBelow.selfNode.hasClass('xw-vend'))) {
-        return showShortTruncateError(pruneCell);
-      } else if (! pruneCell.selfNode.hasClass('xw-vtop')) {
-        return showIllegalSplitError(pruneCell);
-      }
-
-      _collapseVertical(pruneCell);
-    }
-    
-    // The edit is approved.  Shift all content down by one cell, then shrink
-    // the active region by one.
-    var thisCell = $editorCell.toLeft;
-    var thisImg  = $('img.xw-value', thisCell.selfNode);
-    var nextCell = $editorCell;
-    var nextImg  = null;
+    // Shift all content down by one cell, then shrink the word region by one.
+    var pruneCell = getWordEnd();
+    var thisCell  = $editorCell.toLeft;
+    var thisImg   = $('img.xw-value', thisCell.selfNode);
+    var nextCell  = $editorCell;
+    var nextImg   = null;
     while (thisCell != pruneCell) {
-      thisCell.content = nextCell.content;
+      thisCell.content.current = nextCell.content.current;
   
       nextImg  = $('img.xw-value', nextCell.selfNode);
       thisImg.attr('src', nextImg.attr('src'));
@@ -862,227 +914,25 @@
       nextCell = thisCell.toRight;
     }
   
-    _shrinkHorizontal(pruneCell);
-  }
-
-  function clearCharacterVertical() {
-    // Backspace removes a character left of the current cell and therefore
-    // does not apply to the top cell of a word.
-    if ($editorCell.selfNode.hasClass('xw-vtop')) {
-      return showBackspaceAtWordTopError($editorCell);
-    }
-  
-    // Check whether any vertical words will split or be truncated by this
-    // action and prevent any word from being reduced to a single cell.
-    // Words may not be split in two since the editor is not allowed to
-    // glue them back together afterwards.
-    var pruneCell  = mainWordEnd($editorCell);
-    if (isFilled(pruneCell.toLeft)) {
-      if ((pruneCell.toLeft.selfNode.hasClass('xw-htop')) ||
-          (pruneCell.toLeft.toLeft.selfNode.hasClass('xw-htop'))) {
-        return showShortTruncateError(pruneCell);
-      } else if (! pruneCell.selfNode.hasClass('xw-hend')) {
-        return showIllegalSplitError(pruneCell);
-      }
-  
-      _shrinkHorizontal(pruneCell);
-    } else if (isFilled(pruneCell.toRight)) {
-      if ((pruneCell.toRight.selfNode.hasClass('xw-hend')) ||
-          (pruneCell.toRight.toRight.selfNode.hasClass('xw-hend'))) {
-        return showShortTruncateError(pruneCell);
-      } else if (! pruneCell.selfNode.hasClass('xw-htop')) {
-        return showIllegalSplitError(pruneCell);
-      }
-  
-      _collapseHorizontal(pruneCell);
-    }
-    
-    // The edit is approved.  Shift all content down by one cell, then shrink
-    // the active region by one.
-    var thisCell = $editorCell.toAbove;
-    var thisImg  = $('img.xw-value', thisCell.selfNode);
-    var nextCell = $editorCell;
-    var nextImg  = null;
-    while (thisCell != pruneCell) {
-      thisCell.content = nextCell.content;
-  
-      nextImg  = $('img.xw-value', nextCell.selfNode);
-      thisImg.attr('src', nextImg.attr('src'));
-      
-      thisCell = nextCell;
-      thisImg  = nextImg;
-      nextCell = thisCell.toBelow;
-    }
-  
-    _shrinkVertical(pruneCell);
+    moveWordTail(pruneCell, pruneCell.toLeft);
   }
 
   //
   // Active/Inactive/Same(Row|Col) Highlight Manipulation
   //
 
-  function enableEditor() {
-    var wordCells;
-    $(document).on('keydown', onKeyboardInput);
-
-    wordCells = mainWord($editorCell);
-    $editorCell.sameRow.not(wordCells).addClass('xw-samerow');
-    wordCells.addClass('xw-hsel');
-
-    wordCells = altWord($editorCell);
-    $editorCell.sameCol.not(wordCells).addClass('xw-samecol');
-    wordCells.addClass('xw-vsel');
-
-    showCursor();
-  }
-
-  function closeWordEditor() {
-    $(document).off('keydown', onKeyboardInput);
-
-    // Remove any trailing blank space and then check for minimum word length.
-    // Remove words that are too short with an error.
-    var wordEnd = mainWordEnd($editorCell);
-    if ($horizontalMode) {
-      if (isBlank(wordEnd)) {
-        _shrinkHorizontal(wordEnd);
-      }
-
-      if (wordEnd.selfNode.hasClass('xw-htop')) {
-        wordEnd.selfNode.removeClass( 'xw-htop xw-hend' )
-        wordEnd.content = '';
-
-        $('img.xw-value', wordEnd.selfNode
-        ).attr('src', $blankImage);
-
-        showShortWordError();
-      } else if( wordEnd.toLeft.selfNode.hasClass('xw-htop')) {
-        wordEnd.selfNode.removeClass('xw-hend');
-        wordEnd.content = '';
-
-        wordEnd.toLeft.content = '';
-        wordEnd.toLeft.selfNode.removeClass('xw-htop');
-
-        $('img.xw-value', wordEnd.selfNode.add(wordEnd.toLeft.selfNode)
-        ).attr('src', $blankImage);
-
-        showShortWordError();
-      }
-    } else {
-      if (isBlank(wordEnd)) {
-        _shrinkVertical(wordEnd);
-      }
-
-      if (wordEnd.selfNode.hasClass('xw-vtop')) {
-        wordEnd.selfNode.removeClass('xw-vtop xw-vend');
-        wordEnd.content = '';
-
-        $('img.xw-value', wordEnd.selfNode
-        ).attr('src', $blankImage);
-
-        showShortWordError();
-      } else if (wordEnd.toAbove.selfNode.hasClass('xw-vtop')) {
-        wordEnd.selfNode.removeClass('xw-vend');
-        wordEnd.content = '';
-
-        wordEnd.toAbove.content = '';
-        wordEnd.toAbove.selfNode.removeClass('xw-vtop');
-
-        $('img.xw-value', wordEnd.selfNode.add(wordEnd.toAbove.selfNode)
-        ).attr('src', $blankImage);
-
-        showShortWordError();
-      }
-    }
-      
-    $editorCell.sameRow.removeClass('xw-hsel xw-samerow');
-    $editorCell.sameCol.removeClass('xw-vsel xw-samecol');
-    hideCursor();
-
-    $editorCell = null;
-  }
-
   //
   // Error Modal Displays
   //
 
-  function showShortWordError() {
-    alert('Pruning editor result because it is too short');
-
-    return false;
-  }
-
   function showMaxWordsError() { alert('Max Words'); return false; }
 
-  function showHorizontalMergeError(mergeCell) {
-    alert('Horizontal merge error at ({row},{col})'.format(mergeCell));
-
-    return false; 
-  }
-
-  function showVerticalMergeError(mergeCell) {
-    alert('Vertical merge error at ({row},{col})'.format(mergeCell));
-
-    return false;
-  }
-
-  function showCongesionError(hPeer, vPeer) {
-    alert( '2x2 congestion error at [ ({hrow},{vcol}); ({hrow},{hcol}); ({vrow},{vcol}); ({vrow},{hcol}) ]'.format({ hrow: hPeer.row, hcol: hPeer.col, vrow: vPeer.row, vcol: vPeer.col })
-    );
-
-    return false;
-  }
-
-  function showBackspaceAtWordTopError(pruneCell) {
-    alert('Cannot backspace from word starting at ({row},{col})'.format(pruneCell));
-
-    return false;
-  }
-
-  function showShortTruncateError(pruneCell) {
-    alert('Cannot truncate intersecting word at ({row},{col})'.format(pruneCell));
-
-    return false;
-  }
-
-  function showIllegalSplitError(pruneCell) {
-    alert('Cannot split intersecting word at ({row},{col})'.format(pruneCell));
-
-    return false;
-  }
-
-  
   function findWords( ) {
-     for( var row=0; row<11; row++ ) {
-       for( var col=0; col<11; col++ ) {
-isFilled(row*11)
-  }
-  function doThing(dir, strips) {
-    var colCounter = [];
-    for(var ii=0; ii<11; ii++) {
-      colCount[ii] = 0;
-    }
-
-    var offs = 0;
-    var row = 0;
-    var col = 0;
-    var words = [];
-
-    var tempCell = allCells[offs];
-    while(offs < 121) {
-      if( isBlank(tempCell) ) {
-        offs++;
-        tempCell = allCells[offs];
-        while( isBlank(tempCell) ) {
-          offs++;
-        }
-      
-
-    for(var row=0, offs=0; row<10; row++ ) {
-      for( var col=0, col<10; col++, offs++ ) {
-        
+    $words = [];
     
-      var nextStrip = strips[ii];
-      nextStrip.each( dir.markStatus );
+    for (var row=0; row<11; row++) {
+      for (var col=0; col<11; col++) {
+      }
     }
   }
 

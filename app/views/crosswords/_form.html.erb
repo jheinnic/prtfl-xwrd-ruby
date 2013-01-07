@@ -225,10 +225,6 @@
               parallel: { head: 0, tail: 10, length: 11 },
               crossing: { head: 0, tail: 10, length: 11 }
             },
-            word: {
-              parallel: { head: row, tail: col, length: 1 },
-              crossing: { head: col, tail: row, length: 1 }
-            },
             toLeft: lastHCell,
             toRight: null,
             toAbove: null,
@@ -245,10 +241,6 @@
             open: {
               parallel: thisHCell.open.crossing,
               crossing: thisHCell.open.parallel
-            },
-            word: {
-              parallel: thisHCell.word.crossing,
-              crossing: thisHCell.word.parallel
             },
             toLeft: null,
             toRight: null,
@@ -358,12 +350,11 @@
     }
 
     $openRange = $editorCell.open.parallel;
-    $wordRange =
-      bootstrapWordRange(
-        $editorCell, $editorCell.word.parallel,
-        $editorCell.toLeft, $editorCell.toLeft.word.parallel,
-        $editorCell.toRight, $editorCell.toRight.word.parallel
-      );
+    $wordRange = { current: '', previous: '' };
+    $wordRange.current =
+      bootstrapWordRange($editorCell.row, $editorCell.col, $logicalGrid);
+    $wordRange.previous =
+      bootstrapWordRange($editorCell.row, $editorCell.col, $logicalGrid);
 
     $(document).on('keydown', onKeyboardInput);
     addEditorDecorations();
@@ -418,39 +409,29 @@
   // Change-of-context cleanup methods
   // 
 
-  function bootstrapWordRange(midCell, midWord, leftCell, leftWord, rightCell, rightWord) {
+  function bootstrapWordRange(rowIdx, colIdx, orientation) {
+    var midCell = orientation[rowIdx][colIdx];
 
-    if (isFilled(midCell)) {
-      // Intentionally empty.  The result is the same as if it is not filled
-      // and neither as left nor right.  Use this case to short circuit out
-      // to the post-conditional branch block.
-    } else if (isFilled(leftCell)) {
-      return({
-        current: {
-          head:   leftWord.head,
-          tail:   midWord.tail,
-          length: leftWord.length + 1
-        },
-        previous: leftWord
-      });
-    } else if(isFilled(rightCell)) {
-      return({
-        current: {
-          head:   midWord.head,
-          tail:   rightWord.tail,
-          length: rightWord.length + 1
-        },
-        previous: rightWord
-      });
+    var leftCell = midCell;
+    var lastLeftCell = midCell;
+    while(isFilled(leftCell)) {
+      lastLeftCell = leftCell;
+      leftCell = leftCell.toLeft;
     }
+    lefCell = lastLeftCell;
+
+    var rightCell = midCell;
+    var lastRightCell = midCell;
+    while(isFilled(rightCell)) {
+      lastRightCell = rightCell;
+      rightCell = rightCell.toRight;
+    }
+    rightCell = lastRightCell;
 
     return({
-      current: {
-        head:   midWord.head,
-        tail:   midWord.tail,
-        length: midWord.length
-      },
-      previous: midWord
+      head:   leftCell.col,
+      tail:   rightCell.col,
+      length: rightCell.col - leftCell.col + 1
     });
   }
 
@@ -480,17 +461,6 @@
 
     for( var ii=first; ii<=last; ii++ ) {
       var currentCell = $logicalGrid[row][ii];
-
-      if( ii >= wrc.head && ii <= wrc.tail ) {
-        currentCell.word.head = $wordRange.current.head;
-        currentCell.word.tail = $wordRange.current.tail;
-        currentCell.word.length = $wordRange.current.length;
-      } else {
-        currentCell.word.head = currentCell.col;
-        currentCell.word.tail = currentCell.col;
-        currentCell.word.length = 1;
-      }
-
       currentCell.content.previous = currentCell.content.current;
       currentCell.hasTriple.previous = currentCell.hasTriple.current;
     }
@@ -516,6 +486,7 @@
 
   function checkOpenRanges(idx, orientation) {
     var openStart = 0;
+    var wordRun = $();
 
     // Check down the row.  If a cell is populated, it must be in an unlocked
     // space by definition.  If a cell is blank, check its corner adjacencies,
@@ -543,6 +514,17 @@
               markOpenUnit(thisCell);
               openStart = ii+1;
         }
+
+        if(wordRun.size() > 0) {
+          if(wordRun.size() < 3) {
+            addShortRunDecoration(wordRun, orientation);
+          }  else {
+            dropShortRunDecoration(wordRun, orientation);
+          }
+          wordRun = $()
+        }
+      } else {
+        wordRun = wordRun.add(thisCell.selfNode);
       }
     }
   }
@@ -620,11 +602,11 @@
 
     if ($editorCell != null) {
       $openRange = $editorCell.open.parallel;
-      $wordRange = bootstrapWordRange(
-        $editorCell, $editorCell.word.parallel,
-        $editorCell.toLeft, $editorCell.toLeft.word.parallel,
-        $editorCell.toRight, $editorCell.toRight.word.parallel
-      );
+      $wordRange = { current: '', previous: '' };
+      $wordRange.current =
+         bootstrapWordRange($editorCell.row, $editorCell.col, $logicalGrid);
+      $wordRange.previous =
+         bootstrapWordRange($editorCell.row, $editorCell.col, $logicalGrid);
     }
   }
 
@@ -642,13 +624,11 @@
     );
 
     if($hasAltDir) {
-      var altWordRange = bootstrapWordRange(
-        $editorCell, $editorCell.word.crossing,
-        $editorCell.toAbove, $editorCell.toAbove.word.crossing,
-        $editorCell.toBelow, $editorCell.toBelow.word.crossing
-      );
+      var altWordRange =
+        bootstrapWordRange($editorCell.col, $editorCell.row, $altLogicalGrid);
+
       decorateDimension(
-        $editorCell.sameCol, $openRange, altWordRange.current,
+        $editorCell.sameCol, $openRange, altWordRange,
         $dirModeStrategy.decorateCrossing,
         'xw-tabopenhead', 'xw-tabopentail', 'xw-midtabopen',
         'xw-tabwordhead', 'xw-tabwordtail', 'xw-midtabword'
@@ -674,23 +654,25 @@
   function moveWordHead(fromCell, toCell) {
     if (isWordTail(toCell)) {
       fromCell.selfNode.removeClass('xw-wordhead');
-      toCell.selfNode.addClass('xw-wordhead');
+      toCell.selfNode.addClass('xw-wordhead xw-word');
     } else {
-      fromCell.selfNode.removeClass('xw-wordhead');
-      toCell.selfNode.removeClass('xw-midword').addClass('xw-wordhead');
+      fromCell.selfNode.removeClass('xw-wordhead').addClass('xw-midword xw-word');
+      toCell.selfNode.removeClass('xw-midword').addClass('xw-wordhead xw-word');
     }
+
+    $wordRange.current.head = toCell.col;
   }
 
   function moveWordTail(fromCell, toCell) {
     if (isWordHead(toCell)) {
       fromCell.selfNode.removeClass('xw-wordtail');
-      toCell.selfNode.addClass('xw-wordtail');
+      toCell.selfNode.addClass('xw-wordtail xw-word');
     } else {
-      fromCell.selfNode.removeClass('xw-wordtail');
-      toCell.selfNode.removeClass('xw-midword').addClass('xw-wordtail');
+      fromCell.selfNode.removeClass('xw-wordtail').addClass('xw-midword xw-word');
+      toCell.selfNode.removeClass('xw-midword').addClass('xw-word xw-wordtail');
     }
 
-    $wordRow.add(toCell);
+    $wordRange.current.tail = toCell.col;
   }
 
   function moveCursor(fromCell, toCell) {
@@ -710,13 +692,10 @@
     } else {
       $hasAltDir  = true;
 
-      var altWordRange = bootstrapWordRange(
-        $editorCell, $editorCell.word.crossing,
-        $editorCell.toAbove, $editorCell.toAbove.word.crossing,
-        $editorCell.toBelow, $editorCell.toBelow.word.crossing
-      );
+      var altWordRange =
+        bootstrapWordRange($editorCell.col, $editorCell.row, $altLogicalGrid);
       decorateDimension(
-        $editorCell.sameCol, $editorCell.open.crossing, altWordRange.current,
+        $editorCell.sameCol, $editorCell.open.crossing, altWordRange,
         $dirModeStrategy.decorateCrossing,
         'xw-tabopenhead', 'xw-tabopentail', 'xw-midtabopen',
         'xw-tabwordhead', 'xw-tabwordtail', 'xw-midtabword'

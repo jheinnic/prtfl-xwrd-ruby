@@ -191,11 +191,14 @@ table#lettergrid {
         visibility: visible;
       }
     }
+    &.xw-shortrow.xw-shortcol img.xw-fill.xw-altpath {
+      visibility: visible;
+    }
     &.xw-astabrow, &.xw-astabcol {
-      &.xw-tabword img.xw-fill.xw-mainpath {
+      &.xw-tabword img.xw-fill.xw-revealed {
         visibility: visible;
       }
-      &.xw-tabopen img.xw-fill.xw-altpath {
+      &.xw-tabopen img.xw-fill.xw-mainpath {
         visibility: visible;
       }
     }

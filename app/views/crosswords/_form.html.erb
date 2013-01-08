@@ -156,17 +156,45 @@
   var $hasAltDir = true;
   var $wordCount = 0;
 
-  var $wordRange = null;
-  var $openRange = null;
+  var $openRange    = null;
+  var $oldWordRange = null;
+  var $newWordRange = null;
 
-  var $horizontalCells = [];
-  var $verticalCells = [];
-  var $physicalGrid = $horizontalCells;
+  // TABLES:
+  // (X,Y) in horizontal mode yields the same cell as (Y,X) in vertical mode.
+  // When orientation changes invert the meaning of up/down and left/right,
+  // Tables preserve a standard orientation and so swap their coordinates.
+  // These are needed to support Table-to-Cell coordinate mapping in HTML b/c
+  // inverting the logical orientation cannot toggle the X,Y coordinates
+  // embedded in the tables, so the view logic for mapping from click location
+  // to cell object has to have an abstraction that is unaffected by logical
+  // orientation swaps.
+  //
+  // Note that the constrant addressing for non-toggling cell coordinates does
+  // NOT prevent the object retrieved in vertical mode from behaving differently
+  // from that retrieved in horizontal mode.  Just because the means of lookup
+  // is orientation-agnostic doesn't constrain the retrieved objects to also
+  // be orientation-agnostic.
+  var $horizontalTable = [];
+  var $verticalTable = [];
 
-  var $horizontalRows = [];
-  var $verticalRows = [];
-  var $logicalGrid = $horizontalRows;
-  var $altLogicalGrid = $verticalRows;
+  // Logical Table -- Switching logical tables doesn't change the conceptual
+  // cell retrieved by clicking in a UI Table, but it does return an
+  // alternate object for the same conceptual cell, but with up/down and
+  // left/right inverted.
+  var $logicalTable = $horizontalTable;
+
+  // GRIDS:
+  // (X,Y) in horizontal mode yields the same cell as (X,Y) in vertical mode
+  // Coordinates are constant, orientation of up/down and left/right is not.
+
+  // Physical grids
+  var $horizontalGrid = [];
+  var $verticalGrid = [];
+
+  // Logical grids
+  var $logicalGrid = $horizontalGrid;
+  var $altLogicalGrid = $verticalGrid;
 
   var $rootTable  = $('#lettergrid');
   
@@ -200,9 +228,9 @@
     for (var row=0; row<11; row++) {
       var lastHCell = null;
       var lastVCell = null;
-      $horizontalCells[row] = [];
-      $verticalCells[row]   = [];
-      $horizontalRows[row]  = [];
+      $horizontalTable[row] = [];
+      $verticalTable[row]   = [];
+      $horizontalGrid[row]  = [];
 
       var thisRow   = $(selectRowTmpl.format( {row: row}, $rootTable ));
       thisRow.append(contentTmpl);
@@ -260,13 +288,13 @@
           // dimension is toggled.
           lastHCell = thisHCell;
           lastVCell = thisVCell;
-          $horizontalCells[row][col] = thisHCell;
-          $verticalCells[row][col] = thisVCell;
+          $horizontalTable[row][col] = thisHCell;
+          $verticalTable[row][col] = thisVCell;
 
           // The "Rows" arrays are used for logical lookup when cleaning up
           // bookkeeping info using logical objects rather than selected
           // <div> objects.
-          $horizontalRows[row][col] = thisHCell;
+          $horizontalGrid[row][col] = thisHCell;
         }
       );
     }
@@ -278,14 +306,14 @@
     for (var col=0; col<11; col++) {
       var lastHCell = null;
       var lastVCell = null;
-      $verticalRows[col]   = [];
+      $verticalGrid[col]   = [];
 
       var thisCol = $(selectColTmpl.format({col: col}, $rootTable));
 
       thisCol.each(
         function(row, nextCell) { 
-          var thisHCell = $horizontalCells[row][col];
-          var thisVCell = $verticalCells[row][col];
+          var thisHCell = $horizontalGrid[row][col];
+          var thisVCell = $verticalTable[row][col];
 
           thisHCell.sameCol = thisCol;
           thisVCell.sameRow = thisCol;
@@ -300,7 +328,7 @@
   
           lastHCell = thisHCell;
           lastVCell = thisVCell;
-          $verticalRows[col][row] = thisVCell;
+          $verticalGrid[col][row] = thisVCell;
         }
       );
     } // Latter of two intialization "for" loops.
@@ -321,7 +349,7 @@
     var wrap = $(this); // $(event.target).parent();
     var row = wrap.data('rowid');
     var col = wrap.data('colid');
-    var cellState = $physicalGrid[row][col];
+    var cellState = $logicalTable[row][col];
   
     // If all 22 words are accounted for, disallow selections that are not 
     // contiguous with an existing word.
@@ -339,7 +367,7 @@
       toggleDirectionMode();
 
       $hasAltDir  = false;
-      $editorCell = $physicalGrid[row][col];
+      $editorCell = $logicalTable[row][col];
     } else {
       if(cellState.open.crossing.length < 3) {
         $hasAltDir  = false;
@@ -350,14 +378,15 @@
     }
 
     $openRange = $editorCell.open.parallel;
-    $wordRange = { current: '', previous: '' };
-    $wordRange.current =
+    $oldWordRange =
       bootstrapWordRange($editorCell.row, $editorCell.col, $logicalGrid);
-    $wordRange.previous =
-      bootstrapWordRange($editorCell.row, $editorCell.col, $logicalGrid);
+    $newWordRange  = 
+      { head:   $oldWordRange.head,
+        tail:   $oldWordRange.tail,
+        length: $oldWordRange.length };
 
     $(document).on('keydown', onKeyboardInput);
-    addEditorDecorations();
+    decorateOpenWord();
     showCursor();
   }
   
@@ -374,6 +403,7 @@
       setCharacter(String.fromCharCode(keyValue));
     } else if (keyValue == 8) {
       clearCharacter();   // <BACKSPACE> unsets a character
+      return false;
     } else if (keyValue == 999) {
       // <SPACE> marks a tripling multiplier TODO
     } else if (keyValue == 9) {
@@ -388,13 +418,13 @@
       // abortWordEditor();  // <ESC> stops editting and rolls back changes
     } else if (keyValue == 27 ) {
       closeWordEditor();  // <RETURN> stops editting and accepts changes
-    } else if (keyValue = 37) {
+    } else if (keyValue == 37) {
       moveCursorLeft();   // <LEFT> moves the cursor left
-    } else if (keyValue = 38) {
+    } else if (keyValue == 38) {
       moveCursorLeft();   // <UP> moves the cursor up
-    } else if (keyValue = 39) {
+    } else if (keyValue == 39) {
       moveCursorRight();  // <RIGHT> moves the cursor right
-    } else if (keyValue = 40) {
+    } else if (keyValue == 40) {
       moveCursorRight();  // <DOWN> moves the cursor down
     }
   
@@ -412,16 +442,33 @@
   function bootstrapWordRange(rowIdx, colIdx, orientation) {
     var midCell = orientation[rowIdx][colIdx];
 
-    var leftCell = midCell;
-    var lastLeftCell = midCell;
+    var leftCell, rightCell;
+    var lastLeftCell, lastRightCell;
+    if (isBlank(midCell)) {
+      if (isFilled(midCell.toLeft)) {
+        lastLeftCell = midCell.toLeft;
+      } else {
+        lastLeftCell = midCell;
+      }
+
+      if (isFilled(midCell.toRight)) {
+        lastRightCell = midCell.toRight;
+      } else {
+        lastRightCell = midCell;
+      }
+    } else {
+      lastLeftCell = midCell;
+      lastRightCell = midCell;
+    }
+    leftCell = lastLeftCell.toLeft;
+    rightCell = lastRightCell.toRight;
+
     while(isFilled(leftCell)) {
       lastLeftCell = leftCell;
       leftCell = leftCell.toLeft;
     }
-    lefCell = lastLeftCell;
+    leftCell = lastLeftCell;
 
-    var rightCell = midCell;
-    var lastRightCell = midCell;
     while(isFilled(rightCell)) {
       lastRightCell = rightCell;
       rightCell = rightCell.toRight;
@@ -449,8 +496,8 @@
   function commitActiveChanges() {
     // var open = cells.slice(openRange.openHead, openRange.openTail);
     var row = $editorCell.row;
-    var wrc = $wordRange.current;
-    var wrp = $wordRange.previous;
+    var wrc = $newWordRange;
+    var wrp = $oldWordRange;
 
     // Apply changes to cells in the open range first.
     var first;
@@ -468,25 +515,43 @@
     // Re-evaluate the open ranges of logical rows above and below
     // only if there were any changes that could affect them.  If the
     // head or tail moved and the length did not remain unity, the changes
-    // have an impact.
-    if ((wrc.head != wrp.head || wrc.tail != wrp.tail) &&
-        (wrc.length != 1 || wrp.length != 1)) {
-      if(row > 0) { checkOpenRanges(row - 1, $logicalGrid); }
-      checkOpenRanges(row, $logicalGrid);
-      if(row < 10) { checkOpenRanges(row + 1, $logicalGrid); }
-
-      if(first > 0) { checkOpenRanges(first - 1, $altLogicalGrid); }
-      for( var ii=first; ii<=last; ii++ ) {
-        checkOpenRanges(ii, $altLogicalGrid);
-      }
-      if(last < 10) { checkOpenRanges(last + 1, $altLogicalGrid); }
-    }
+    // have an impact. (TODO!)
+    // if ((wrc.head != wrp.head || wrc.tail != wrp.tail) &&
+    //     (wrc.length != 1 || wrp.length != 1)) {
+      refreshOpenRanges();
+    // }
   }
 
+  // Let 'a', 'b', and 'c' designate any three consecutive cells, with
+  // valid corner cases when 'a' or 'c' is null at the graph edges, but with
+  // 'b' != null as an invariant.  Iterate through all 'b' values from left to
+  // right.  On each iteration, label cells immediately above, below, and on
+  // a diagonal to the right as follows:
+  //
+  // - m n
+  // a b c
+  // - p q
+  // 
+  // The task of finding open regions amounts to finding all b such that either
+  // m and n are filled or p and q are filled, or m, n, p, and q are all filled.
+  // There is an open region that closes at each such b value.  The region
+  // always begins at the first preceding "b" value to not close a region.  How
+  // its end points are defined depends on the state of "c".
+  // -- If "c" is filled, then "a" is the last cell of the preceding region,
+  //    "b" must be empty and it both begins and ends a second open region of
+  //    size unity, which renders it incapable of supporting a word.  Finally,
+  //    "c" is the beginning of a third region whose closing end is unknown.
+  // -- If "c" is empty, then "b" is the last cell of the preceding region, and
+  //    "c" begins a new region (but if m/n or p/q continue to the right, that
+  //    new region will get truncated to unity very quickly.
+  function refreshOpenRanges() {
+    $wordCount = 0;
+    $('div.xw-cell', $rootTable).removeClass('xw-shortrow xw-shortcol');
 
-  function checkOpenRanges(idx, orientation) {
-    var openStart = 0;
-    var wordRun = $();
+    var colTrack = [ ];
+    for( var ii=0; ii<11; ii++ ) {
+      colTrack[ii] = { openStart: null, wordRun: $() };
+    }
 
     // Check down the row.  If a cell is populated, it must be in an unlocked
     // space by definition.  If a cell is blank, check its corner adjacencies,
@@ -497,51 +562,166 @@
     // the open region bounds discovered, then increment openStart and keep 
     // on searching.
     for( var ii=0; ii<11; ii++ ) {
-      var thisCell = orientation[idx][ii];
-      if (! isFilled(thisCell)) {
-        if (((isFilled(thisCell.toAbove)) &&
-             ((isFilled(thisCell.toRight)) &&
-              (isFilled(thisCell.toRight.toAbove))) ||
-             ((isFilled(thisCell.toLeft)) &&
-              (isFilled(thisCell.toLeft.toAbove)))) ||
-            ((isFilled(thisCell.toBelow)) &&
-             ((isFilled(thisCell.toRight)) &&
-              (isFilled(thisCell.toRight.toBelow))) ||
-             ((isFilled(thisCell.toLeft)) &&
-              (isFilled(thisCell.toLeft.toBelow))))) {
-              // Illegal 2x2 if this cell is used.  Its locked.
-              markOpenRange(idx, openStart, ii - 1, orientation);
-              markOpenUnit(thisCell);
-              openStart = ii+1;
+      var rowTrack =
+        { openStart: null, wordRun: $() };
+
+      for( var jj=0; jj<11; jj++ ) {
+        var thisCell = $horizontalGrid[ii][jj];
+        // var thisCell = $logicalTable[ii][jj];
+        // var thisCell = $logicalGrid[ii][jj];
+
+        // Do both horizontal and vertical word tracking first.
+        if (! isFilled(thisCell)) {
+          markWordBoundary(rowTrack, 'xw-shortrow');
+          markWordBoundary(colTrack[jj], 'xw-shortcol');
+        } else {
+          rowTrack.wordRun = rowTrack.wordRun.add(thisCell.selfNode);
+          colTrack[jj].wordRun = colTrack[jj].wordRun.add(thisCell.selfNode);
         }
 
-        if(wordRun.size() > 0) {
-          if(wordRun.size() < 3) {
-            addShortRunDecoration(wordRun, orientation);
-          }  else {
-            dropShortRunDecoration(wordRun, orientation);
+        // Next, check horizontal open region boundaries.
+        if ((isFilled(thisCell.toAbove) &&
+             isFilled(thisCell.toAbove.toRight)) ||
+            (isFilled(thisCell.toBelow) &&
+             isFilled(thisCell.toBelow.toRight))) {
+          if(isFilled(thisCell.toRight)) {
+            markRowOpenRange(rowTrack.openStart, thisCell.toLeft);
+            markRowLockedCell(thisCell);
+          } else {
+            markRowOpenRange(rowTrack.openStart, thisCell);
           }
-          wordRun = $()
+
+          rowTrack.openStart = thisCell.toRight;
         }
+
+        // Next, check horizontal open region boundaries.
+        if ((isFilled(thisCell.toLeft) &&
+             isFilled(thisCell.toLeft.toBelow)) ||
+            (isFilled(thisCell.toRight) &&
+             isFilled(thisCell.toRight.toBelow))) {
+          if(isFilled(thisCell.toBelow)) { markColOpenRange(colTrack[jj].openStart, thisCell.toAbove);
+            markColLockedCell(thisCell);
+          } else {
+            markColOpenRange(colTrack[jj].openStart, thisCell);
+          }
+
+          colTrack[jj].openStart = thisCell.toBelow;
+        }
+      }
+        
+      // Close off the remaining horizontal words and open horizontal region
+      // boundary discoveries at end-of-row.
+      markWordBoundary(rowTrack, 'xw-shortrow');
+      markRowOpenRange(rowTrack.openStart, thisCell);
+    }
+  
+    // Close off the remaining vertical words and open vertical region boundary
+    // discoveries at end-of-grid.
+    for( var ii=0; ii<11; ii++ ) {
+      markWordBoundary(colTrack[ii], 'xw-shortcol');
+    }
+    for( var ii=0; ii<11; ii++ ) {
+      // markColOpenRange(colTrack[ii].openStart, $logicalTable[10][ii]);
+      // markColOpenRange(colTrack[ii].openStart, $logicalGrid[10][ii]);
+      markColOpenRange(colTrack[ii].openStart, $horizontalGrid[10][ii]);
+    }
+  }
+
+  function markRowLockedCell(cell) {
+    cell.open.parallel.head = cell.col;
+    cell.open.parallel.tail = cell.col;
+    cell.open.parallel.length = 1;
+  }
+
+  function markColLockedCell(cell) {
+    cell.open.crossing.head = cell.row;
+    cell.open.crossing.tail = cell.row;
+    cell.open.crossing.length = 1;
+  }
+
+  function markRowOpenRange(headCell, tailCell) {
+    var regionCell, rangeLen, finalIdx;
+
+    if(headCell == null) {
+      if(tailCell == null) { return; }
+
+      rangeLen = tailCell.col + 1;
+      finalIdx = tailCell.col;
+      regionCell = tailCell;
+      while(regionCell != headCell) {
+        regionCell.open.parallel.head = 0;
+        regionCell.open.parallel.tail = finalIdx;
+        regionCell.open.parallel.length = rangeLen;
+        regionCell = regionCell.toLeft;
+      }
+    } else {
+      if(tailCell == null) {
+        rangeLen = 11 - headCell.col;
+        finalIdx = 10;
+      } else if(headCell.col >= tailCell.col) {
+        return markRowLockedCell(tailCell);
       } else {
-        wordRun = wordRun.add(thisCell.selfNode);
+        rangeLen = tailCell.col - headCell.col + 1;
+        finalIdx = tailCell.col;
+      }
+
+      regionCell = headCell;
+      while(regionCell != tailCell) {
+        regionCell.open.parallel.head = headCell.col;
+        regionCell.open.parallel.tail = finalIdx;
+        regionCell.open.parallel.length = rangeLen;
+
+        regionCell = regionCell.toRight;
       }
     }
   }
 
-  function markOpenUnit(cell) {
-    cell.open.head = cell.open.tail = cell.col;
-    cell.open.length = 1;
+  function markColOpenRange(headCell, tailCell) {
+    var regionCell, rangeLen, finalIdx;
+
+    if(headCell == null) {
+      if(tailCell == null) { return; }
+
+      rangeLen = tailCell.row + 1;
+      finalIdx = tailCell.row;
+      regionCell = tailCell;
+      while(regionCell != headCell) {
+        regionCell.open.crossing.head = 0;
+        regionCell.open.crossing.tail = finalIdx;
+        regionCell.open.crossing.length = rangeLen;
+        regionCell = regionCell.toAbove;
+      }
+    } else {
+      if(tailCell == null) {
+        rangeLen = 11 - headCell.row;
+        finalIdx = 10;
+      } else if(headCell.row >= tailCell.row) {
+        return markColLockedCell(tailCell);
+      } else {
+        rangeLen = tailCell.row - headCell.row + 1;
+        finalIdx = tailCell.row;
+      }
+
+      regionCell = headCell;
+      while(regionCell != tailCell) {
+        regionCell.open.crossing.head = headCell.row;
+        regionCell.open.crossing.tail = finalIdx;
+        regionCell.open.crossing.length = rangeLen;
+
+        regionCell = regionCell.toBelow;
+      }
+    }
   }
 
-  function markOpenRange(idx, head, tail, orientation) {
-    var regionCell;
-    var rangeLen = tail - head + 1;
-    for( var ii=head; ii<=tail; ii++ ) {
-      regionCell = orientation[idx][ii];
-      regionCell.open.head = head;
-      regionCell.open.tail = tail;
-      regionCell.open.length = rangeLen;
+  function markWordBoundary(trackObj, shortClass) {
+    if(trackObj.wordRun.size() > 0) {
+      if(trackObj.wordRun.size() < 3) {
+        trackObj.wordRun.addClass(shortClass);
+      } else {
+        $wordCount = $wordCount + 1;
+      }
+
+      trackObj.wordRun = $()
     }
   }
 
@@ -552,46 +732,62 @@
   var $horizontalStrategy = {
     toggleDirectionMode: function() {
       $dirModeStrategy = $verticalStrategy;
-      $physicalGrid = $verticalCells;
+      $logicalTable = $verticalTable;
       $altLogicalGrid = $logicalGrid;
-      $logicalGrid = $verticalRows;
+      $logicalGrid = $verticalGrid;
       
       if($editorCell != null) {
-        $editorCell = $physicalGrid[$editorCell.row][$editorCell.col];
+        $editorCell = $logicalGrid[$editorCell.row][$editorCell.col];
       }
     },
 
-    decorateParallel: function(open, word) {
+    decorateParallel: function(open, word, focus) {
       open.addClass('xw-open xw-asrow');
       word.addClass('xw-word xw-asrow');
     },
 
-    decorateCrossing: function(open, word) {
-      open.not($editorCell.selfNode).addClass('xw-tabopen xw-astabcol');
-      word.not($editorCell.selfNode).addClass('xw-tabword xw-astabcol');
+    decorateCrossing: function(open, word, focus) {
+      open.not(focus).addClass('xw-tabopen xw-astabcol');
+      word.not(focus).addClass('xw-tabword xw-astabcol');
+    },
+
+    decorateShortWord: function(wordRun, orientation) {
+      if(orientation == $logicalGrid) {
+        wordRun.addClass('xw-shortcol');
+      } else {
+        wordRun.addClass('xw-shortrow');
+      }
     }
   };
 
   var $verticalStrategy = {
     toggleDirectionMode: function() {
       $dirModeStrategy = $horizontalStrategy;
-      $physicalGrid = $horizontalCells;
+      $logicalTable = $horizontalTable;
       $altLogicalGrid = $logicalGrid;
-      $logicalGrid = $horizontalRows;
+      $logicalGrid = $horizontalGrid;
 
-      if( $editorCell != null ) {
-        $editorCell = $physicalGrid[$editorCell.col][$editorCell.row];
+      if ($editorCell != null) {
+        $editorCell = $logicalGrid[$editorCell.col][$editorCell.row];
       }
     },
 
-    decorateParallel: function(open, word) {
+    decorateParallel: function(open, word, focus) {
       open.addClass('xw-open xw-ascol');
       word.addClass('xw-word xw-ascol');
     },
 
-    decorateCrossing: function(open, word) {
-      open.not($editorCell.selfNode).addClass('xw-tabopen xw-astabrow');
-      word.not($editorCell.selfNode).addClass('xw-tabword xw-astabrow');
+    decorateCrossing: function(open, word, focus) {
+      open.not(focus).addClass('xw-tabopen xw-astabrow');
+      word.not(focus).addClass('xw-tabword xw-astabrow');
+    },
+
+    decorateShortWord: function(wordRun, orientation) {
+      if(orientation == $logicalGrid) {
+        wordRun.addClass('xw-shortrow');
+      } else {
+        wordRun.addClass('xw-shortcol');
+      }
     }
   };
 
@@ -602,11 +798,12 @@
 
     if ($editorCell != null) {
       $openRange = $editorCell.open.parallel;
-      $wordRange = { current: '', previous: '' };
-      $wordRange.current =
+      $oldWordRange =
          bootstrapWordRange($editorCell.row, $editorCell.col, $logicalGrid);
-      $wordRange.previous =
-         bootstrapWordRange($editorCell.row, $editorCell.col, $logicalGrid);
+      $newWordRange =
+         { head:   $oldWordRange.head,
+           tail:   $oldWordRange.tail,
+           length: $oldWordRange.length };
     }
   }
 
@@ -615,9 +812,9 @@
       'xw-openhead xw-opentail xw-midopen xw-open xw-wordhead xw-wordtail xw-midword xw-word xw-tabopenhead xw-tabopentail xw-midtabopen xw-tabopen xw-tabwordhead xw-tabwordtail xw-midtabword xw-tabword xw-asrow xw-ascol xw-astabrow xw-astabcol');
   }
 
-  function addEditorDecorations() {
+  function decorateOpenWord() {
     decorateDimension(
-      $editorCell.sameRow, $openRange, $wordRange.current,
+      $editorCell, $editorCell.sameRow, $openRange, $newWordRange,
       $dirModeStrategy.decorateParallel,
       'xw-openhead', 'xw-opentail', 'xw-midopen',
       'xw-wordhead', 'xw-wordtail', 'xw-midword'
@@ -628,7 +825,7 @@
         bootstrapWordRange($editorCell.col, $editorCell.row, $altLogicalGrid);
 
       decorateDimension(
-        $editorCell.sameCol, $openRange, altWordRange,
+        $editorCell, $editorCell.sameCol, $openRange, altWordRange,
         $dirModeStrategy.decorateCrossing,
         'xw-tabopenhead', 'xw-tabopentail', 'xw-midtabopen',
         'xw-tabwordhead', 'xw-tabwordtail', 'xw-midtabword'
@@ -636,11 +833,15 @@
     }
   }
 
-  function decorateDimension(cells, openRange, wordRange, dimMethod, openhead, opentail, midopen, wordhead, wordtail, midword) {
+  function decorateShortWord(wordRun, orientation) {
+    $dirModeStrategy.decorateShortWord(wordRun, orientation);
+  }
+
+  function decorateDimension(focus, cells, openRange, wordRange, dimMethod, openhead, opentail, midopen, wordhead, wordtail, midword) {
     var open = cells.slice(openRange.head, openRange.tail + 1);
     var word = cells.slice(wordRange.head, wordRange.tail + 1);
 
-    dimMethod(open, word);
+    dimMethod(open, word, focus.selfNode);
 
     open.first().addClass(openhead);
     open.last().addClass(opentail);
@@ -651,28 +852,87 @@
     word.slice(1, wordRange.length - 1).addClass(midword);
   }
       
-  function moveWordHead(fromCell, toCell) {
-    if (isWordTail(toCell)) {
-      fromCell.selfNode.removeClass('xw-wordhead');
-      toCell.selfNode.addClass('xw-wordhead xw-word');
-    } else {
-      fromCell.selfNode.removeClass('xw-wordhead').addClass('xw-midword xw-word');
-      toCell.selfNode.removeClass('xw-midword').addClass('xw-wordhead xw-word');
+  function shiftWordHead(fromCell, toCell) {
+    if(toCell.col > $newWordRange.tail) { 
+      alert('Coding error!  Illegal move of word head to <' + toCell.col + '> after word at <{head},{tail}>!'.format($newWordRange));
+    } else if((toCell.col < $openRange.head) ||
+              (toCell.col > $openRange.tail)) {
+      alert('Coding errror!  Illegal move of word head to <' + toCell.col + '> beyond open range of <{head},{tail}>!'.format($openRange));
     }
 
-    $wordRange.current.head = toCell.col;
+    if(fromCell.col < toCell.col) {
+      // Head is moving right.  Prune word markers from all cells until the new
+      // destination is reached.  Remove a mid-word tag from the new destination
+      // cell, and apply the head tag.  If that cell happens to be the tail,
+      // then removing the mid tag will be a harmless no-op.  Its not worth 
+      // exerting to test for tail-ness.
+      var nextCell = fromCell;
+      while(nextCell != toCell) {
+        nextCell.selfNode.removeClass('xw-wordhead xw-word xw-midword');
+        nextCell = nextCell.toRight;
+      }
+
+      toCell.selfNode.removeClass('xw-midword').addClass('xw-wordhead');
+    } else {
+      // Head is moving left.  Prune old head marker from head and then add a
+      // mid marker to every cell leading up to the new head location.  If the
+      // old head is also currently the tail, make one exception and do not
+      // apply the mid label there--it will retain its "tail" class.
+      var nextCell = fromCell;
+      nextCell.selfNode.removeClass('xw-wordhead');
+      if(isWordTail(nextCell)) {
+        nextCell = nextCell.toRight;
+      }
+      while(nextCell != toCell) {
+        nextCell.selfNode.addClass('xw-word xw-midword');
+        nextCell = nextCell.toRight;
+      }
+
+      toCell.selfNode.addClass('xw-word xw-wordtail');
+    }
+
+    $newWordRange.head = toCell.col;
   }
 
-  function moveWordTail(fromCell, toCell) {
-    if (isWordHead(toCell)) {
-      fromCell.selfNode.removeClass('xw-wordtail');
-      toCell.selfNode.addClass('xw-wordtail xw-word');
-    } else {
-      fromCell.selfNode.removeClass('xw-wordtail').addClass('xw-midword xw-word');
-      toCell.selfNode.removeClass('xw-midword').addClass('xw-word xw-wordtail');
+  function shiftWordTail(fromCell, toCell) {
+    if(toCell.col < $newWordRange.head) { 
+      alert('Coding error!  Illegal move of word tail to <' + toCell.col + '> before word at <{head},{tail}>!'.format($newWordRange));
+    } else if((toCell.col < $openRange.head) ||
+              (toCell.col > $openRange.tail)) {
+      alert('Coding errror!  Illegal move of word tail to <' + toCell.col + '> beyond open range of <{head},{tail}>!'.format($openRange));
     }
 
-    $wordRange.current.tail = toCell.col;
+    if(fromCell.col > toCell.col) {
+      // Head is moving right.  Prune word markers from all cells until the new
+      // destination is reached.  Remove a mid-word tag from the new destination
+      // cell, and apply the head tag.  If that cell happens to be the tail,
+      // then removing the mid tag will be a harmless no-op.  Its not worth 
+      // exerting to test for tail-ness.
+      var nextCell = fromCell;
+      while(nextCell != toCell) {
+        nextCell.selfNode.removeClass('xw-wordtail xw-word xw-midword');
+        nextCell = nextCell.toLeft;
+      }
+
+      toCell.selfNode.removeClass('xw-midword').addClass('xw-wordtail');
+    } else {
+      // Head is moving left.  Prune old head marker from head and then add a
+      // mid marker to every cell leading up to the new head location.  If the
+      // old head is also currently the tail, make one exception and do not
+      // apply the mid label there--it will retain its "tail" class.
+      var nextCell = fromCell;
+      fromCell.selfNode.removeClass('xw-wordtail');
+      if(isWordHead(nextCell)) { nextCell = fromCell.toRight; }
+
+      while(nextCell != toCell) {
+        nextCell.selfNode.addClass('xw-word xw-midword');
+        nextCell = nextCell.toRight;
+      }
+
+      toCell.selfNode.addClass('xw-word xw-wordtail');
+    }
+
+    $newWordRange.tail = toCell.col;
   }
 
   function moveCursor(fromCell, toCell) {
@@ -682,7 +942,6 @@
     } else {
       cursorReplacement = $valueImages.attr($editorCell.content.current);
     }
-    $('img.xw-value', fromCell.selfNode).attr('src', cursorReplacement);
 
     fromCell.sameCol.removeClass(
       'xw-tabopenhead xw-tabopentail xw-midtabopen xw-tabopen xw-tabwordhead xw-tabwordtail xw-midtabword xw-tabword xw-astabrow xw-astabcol');
@@ -693,15 +952,16 @@
       $hasAltDir  = true;
 
       var altWordRange =
-        bootstrapWordRange($editorCell.col, $editorCell.row, $altLogicalGrid);
+        bootstrapWordRange(toCell.col, toCell.row, $altLogicalGrid);
       decorateDimension(
-        $editorCell.sameCol, $editorCell.open.crossing, altWordRange,
+        toCell, toCell.sameCol, toCell.open.crossing, altWordRange,
         $dirModeStrategy.decorateCrossing,
         'xw-tabopenhead', 'xw-tabopentail', 'xw-midtabopen',
         'xw-tabwordhead', 'xw-tabwordtail', 'xw-midtabword'
       );
     }
 
+    $('img.xw-value', fromCell.selfNode).attr('src', cursorReplacement);
     $('img.xw-value', toCell.selfNode).attr('src', $cursorImage);
   }
 
@@ -811,16 +1071,19 @@
   }
 
   function moveCursorRight() {
-    if (isOpenTail($editorCell)) { return }
-
     var rightCell = $editorCell.toRight;
+
+    if (! isOpen(rightCell)) { return }
 
     if ((! isWord(rightCell)) &&
         ((! isWord($editorCell)) || isBlank($editorCell))) { return }
 
-    if (isBlank($editorCell) && isWordHead($editorCell)) {
+    if (isWordTail($editorCell)) {
       moveCursor($editorCell, rightCell);
-      moveWordHead($editorCell, rightCell);
+      shiftWordTail($editorCell, rightCell);
+    } else if (isBlank($editorCell) && isWordHead($editorCell)) {
+      moveCursor($editorCell, rightCell);
+      shiftWordHead($editorCell, rightCell);
     } else {
       moveCursor($editorCell, rightCell);
     }
@@ -829,16 +1092,19 @@
   }
 
   function moveCursorLeft() {
-    if (isOpenHead($editorCell)) { return }
-
     var leftCell = $editorCell.toLeft;
+
+    if (! isOpen(leftCell)) { return }
 
     if ((! isWord(leftCell)) &&
         ((! isWord($editorCell)) || isBlank($editorCell))) { return }
 
-    if (isBlank($editorCell) && isWordTail($editorCell)) {
+    if (isWordHead($editorCell)) {
       moveCursor($editorCell, leftCell);
-      moveWordTail($editorCell, leftCell);
+      shiftWordHead($editorCell, leftCell);
+    } else if (isBlank($editorCell) && isWordTail($editorCell)) {
+      moveCursor($editorCell, leftCell);
+      shiftWordTail($editorCell, leftCell);
     } else {
       moveCursor($editorCell, leftCell);
     }
@@ -853,22 +1119,6 @@
   function setCharacter(c) {
     $editorCell.content.current = c;
     moveCursorRight();
-
-    // Relocate the borders of any perpendicular words adjacent to the 
-    // changed cell if it was previously blank.  Presume that this edit is
-    // at extending a word on one side or the other, but not joining two 
-    // words since the editor is supposed to prevent the cursor from even 
-    // advancing into a space such that that was possible.
-//    var tempCellOne = altPrevCell($editorCell);
-//    if (altIsTail(tempCellOne)) {
-//      altExtend(tempCellOne);
-//    } else { 
-//      tempCellOne = altNextCell($editorCell);
-//
-//      if (altIsHead(tempCellOne)) {
-//        _backfillVertical(tempCellOne);
-//      }
-//    }
   }
 
   function clearCharacter() {
@@ -893,7 +1143,7 @@
       nextCell = thisCell.toRight;
     }
   
-    moveWordTail(pruneCell, pruneCell.toLeft);
+    shiftWordTail(pruneCell, pruneCell.toLeft);
   }
 
   //

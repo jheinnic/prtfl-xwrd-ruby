@@ -20,6 +20,6 @@ class WordItem < ActiveRecord::Base
   
   private
   def parse_letters
-    @letters = text_value.split(//).to_set
+    @letters = text_value.downcase.split(//).to_set
   end
 end

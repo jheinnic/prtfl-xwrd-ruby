@@ -12,8 +12,12 @@
     <% end %>
     <%= f.hidden_field :bonus_value %>
     <%= f.hidden_field :bonus_word %>
+    <% tags = ['word01', 'word02', 'word03', 'word04', 'word05', 'word06', 'word07', 'word08', 'word09', 'word10', 'word11', 'word12', 'word13', 'word14', 'word15', 'word16', 'word17', 'word18', 'word19', 'word20', 'word21', 'word22']; %>
+    <% tagid = 0; %>
     <%= f.fields_for :word_items do |w| %>
-      <%= w.hidden_field :text_value %><%= w.hidden_field :triple_letter_index %><%= w.hidden_field :x_coordinate %><%= w.hidden_field :y_coordinate %><%= w.hidden_field :is_horizontal %>
+<%= w.hidden_field :x_coordinate, :class=>tags[tagid] %><%= w.hidden_field :y_coordinate, :class=>tags[tagid] %><%= w.hidden_field :is_horizontal, :class => tags[tagid] %><%= w.text_field :text_value, :class=>tags[tagid] + ' xw-initword', :readonly => true %><%= w.hidden_field :triple_letter_index, :class=>tags[tagid] %>
+
+    <% tagid = tagid + 1 %>
     <% end %>
     <%= f.submit %>
   </div>
@@ -155,6 +159,7 @@
   var $editorCell = null;
   var $hasAltDir = true;
   var $wordCount = 0;
+  var $tripleCellCount = 0;
 
   var $openRange    = null;
   var $oldWordRange = null;
@@ -215,6 +220,14 @@
     W: "<%= path_to_image 'val/W.png' %>", X: "<%= path_to_image 'val/X.png' %>",
     Y: "<%= path_to_image 'val/Y.png' %>", Z: "<%= path_to_image 'val/Z.png' %>"
   } );
+
+  var $wordAttrs = {
+    xCoord: 'input:hidden#crossword_word_items_attributes_{idx}_x_coordinate',
+    yCoord: 'input:hidden#crossword_word_items_attributes_{idx}_y_coordinate',
+    isHoriz: 'input:hidden#crossword_word_items_attributes_{idx}_is_horizontal',
+    textValue: 'input:text#crossword_word_items_attributes_{idx}_text_value',
+    tripleIndex: 'input:hidden#crossword_word_items_attributes_{idx}_triple_letter_index'
+  };
     
   function initialize() {
     var contentTmpl = 
@@ -335,6 +348,60 @@
 
     // Set a handler for the table, setup to recieve calls from 
     $rootTable.on('click', 'div.xw-cell', onClickCell);
+    $rootTable.on('contextmenu', 'div.xw-cell', onContextMenu);
+
+    var $wordFilter = ('word01', 'word02', 'word03', 'word04', 'word05', 'word06', 'word07', 'word08', 'word09', 'word10', 'word11', 'word12', 'word13', 'wrod14', 'word15', 'word16', 'word17', 'word18', 'word19', 'word20', 'word21', 'word22');
+    $("input.xw-initword").each(
+      function(idx, tag) {
+        var wordinput = $(tag);
+        if (wordinput.val() != '') {
+          wordinput.addClass('xw-foundword uneditable-input').removeClass('xw-initword');
+        } else {
+          wordinput.addClass('xw-blankword').removeClass('xw-initword');
+        }
+      });
+
+    for( var ii=0; ii<22; ii=ii + 1 ) {
+      var x_coordinate = -1;
+      var y_coordinate = -1;
+      var triple_index = -1;
+      var is_horizontal = null;
+      var text_value = '';
+      $($wordFilter[ii]).each(
+        function( idx, tag ) {
+          if( idx == 0 ) {
+            x_coordinate = $(tag).val();
+          } else if( idx == 1 ) {
+            y_coordinate = $(tag).val();
+          } else if( idx == 2 ) {
+            is_horizontal = $(tag).val();
+          } else if( idx == 3 ) {
+            text_value = $(tag).val();
+          } else if( idx == 4 ) {
+            :riple_index = $(tag).val();
+          }
+        }
+      );
+
+      if (is_horizontal != null) {
+        var cell = $logicalTable[x_coordinate][y_coordinate];
+        var len = text_value.length;
+        for( var jj=0; jj<len; jj++ ) {
+          var nextChar = text_value[jj];
+          cell.content.current = nextChar;
+          cell.selfNode.data('content', nextChar);
+          $('img', cell.selfNode).attr('src', $valueImages.attr(nextChar))
+  
+          if (jj == triple_index) { cell.selfNode.addClass('xw-triple'); }
+
+          if (is_horizontal) {
+            cell = cell.toRight;
+          } else {
+            cell = cell.toBelow;
+          }
+        }
+      }
+    }
   }
 
   //
@@ -342,21 +409,47 @@
   //
 
   function onClickCell(event) {
-    // If another word is already active accept its changes and release its
-    // interests in the cell grid's decoration state.
-    if ($editorCell != null) { closeWordEditor(); }
-  
     var wrap = $(this); // $(event.target).parent();
     var row = wrap.data('rowid');
     var col = wrap.data('colid');
     var cellState = $logicalTable[row][col];
   
+    if($editorCell != null) {
+      if (! isOpen(cellState)) {
+        // If another word is already active accept its changes and release 
+        // its interests in the cell grid's decoration state.
+        closeWordEditor();
+      } else if (! isWord(cellState)) {
+        if (isWordTail(cellState.toLeft) && (isFilled(cellState.toLeft))) {
+          shiftWordTail(cellState.toLeft, cellState);
+          moveCursor($editorCell, cellState);
+          $editorCell = cellState;
+
+          return true;
+        } else if (isWordHead(cellState.toRight) && isFilled(cellState.toRight)) {
+          shiftWordHead(cellState.toRight, cellState);
+          moveCursor($editorCell, cellState);
+          $editorCell = cellState;
+
+          return true;
+        } else {
+          closeWordEditor();
+        }
+      } else {
+        moveCursor($editorCell, cellState);
+        $editorCell = cellState;
+
+        return true;
+      }
+    }
+
     // If all 22 words are accounted for, disallow selections that are not 
     // contiguous with an existing word.
-    // if (isBlank(cellState) && ($wordCount >= 22)) {
-    //   showMaxWordsError();
-    //   return false;
-    // }
+    // TODO: Allow extending an existing word into blank space!
+    if (isBlank(cellState) && ($wordCount >= 22)) {
+      showMaxWordsError();
+      return false;
+    }
 
     if(cellState.open.parallel.length < 3) {
       if(cellState.open.crossing.length < 3) {
@@ -369,7 +462,7 @@
       $hasAltDir  = false;
       $editorCell = $logicalTable[row][col];
     } else {
-      if(cellState.open.crossing.length < 3) {
+      if (cellState.open.crossing.length < 3) {
         $hasAltDir  = false;
       } else {
         $hasAltDir  = true;
@@ -413,10 +506,11 @@
       } else {                   // and accepts changes. (TODO only accept 
         // showBadToggleError(); // changes after the first change in a toggled
       }                          // direction).
-    } else if (keyValue == 13) {
+    } else if (keyValue == 27) {
       // TODO:
       // abortWordEditor();  // <ESC> stops editting and rolls back changes
-    } else if (keyValue == 27 ) {
+      closeWordEditor();  // <RETURN> stops editting and accepts changes
+    } else if (keyValue == 13) {
       closeWordEditor();  // <RETURN> stops editting and accepts changes
     } else if (keyValue == 37) {
       moveCursorLeft();   // <LEFT> moves the cursor left
@@ -431,7 +525,30 @@
     return true;
   }
   
-  function showContextMenu(event) {
+  function onContextMenu(event) {
+    var wrap = $(this); // $(event.target).parent();
+    var row = wrap.data('rowid');
+    var col = wrap.data('colid');
+    var cellState = $logicalTable[row][col];
+
+    if( $tripleCellCount > 0 ) {
+      if( cellState.hasTriple.current ) {
+        // Render remove triple context option.
+      } else if ($tripleCellCount >= 4) {
+        // Render unselectable error.
+      } else if (isBlank(cellState)) {
+        // Render illegal blank target.
+      } else if ((isFilled(cellState.toAbove) ||
+                  isFilled(cellState.toBellow)) &&
+                 (isFilled(cellState.toLeft) ||
+                  isFilled(cellState.toRight))) {
+        // Render illegal intersection.
+      } else {
+        // Render add triple context option.
+      }
+    }
+
+    alert( wrap.get() );
     return false;
   }
   
@@ -546,6 +663,7 @@
   //    new region will get truncated to unity very quickly.
   function refreshOpenRanges() {
     $wordCount = 0;
+    $('input.xw-foundword').removeClass('xw-foundword').addClass('xw-blankword');
     $('div.xw-cell', $rootTable).removeClass('xw-shortrow xw-shortcol');
 
     var colTrack = [ ];
@@ -718,6 +836,31 @@
       if(trackObj.wordRun.size() < 3) {
         trackObj.wordRun.addClass(shortClass);
       } else {
+        var subst = { idx: $wordCount };
+        var text_value = '';
+
+        trackObj.wordRun.each( function(letterIdx, cell) { 
+          var jcell = $(cell);
+
+          text_value = text_value + jcell.data('content');
+
+          if (jcell.data('triple')) {
+            $($wordAttrs.tripleIndex.format(subst)).val(letterIdx);
+          }
+        });
+        
+        $($wordAttrs.textValue.format(subst)).removeClass('xw-blankword').addClass('xw-foundword uneditable-input').val(text_value);
+        $($wordAttrs.xCoord.format(subst)).val(
+          trackObj.wordRun.first().data('rowid'));
+        $($wordAttrs.yCoord.format(subst)).val(
+          trackObj.wordRun.first().data('colid'));
+
+        if( shortClass == "xw-shortrow" ) {
+          $($wordAttrs.isHoriz.format(subst)).val(true);
+        } else {
+          $($wordAttrs.isHoriz.format(subst)).val(false);
+        }
+
         $wordCount = $wordCount + 1;
       }
 
@@ -737,7 +880,7 @@
       $logicalGrid = $verticalGrid;
       
       if($editorCell != null) {
-        $editorCell = $logicalGrid[$editorCell.row][$editorCell.col];
+        $editorCell = $logicalGrid[$editorCell.col][$editorCell.row];
       }
     },
 
@@ -1118,6 +1261,7 @@
 
   function setCharacter(c) {
     $editorCell.content.current = c;
+    $editorCell.selfNode.data('content', c);
     moveCursorRight();
   }
 
@@ -1134,6 +1278,7 @@
     var nextImg   = null;
     while (thisCell != pruneCell) {
       thisCell.content.current = nextCell.content.current;
+      thisCell.selfNode.data('content', thisCell.content.current);
   
       nextImg  = $('img.xw-value', nextCell.selfNode);
       thisImg.attr('src', nextImg.attr('src'));
@@ -1144,6 +1289,7 @@
     }
   
     shiftWordTail(pruneCell, pruneCell.toLeft);
+    moveCursorLeft();
   }
 
   //

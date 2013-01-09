@@ -1,21 +1,26 @@
 <h1>Listing crosswords</h1>
-
+<div class="row">
+  <div class="span2">
 <table>
   <tr>
-    <th>Bonus value</th>
     <th>Bonus word</th>
+    <th>Date created</th>
+    <th>Date modified</th>
     <th></th>
     <th></th>
     <th></th>
+    <th>Experimental</th>
   </tr>
 
 <% @crosswords.each do |crossword| %>
   <tr>
-    <td><%= crossword.bonus_value %></td>
     <td><%= crossword.bonus_word %></td>
-    <td><%= link_to 'Show', crossword %></td>
-    <td><%= link_to 'Edit', edit_crossword_path(crossword) %></td>
-    <td><%= link_to 'Destroy', crossword, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+    <td><%= crossword.created_at %></td>
+    <td><%= crossword.updated_at %></td>
+    <td><%= link_to 'Show', show_crossword_path(crossword), :remote => true, :html => { :'data-type' => 'json', :'data-action' => 'show_crossword' } %></td>
+    <td><%= link_to 'Edit', edit_crossword_path(crossword), :remote => true, :html => { :'data-type' => 'json', :'data-action' => 'edit_crossword' } %></td>
+    <td><%= link_to 'Destroy', crossword, :method => :delete, :data => { :confirm => 'Are you sure?' } %></td>
+    <td><%= link_to 'AltDestroy', delete_crossword_path(crossword), :remote => true, :html => {:'data-type' => 'json', :'data-action' => 'delete_crossword'}, :data => { :confirm => 'Are you sure?' } %></td>
   </tr>
 <% end %>
 </table>

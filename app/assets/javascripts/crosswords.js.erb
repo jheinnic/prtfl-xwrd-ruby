@@ -1,17 +1,13 @@
 // TODO LIST:
 // P1:
-// -- Rudimentary Bonus, Tripling, Your Letter Fields
+// -- Rudimentary Your Letter Fields
 // -- Reading hidden form fields in during initialize for edit
 // -- AJAX call to load different card state without page reload
 // -- AJAX call to wait on payout stats update on save
 // -- AJAX call to save and update payout stats on edit
 // P2:
-// -- Bonus word UI
 // -- Your Letters UI
-// -- Tripling Modifier UI
 // P3:
-// -- Check for cell clicks that cannot grow out to 3 characters
-// -- Check for direction toggle capability on cursor movement
 // -- Bootstrap dialogs
 // -- Cursor blinking
 
@@ -38,6 +34,9 @@
       return value != null ? value : match;
     });
   };
+
+  var $currentKeyHandler = null;
+  var $currentClickHandler = null;
 
   var $editorCell = null;
   var $hasAltDir = true;
@@ -85,7 +84,17 @@
   var $altLogicalGrid = $verticalGrid;
 
   var $rootTable;
+  var $docWrapper;
   
+  // Other grids -- Bonus and Your Letters
+  var $bonusWord  = [];
+  var $bonusTable;
+  var $bonusColumn;
+
+  var $playerGrid = [];
+
+  var $foundWordBadges;
+
   var $blankImage = "<%= path_to_image 'val/blank.png' %>";
   var $cursorImage = "<%= path_to_image 'val/qm.png' %>";
   var $valueImages = $( {
@@ -104,11 +113,15 @@
     Y: "<%= path_to_image 'val/Y.png' %>", Z: "<%= path_to_image 'val/Z.png' %>"
   } );
 
+  var $fillImages = {
+    pink: '', revealed: '', silver: ''
+  };
+
   var $wordAttrs = {
     xCoord: 'input:hidden#crossword_word_items_attributes_{idx}_x_coordinate',
     yCoord: 'input:hidden#crossword_word_items_attributes_{idx}_y_coordinate',
     isHoriz: 'input:hidden#crossword_word_items_attributes_{idx}_is_horizontal',
-    textValue: 'input:text#crossword_word_items_attributes_{idx}_text_value',
+    textValue: 'input:hidden#crossword_word_items_attributes_{idx}_text_value',
     tripleIndex: 'input:hidden#crossword_word_items_attributes_{idx}_triple_letter_index'
   };
     
@@ -116,8 +129,8 @@
     $rootTable  = $('#lettergrid');
 
     var contentTmpl = '<img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" /><img class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" /><img class="xw-fill xw-revealed" src="<%= path_to_image 'fill/brite1.png' %>" /><img class="xw-fill xw-selected" src="<%= path_to_image 'fill/selected1.png' %>" /><img class="xw-fill xw-altword" src="<%= path_to_image 'fill/imageSrc.png' %>" /><img class="xw-fill xw-altopen" src="<%= path_to_image 'fill/briteblue.png' %>" /><img class="xw-fill xw-locked" src="<%= path_to_image 'fill/locked.png' %>" /><img class="xw-fill xw-tooshort" src="<%= path_to_image 'fill/altPath.png' %>" /><img class="xw-fill xw-tripshort" src="<%= path_to_image 'fill/altPath.png' %>" /><img class="xw-fill xw-triple" src="<%= path_to_image 'fill/golden.png' %>" /><img class="xw-fill xw-halflock" src="<%= path_to_image 'fill/cornsilk.png' %>" /><img class="xw-fill xw-initial" src="<%= path_to_image 'fill/pink2.png' %>" /></div></td>';
-    var selectRowTmpl = 'div[data-rowid="{row}"]';
-    var selectColTmpl = 'div[data-colid="{col}"]';
+    var selectRowTmpl = 'table#lettergrid div[data-rowid="{row}"]';
+    var selectColTmpl = 'table#lettergrid div[data-colid="{col}"]';
 
     // Iterate through the cells in document order, adding image data to
     // each cell and building a horizontal doubly linked lists connecting
@@ -230,20 +243,44 @@
       );
     } // Latter of two intialization "for" loops.
 
-    // Set a handler for the table, setup to recieve calls from 
-    $rootTable.on('click', 'div.xw-cell', onClickCell);
-    // $rootTable.on('contextmenu', 'div.xw-cell', onContextMenu);
+    // Clear any previous mouse and key handlers.
+    $docWrapper = $(document);
+    if($currentKeyHandler != null) {
+       $docWrapper.off('keydown', $currentKeyHandler); }
+    if($currentClickHandler != null) {
+       $docWrapper.off('click', $currentClickHandler); }
 
+    // Set mouse and keyboard handlers.
+    $docWrapper.on('keydown', onKeyboardInput);
+    $currentKeyHandler = onKeyboardInput;
+    $rootTable.on('click', 'div.xw-cell', onClickWordGrid);
+    $currentClickHandler = onClickWordGrid;
+    $rootTable.on('contextmenu', 'div.xw-cell', onWordGridContext);
+
+    for( var ii=0; ii<5; ii++ ) {
+      $bonusWord[ii] = { letter: '', valImg: null }; }
+    $bonusTable = $("table#bonusgrid")
+    $("img.xw-value", $bonusTable).each(
+      function(idx, obj) {
+        $bonusWord[idx].valImg = $(obj)
+      }
+    );
+
+    $foundWordBadges = $("table#wordsummary span.badge");
+    $playerLetters   = $("table#yourletters div.xw-cell");
+  }
+
+  function badLoadWords() {
     var $wordFilter = ('word01', 'word02', 'word03', 'word04', 'word05', 'word06', 'word07', 'word08', 'word09', 'word10', 'word11', 'word12', 'word13', 'wrod14', 'word15', 'word16', 'word17', 'word18', 'word19', 'word20', 'word21', 'word22');
-    $("input.xw-initword").each(
-      function(idx, tag) {
-        var wordinput = $(tag);
-        if (wordinput.val() != '') {
-          wordinput.addClass('xw-foundword uneditable-input').removeClass('xw-initword');
-        } else {
-          wordinput.addClass('xw-blankword').removeClass('xw-initword');
-        }
-      });
+//    $("input.xw-initword").each(
+//      function(idx, tag) {
+//        var wordinput = $(tag);
+//        if (wordinput.val() != '') {
+//          wordinput.addClass('xw-foundword uneditable-input').removeClass('xw-initword');
+//        } else {
+//          wordinput.addClass('xw-blankword').removeClass('xw-initword');
+//        }
+//      });
 
     for( var ii=0; ii<22; ii=ii + 1 ) {
       var x_coordinate = -1;
@@ -278,11 +315,7 @@
   
           if (jj == triple_index) { cell.selfNode.addClass('xw-triple'); }
 
-          if (is_horizontal) {
-            cell = cell.toRight;
-          } else {
-            cell = cell.toBelow;
-          }
+          if (is_horizontal) { cell = cell.toRight; } else { cell = cell.toBelow; }
         }
       }
     }
@@ -292,14 +325,26 @@
   // Javascript Event Handlers
   //
 
-  function onClickCell(event) {
+  function onClickWordGrid(event) {
     var wrap = $(this); 
     goToCell(wrap.data('rowid'), wrap.data('colid'));
   }
   
+  function onClickBonusGrid(event) {
+    var wrap = $(this); 
+    if ($editorCell != null) { closeWordEditor(); }
+
+    $bonusColumn = wrap.data('colid');
+    $("img.xw-fill", wrap).attr('src', $fillImages.revealed);
+    $("img.xw-border", wrap).attr('style', 'visibility: visible;');
+    $("img.xw-value", wrap).attr('src', $fillImages.qm);
+    
+    $(document).off('keydown', $currentKeyInput);
+    $(document).on('keydown', onBonusKeyInput);
+  }
+  
   function onKeyboardInput(event) {
     if ($editorCell == null) { return true; }
-  
     if (!event) var event = window.event;
 
     var keyValue = event.keyCode;
@@ -342,7 +387,56 @@
     return false;
   }
   
-  function onContextMenu(event) {
+  function onBonusKeyInput(event) {
+    if ($editorCell == null) { return true; }
+    if (!event) var event = window.event;
+
+    var keyValue = event.keyCode;
+    if( keyValue == null ) { return true; }
+  
+    // Accept DEL, RETURN, TAB, arrows, and letters.
+    if (keyValue >= 65 && keyValue <= 90) { 
+      if($bonusColumn < 0 || $bonusColumn > 4) { return false; }
+
+      var keyChar = String.fromCharCode(keyValue);
+      $bonusWord[$bonusColumn].letter = keyChar
+      $bonusWord[$bonusColumn].valImg.attr('src', $valueImages.attr(keyChar));
+
+      $bonusColumn = $bonusColumn + 1;
+      if($bonusColumn < 5) {
+        $bonusWord[$bonusColumn].valImg.attr(
+          'src', $valueImages.qm);
+      }
+    } else if (keyValue == 27 || keyValue == 13) {
+      // <ESC> and <RETURN> each stop editting and accept changes
+      var bonusWord = 
+        $bonusWord[0].letter + $bonusWord[1].letter + $bonusWord[2].letter +
+        $bonusWord[3].letter + $bonusWord[4].letter;
+      // TODO: Set it in the appropriate form field
+
+      
+    } else if (keyValue == 37 && $bonusColumn > 0) {
+      // <LEFT> shifts the cursor left if possible.
+      $bonusWord[$bonusColumn].valImg.attr(
+        'src', $valueImages.attr($bonusWord[$bonusColumn].letter));
+      $bonusColumn = $bonusColumn - 1;
+      $bonusWord[$bonusColumn].valImg.attr(
+        'src', $valueImages.attr($valueImages.qm));
+    } else if (keyValue == 39) {
+      // <RIGHT> shifts the cursor right if possible.
+      if($bonusColumn < 4) {
+        $bonusWord[$bonusColumn].valImg.attr(
+          'src', $valueImages.attr($bonusWord[$bonusColumn].letter));
+        $bonusColumn = $bonusColumn + 1;
+        $bonusWord[$bonusColumn].valImg.attr(
+          'src', $valueImages.attr($valueImages.qm));
+      }
+    }
+  
+    return false;
+  }
+  
+  function onWordGridContext(event) {
     var wrap = $(this); // $(event.target).parent();
     var row = wrap.data('rowid');
     var col = wrap.data('colid');
@@ -351,29 +445,35 @@
     if( $tripleCellCount > 0 ) {
       if( cellState.hasTriple.current ) {
         // Render remove triple context option.
+        return false;
       } else if ($tripleCellCount >= 4) {
         // Render unselectable error.
+        return false;
       } else if (isBlank(cellState)) {
         // Render illegal blank target.
+        return false;
       } else if ((isFilled(cellState.toAbove) ||
                   isFilled(cellState.toBellow)) &&
                  (isFilled(cellState.toLeft) ||
                   isFilled(cellState.toRight))) {
         // Render illegal intersection.
-      } else {
-        // Render add triple context option.
+        return false;
       }
     }
 
-    alert( wrap.get() );
-    return false;
+    // Render add triple context option.
+    cellState.data('triple', ! cellStateData('triple'));
+    refreshVisualCues();
+    return true;
   }
   
   //
   // Change-of-context cleanup methods
   // 
   function goToCell(rowIdx, colIdx) {
-    if ((rowIdx < 0) || (colIdx < 0) || (rowIdx > 10) || (colIdx > 10)) { return false; }
+    if ((rowIdx < 0) || (colIdx < 0) || (rowIdx > 10) || (colIdx > 10)) {
+      return false;
+    }
 
     var cellState = $logicalTable[rowIdx][colIdx];
   
@@ -402,7 +502,7 @@
       }
     }
 
-    // If all 22 words are accounted for, disallow selections that are not 
+    // If all 22 words are accounted for, disallow selections that are not
     // contiguous with an existing word.
     // TODO: Short words will still fool this test...
     if (isBlank(cellState) && ($wordCount >= 22)) {
@@ -436,12 +536,11 @@
 
     $openRange = $editorCell.open.parallel;
     $oldWordRange = bootstrapWordRange($editorCell);
-    $newWordRange  = 
+    $newWordRange  =
       { head:   $oldWordRange.head,
         tail:   $oldWordRange.tail,
         length: $oldWordRange.length };
 
-    $(document).on('keydown', onKeyboardInput);
     decorateOpenWord();
     showCursor();
   }
@@ -488,8 +587,6 @@
   }
 
   function closeWordEditor() {
-    $(document).off('keydown', onKeyboardInput);
-
     commitActiveChanges();
 
     hideCursor();
@@ -523,7 +620,7 @@
     // have an impact. (TODO!)
     // if ((wrc.head != wrp.head || wrc.tail != wrp.tail) &&
     //     (wrc.length != 1 || wrp.length != 1)) {
-      refreshOpenRanges();
+      refreshVisualCues();
     // }
   }
 
@@ -549,9 +646,9 @@
   // -- If "c" is empty, then "b" is the last cell of the preceding region, and
   //    "c" begins a new region (but if m/n or p/q continue to the right, that
   //    new region will get truncated to unity very quickly.
-  function refreshOpenRanges() {
+  function refreshVisualCues() {
     $wordCount = 0;
-    $('input.xw-foundword').removeClass('xw-foundword').addClass('xw-blankword');
+    $foundWordBadges.text('');
     $('div.xw-cell', $rootTable).removeClass('xw-short xw-triple xw-tripshort xw-hclosed xw-vclosed xw-blocked');
 
     var colTrack = [ ];
@@ -755,7 +852,7 @@
     return closed;
   }
 
-  function markWordBoundary(trackObj, isHorizontal, wordModFlags)
+  function markWordBoundary(trackObj, isHorizontal, wordModFlags) {
     var wordRun = trackObj.wordRun;
 
     if (wordRun.size() > 0) {
@@ -770,35 +867,39 @@
           function(letterIdx, cell) { 
             var wrappedCell = $(cell);
             if (wrappedCell.data('triple')) {
-              wordModFlags.triples = wordModeFlags.triples.add(wrappedCell)
+              wordModFlags.triples = wordModFlags.triples.add(wrappedCell)
               $tripleCellCount = $tripleCellCount + 1;
             }
           }
         );
       } else {
+        var firstCell = trackObj.wordRun.first()
         var subst = { idx: $wordCount };
         var text_value = '';
 
         wordRun.each(
           function(letterIdx, cell) { 
             var wrappedCell = $(cell);
-            var firstCell = trackObj.wordRun.first()
   
             text_value = text_value + wrappedCell.data('content');
   
             if (wrappedCell.data('triple')) {
               $($wordAttrs.tripleIndex.format(subst)).val(letterIdx);
-              wordModFlags.triples = wordModeFlags.triples.add(wrappedCell)
+              wordModFlags.triples = wordModFlags.triples.add(wrappedCell)
               $tripleCellCount = $tripleCellCount + 1;
             }
           }
         );
         
-        $($wordAttrs.textValue.format(subst)).addClass(
-          'xw-foundword uneditable-input').val(text_value);
-        $($wordAttrs.xCoord.format(subst)).val(wrappedCell.data('rowid'));
-        $($wordAttrs.yCoord.format(subst)).val(wrappedCell.data('colid'));
+        // Update form fields.
+        $($wordAttrs.textValue.format(subst)).val(text_value);
+        $($wordAttrs.xCoord.format(subst)).val(firstCell.data('rowid'));
+        $($wordAttrs.yCoord.format(subst)).val(firstCell.data('colid'));
         $($wordAttrs.isHoriz.format(subst)).val(isHorizontal);
+
+        // Display badges self-collapse when empty and self-several when
+        // given content.  Awesome!
+        $foundWordBadges.eq($wordCount).text($bonusWord);
 
         $wordCount = $wordCount + 1;
       }
@@ -1170,14 +1271,15 @@
     $('img.xw-value', $editorCell.selfNode).attr('src', cursorReplacement);
   }
 
-  function moveCursorRight() {
+  function setCharacter(c) {
+    $editorCell.content.current = c;
+    $editorCell.selfNode.data('content', c);
+
     var rightCell = $editorCell.toRight;
 
     if (! isOpen(rightCell)) { return }
-
     if ((! isWord(rightCell)) &&
         ((! isWord($editorCell)) || isBlank($editorCell))) { return }
-
     if (isWordTail($editorCell)) {
       moveCursor($editorCell, rightCell);
       shiftWordTail($editorCell, rightCell);
@@ -1189,37 +1291,6 @@
     }
 
     $editorCell = rightCell;
-  }
-
-  function moveCursorLeft() {
-    var leftCell = $editorCell.toLeft;
-
-    if (! isOpen(leftCell)) { return }
-
-    if ((! isWord(leftCell)) &&
-        ((! isWord($editorCell)) || isBlank($editorCell))) { return }
-
-    if (isWordHead($editorCell)) {
-      moveCursor($editorCell, leftCell);
-      shiftWordHead($editorCell, leftCell);
-    } else if (isBlank($editorCell) && isWordTail($editorCell)) {
-      moveCursor($editorCell, leftCell);
-      shiftWordTail($editorCell, leftCell);
-    } else {
-      moveCursor($editorCell, leftCell);
-    }
-
-    $editorCell = leftCell;
-  }
-
-  //
-  // Content manipulation -- setCharacter() and clearCharacter()
-  //
-
-  function setCharacter(c) {
-    $editorCell.content.current = c;
-    $editorCell.selfNode.data('content', c);
-    moveCursorRight();
   }
 
   function clearCharacter() {
@@ -1240,13 +1311,28 @@
       nextImg  = $('img.xw-value', nextCell.selfNode);
       thisImg.attr('src', nextImg.attr('src'));
       
-      thisCell = nextCell;
-      thisImg  = nextImg;
-      nextCell = thisCell.toRight;
+      thisCell = nextCell;  thisImg  = nextImg;  nextCell = thisCell.toRight;
     }
   
-    shiftWordTail(pruneCell, pruneCell.toLeft);
-    moveCursorLeft();
+    var leftCell = $editorCell.toLeft;
+
+    if (! isOpen(leftCell)) { return }
+
+    if ((! isWord(leftCell)) &&
+        ((! isWord($editorCell)) || isBlank($editorCell))) { return }
+
+    if (isWordHead($editorCell)) {
+      moveCursor($editorCell, leftCell);
+      shiftWordHead($editorCell, leftCell);
+    } else if (isBlank($editorCell) && isWordTail($editorCell)) {
+      moveCursor($editorCell, leftCell);
+      shiftWordTail($editorCell, leftCell);
+    } else {
+      moveCursor($editorCell, leftCell);
+    }
+
+    // shiftWordTail(pruneCell, pruneCell.toLeft);
+    $editorCell = leftCell;
   }
 
   //
@@ -1256,8 +1342,3 @@
   function showMaxWordsError() { alert('Max Words'); return false; }
 
   function showLockedOutCellError() { alert('That cell is locked out'); return false; }
-  //
-  // Schedule OnLoad Handler
-  //
-
-  $().on('load', initialize);

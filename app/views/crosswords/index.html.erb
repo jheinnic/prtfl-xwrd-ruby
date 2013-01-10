@@ -1,32 +1,70 @@
-<h1>Listing crosswords</h1>
 <div class="row">
-  <div class="span2">
-<table>
-  <tr>
-    <th>Bonus word</th>
-    <th>Date created</th>
-    <th>Date modified</th>
-    <th></th>
-    <th></th>
-    <th></th>
-    <th>Experimental</th>
-  </tr>
+  <div class="span3">
+    <h1>Crosswords</h1>
+    <table class="table table-condensed">
+      <tr>
+        <th>Bonus<br>word</th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
+    
+    <% @crosswords.each do |crossword| %>
+      <tr>
+        <td><%= crossword.bonus_word %></td>
+        <td><%= link_to 'Show', crossword_path(crossword), :remote => true, :'data-type' => 'json', :'data-action' => 'show_crossword' %></td>
+        <td><%= link_to 'Edit', edit_crossword_path(crossword), :remote => true, :'data-type' => 'json', :'data-action' => 'edit_crossword' %></td>
+        <td><%= link_to 'Del', crossword_path(crossword), :remote => true, :'data-type' => 'json', :'data-action' => 'delete_crossword', :data => { :confirm => 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+    <% for ii in (1..50) %>
+      <tr><td><%= ii * 10 %></td><td><%= (ii *74153) % 59 %></td><td><%= (ii*2911) % 59%></td><td></td></tr>
+    <% end %>
+    </table>
+  </div>
+  <div id="ticketview" class="span9">
+    <div data-spy="affix" id="ticketplaceholder"><p><%= link_to 'New Crossword', new_crossword_path, :remote => true, :'data-type' => 'html', :'data-action' => 'new_crossword' %></p></div>
+  </div>
+</div>
 
-<% @crosswords.each do |crossword| %>
-  <tr>
-    <td><%= crossword.bonus_word %></td>
-    <td><%= crossword.created_at %></td>
-    <td><%= crossword.updated_at %></td>
-    <td><%= link_to 'Show', show_crossword_path(crossword), :remote => true, :html => { :'data-type' => 'json', :'data-action' => 'show_crossword' } %></td>
-    <td><%= link_to 'Edit', edit_crossword_path(crossword), :remote => true, :html => { :'data-type' => 'json', :'data-action' => 'edit_crossword' } %></td>
-    <td><%= link_to 'Destroy', crossword, :method => :delete, :data => { :confirm => 'Are you sure?' } %></td>
-    <td><%= link_to 'AltDestroy', delete_crossword_path(crossword), :remote => true, :html => {:'data-type' => 'json', :'data-action' => 'delete_crossword'}, :data => { :confirm => 'Are you sure?' } %></td>
-  </tr>
+<%= content_for :scripts do %>
+<script type="text/javascript">
+var $successHandlers = $({
+  new_crossword:
+    function(evt, xhr, settings) {
+      $('a[data-action]').attr('data-type', 'json');
+      var placeholder = $('#ticketplaceholder');
+      placeholder.children().remove();
+      placeholder.append(xhr.responseText);
+      initialize();
+    },
+
+  show_crossword:
+    function(evt, xhr, settings) {
+    },
+
+  edit_crossword:
+    function(evt, xhr, settings) {
+    },
+
+  delete_crossword:
+    function(evt, xhr, settings) {
+    }
+});
+
+$(document).ready(
+  function() {
+    $('a[data-action]').each(
+      function(idx, tag) {
+        var wrappedTag = $(tag);
+        wrappedTag.on(
+          'ajax:complete', $successHandlers.attr(wrappedTag.data('action'))
+        );
+      }
+    );
+  }
+);
+</script>
 <% end %>
-</table>
 
-<br />
-
-<%= link_to 'New Crossword', new_crossword_path %>
-
-<%= content_for :active_navtab, "crosswords" %>
+<%= content_for :active_navtab, 'crosswords' %>

@@ -33,7 +33,13 @@ class CrosswordsController < ApplicationController
     #   format.html # new.html.erb
     #   format.json { render :json => @crossword }
     # end
-    respond_with(@crossword)
+    respond_with(@crossword) do |f|
+      if request.xhr?
+        f.html do 
+          render :partial => "crosswords/form", :layout => false
+        end
+      end
+    end
   end
 
   # GET /crosswords/1/edit
@@ -47,15 +53,16 @@ class CrosswordsController < ApplicationController
     logger.debug(params.inspect)
     @crossword = Crossword.new(params[:crossword])
 
-    respond_to do |format|
-      if @crossword.save
-        format.html { redirect_to @crossword, :notice => 'Crossword was successfully created.' }
-        format.json { render :json => @crossword, :status => :created, :location => @crossword }
-      else
-        format.html { render :action => "new" }
-        format.json { render :json => @crossword.errors, :status => :unprocessable_entity }
-      end
-    end
+    respond_with(@crossword)
+    # respond_to do |format|
+    #   if @crossword.save
+    #     format.html { redirect_to @crossword, :notice => 'Crossword was successfully created.' }
+    #     format.json { render :json => @crossword, :status => :created, :location => @crossword }
+    #   else
+    #     format.html { render :action => "new" }
+    #     format.json { render :json => @crossword.errors, :status => :unprocessable_entity }
+    #   end
+    # end
   end
 
   # PUT /crosswords/1

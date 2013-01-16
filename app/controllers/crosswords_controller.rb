@@ -6,10 +6,11 @@ class CrosswordsController < ApplicationController
   def index
     @crosswords = Crossword.all
 
-    respond_to do |format|
-      format.html # index.html.erb
-      format.json { render :json => @crosswords }
-    end
+    # respond_to do |format|
+    #   format.html # index.html.erb
+    #   format.json { render :json => @crosswords }
+    # end
+    respond_with @crosswords
   end
 
   # GET /crosswords/1
@@ -17,10 +18,12 @@ class CrosswordsController < ApplicationController
   def show
     @crossword = Crossword.find(params[:id])
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render :json => @crossword }
-    end
+    #  respond_to do |format|
+    #    format.html # show.html.erb
+    #    format.json { render :json => @crossword }
+    #  end
+
+    respond_with @crossword
   end
 
   # GET /crosswords/new

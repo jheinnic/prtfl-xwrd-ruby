@@ -24,7 +24,7 @@
           <% for ii in (0..2) %>
           <tr>
             <% for jj in (0..5) %>
-            <td><div data-rowid="<%= ii %>" data-colid="<%= jj %>" data-content='' class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
+            <td><div data-rowid="<%= ii %>" data-colid="<%= jj %>" data-content='' class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
             <% end %>
           </tr>
           <% end %>
@@ -34,9 +34,9 @@
       <td>
         <table id="bonusvalue" class="xw-sliced">
           <tr>
-            <td><img src="<%= path_to_image 'fill/altPath.png' %>"></td>
-            <td><img src="<%= path_to_image 'fill/scratched.png' %>"></td>
-            <td><img src="<%= path_to_image 'fill/imageSrc.png' %>"></td>
+            <td><img class="xw-fill" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
+            <td><img class="xw-fill" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
+            <td><img class="xw-fill" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
           </tr>
         </table>
       </td>
@@ -50,9 +50,11 @@
       <td colspan="3">
         <table id="bonusword" class="xw-layered">
           <tr>
-            <% for jj in (0..4) %>
-              <td><div colid = jj class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
-            <% end %>
+              <td><div colid="0" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div colid="1" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div colid="2" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div colid="3" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div colid="4" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
           </tr>
         </table>
       </td>

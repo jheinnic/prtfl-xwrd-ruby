@@ -68,12 +68,10 @@ div {
   }
 }
 
+// border-collapse and border-spacing already set by Bootstrap for all tables.
 table.xw-sliced {
-  padding: 0;
   line-height: 0px;
   border: 0;
-  border-collapse: collapse;
-  border-spacing: 0px;
   img {
     min-height: 100%;
     min-width: 100%;
@@ -85,6 +83,9 @@ table.xw-sliced {
 }
 
 table.xw-layered {
+  td {
+    padding: 0;
+  }
   div.xw-cell {
     position: relative;
     top: 0px;
@@ -188,33 +189,32 @@ table#lettergrid {
     }
   }
   div.xw-cell {
+    img {
+      visibility: hidden;
+    }
     &.xw-open img.xw-fill.xw-selected {
       visibility: visible;
     }
-    &.xw-shortrow.xw-shortcol {
-      &.xw-triple {
-        img.xw-fill.xw-tripshort {
-          visibility: visible;
-        }
-      }
-      img.xw-fill.xw-tooshort {
-        visibility: visible;
-      }
+    &.xw-triple img.xw-fill.xw-tripshort {
+      visibility: visible;
+    }
+    &.xw-short img.xw-fill.xw-tooshort {
+      visibility: visible;
+    }
+    &.xw-tripshort img.xw-fill.xw-tripshort {
+      visibility: visible;
     }
     &.xw-blocked img.xw-fill.xw-locked {
       visibility: visible;
     }
-    &.xw-tabword img.xw-fill.xw-altword {
-      visibility: visible;
-    }
-    &.xw-tabopen img.xw-fill.xw-altopen {
+    &.xw-revealed img.xw-fill.xw-revealed {
       visibility: visible;
     }
   }
   div.xw-cell img {
     visibility: hidden;
 
-    &.xw-fill.xw-initial {
+    &.xw-fill.xw-baseline {
       visibility:visible;
       z-index: 8;
     }

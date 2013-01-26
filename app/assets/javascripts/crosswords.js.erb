@@ -15,8 +15,7 @@
     var regex = /\{([\w-]+)(?:\:([\w\.]*)(?:\((.*?)?\))?)?\}/g;
   
     var getValue = function(key) {
-      if(values == null || typeof values === 'undefined')
-        return null;
+      if(values == null || typeof values === 'undefined') return null;
   
       var value = values[key];
       var type = typeof value;
@@ -36,7 +35,6 @@
   };
 
   var $currentKeyHandler = null;
-  var $currentClickHandler = null;
 
   var $editorCell = null;
   var $hasAltDir = true;
@@ -44,44 +42,68 @@
   var $tripleCellCount = 0;
 
   var $openRange    = null;
-  var $oldWordRange = null;
-  var $newWordRange = null;
+  var $wordRange = null;
 
-  // TABLES:
-  // (X,Y) in horizontal mode yields the same cell as (Y,X) in vertical mode.
-  // When orientation changes invert the meaning of up/down and left/right,
-  // Tables preserve a standard orientation and so swap their coordinates.
-  // These are needed to support Table-to-Cell coordinate mapping in HTML b/c
-  // inverting the logical orientation cannot toggle the X,Y coordinates
-  // embedded in the tables, so the view logic for mapping from click location
-  // to cell object has to have an abstraction that is unaffected by logical
-  // orientation swaps.
+  // GRID NODE:
+  // Every grid is an 11x11 2-dimensional array of node objects.  There are
+  // two node objects for each physical location.
+  // 
+  // HORIZONTAL GRID NODE:
+  // The horizontal node has its row and col properties set using the same
+  // coordinates as in the physical display grid.  Its navigation pointers are
+  // threaded such that left, right, up, and down behave exactly as one would
+  // expect given the display grid.
   //
-  // Note that the constrant addressing for non-toggling cell coordinates does
+  // VERTICAL GRID NODE:
+  // The vertical node has its row and col properties set by inverting the
+  // coordinates used in the physical display grid such that (row, col) in the
+  // node maps to (col, row) in the physical grid.  Its navigation pointers are
+  // threaded such that left, right, up, and down behave as though the display
+  // grid had been rotate 90 degrees clockwise.
+  //
+  // GRIDS:
+  // The difference between "logical" and "physical" grids is whether or not
+  // their x,y coordinates are sensitive to the "edit orientation toggle".
+  // In either case, both grids are composed either of all horizontal grid 
+  // nodes or all vertical grid nodes.
+  // 
+  // For any given (x,y) coordinate pair, the following rules hold true
+  // before and after a change of editor orientation mode:
+  // 1) PhysicalGrid[x,y] before the change will return an object that 
+  //    describes the same crossword cell as PhysicalGrid[x,y] afterwards.
+  // 2) LogicalGrid[x,y] before the change will return an object that 
+  //    describes the same crossword cell as LogicalGrid[y,x] afterwards.
+  // 3) The pair of nodes will be threaded for different logical perspectives
+  //    such that:
+  // nodeOne.col      =  nodeTwo.row     | nodeOne.row      =  nodeTwo.col
+  // nodeOne.toLeft   =  nodeTwo.toAbove | nodeOne.toRight  =  nodeTwo.toBelow
+  // nodeOne.toAbove  =  nodeTwo.toLeft  | nodeOne.toBelow  =  nodeTwo.toRight
+  //
+  // LOGICAL GRID:
+  // (X,Y) in horizontal mode yields an object threaded for horizontal access
+  // that describes the same cell as the object threaded for vertical access
+  // found at (Y,X) in vertical mode.
+  //
+  // PHYSICAL GRID:
+  // (X,Y) in horizontal mode yields an object threaded for horizontal access
+  // that describes the same cell as the object threaded for vertical access
+  // found at (X,Y) in vertical mode.
+  //
+  // Note that the constant addressing for non-toggling cell coordinates does
   // NOT prevent the object retrieved in vertical mode from behaving differently
   // from that retrieved in horizontal mode.  Just because the means of lookup
   // is orientation-agnostic doesn't constrain the retrieved objects to also
   // be orientation-agnostic.
-  var $horizontalTable = [];
-  var $verticalTable = [];
-
-  // Logical Table -- Switching logical tables doesn't change the conceptual
-  // cell retrieved by clicking in a UI Table, but it does return an
-  // alternate object for the same conceptual cell, but with up/down and
-  // left/right inverted.
-  var $logicalTable = $horizontalTable;
-
-  // GRIDS:
-  // (X,Y) in horizontal mode yields the same cell as (X,Y) in vertical mode
-  // Coordinates are constant, orientation of up/down and left/right is not.
-
-  // Physical grids
+  //
+  // Note that the logical and physical grids are identical in horizontal mode,
+  // but not vertical mode.
   var $horizontalGrid = [];
-  var $verticalGrid = [];
+  var $verticalPhysical = [];
+  var $verticalLogical = [];
 
-  // Logical grids
+  // The active pair of physical and logical grids.
+  var $physicalGrid = $horizontalGrid;
   var $logicalGrid = $horizontalGrid;
-  var $altLogicalGrid = $verticalGrid;
 
   var $rootTable;
   var $docWrapper;
@@ -91,46 +113,51 @@
   var $bonusTable;
   var $bonusColumn;
 
-  var $playerGrid = [];
+  var $yourLetters = [];
+  var $yourLettersGrid = [];
 
   var $foundWordBadges;
 
-  var $blankImage = "<%= path_to_image 'val/blank.png' %>";
-  var $cursorImage = "<%= path_to_image 'val/qm.png' %>";
+  var $blankImage = '<%= path_to_image 'val/blank.png' %>';
+  var $cursorImage = '<%= path_to_image 'val/qm.png' %>';
   var $valueImages = $( {
-    A: "<%= path_to_image 'val/A.png' %>", B: "<%= path_to_image 'val/B.png' %>",
-    C: "<%= path_to_image 'val/C.png' %>", D: "<%= path_to_image 'val/D.png' %>",
-    E: "<%= path_to_image 'val/E.png' %>", F: "<%= path_to_image 'val/F.png' %>",
-    G: "<%= path_to_image 'val/G.png' %>", H: "<%= path_to_image 'val/H.png' %>",
-    I: "<%= path_to_image 'val/I.png' %>", J: "<%= path_to_image 'val/J.png' %>",
-    K: "<%= path_to_image 'val/K.png' %>", L: "<%= path_to_image 'val/L.png' %>",
-    M: "<%= path_to_image 'val/M.png' %>", N: "<%= path_to_image 'val/N.png' %>",
-    O: "<%= path_to_image 'val/O.png' %>", P: "<%= path_to_image 'val/P.png' %>",
-    Q: "<%= path_to_image 'val/Q.png' %>", R: "<%= path_to_image 'val/R.png' %>",
-    S: "<%= path_to_image 'val/S.png' %>", T: "<%= path_to_image 'val/T.png' %>",
-    U: "<%= path_to_image 'val/U.png' %>", V: "<%= path_to_image 'val/V.png' %>",
-    W: "<%= path_to_image 'val/W.png' %>", X: "<%= path_to_image 'val/X.png' %>",
-    Y: "<%= path_to_image 'val/Y.png' %>", Z: "<%= path_to_image 'val/Z.png' %>"
+    A: '<%= path_to_image 'val/A.png' %>', B: '<%= path_to_image 'val/B.png' %>',
+    C: '<%= path_to_image 'val/C.png' %>', D: '<%= path_to_image 'val/D.png' %>',
+    E: '<%= path_to_image 'val/E.png' %>', F: '<%= path_to_image 'val/F.png' %>',
+    G: '<%= path_to_image 'val/G.png' %>', H: '<%= path_to_image 'val/H.png' %>',
+    I: '<%= path_to_image 'val/I.png' %>', J: '<%= path_to_image 'val/J.png' %>',
+    K: '<%= path_to_image 'val/K.png' %>', L: '<%= path_to_image 'val/L.png' %>',
+    M: '<%= path_to_image 'val/M.png' %>', N: '<%= path_to_image 'val/N.png' %>',
+    O: '<%= path_to_image 'val/O.png' %>', P: '<%= path_to_image 'val/P.png' %>',
+    Q: '<%= path_to_image 'val/Q.png' %>', R: '<%= path_to_image 'val/R.png' %>',
+    S: '<%= path_to_image 'val/S.png' %>', T: '<%= path_to_image 'val/T.png' %>',
+    U: '<%= path_to_image 'val/U.png' %>', V: '<%= path_to_image 'val/V.png' %>',
+    W: '<%= path_to_image 'val/W.png' %>', X: '<%= path_to_image 'val/X.png' %>',
+    Y: '<%= path_to_image 'val/Y.png' %>', Z: '<%= path_to_image 'val/Z.png' %>'
   } );
 
   var $fillImages = {
-    pink: '', revealed: '', silver: ''
+    pink: '<%= path_to_image 'fill/pink2.png' %>',
+    selected: '<%= path_to_image 'fill/selected1.png' %>',
+    scratched: '<%= path_to_image 'fill/scratched.png' %>',
+    silver: '<%= path_to_image 'fill/SilverCover.png'%>'
   };
 
-  var $wordAttrs = {
-    xCoord: 'input:hidden#crossword_word_items_attributes_{idx}_x_coordinate',
-    yCoord: 'input:hidden#crossword_word_items_attributes_{idx}_y_coordinate',
-    isHoriz: 'input:hidden#crossword_word_items_attributes_{idx}_is_horizontal',
-    textValue: 'input:hidden#crossword_word_items_attributes_{idx}_text_value',
-    tripleIndex: 'input:hidden#crossword_word_items_attributes_{idx}_triple_letter_index'
+  var $formSelectors = {
+    bonusWord: 'input#crossword_bonus_word',
+    bonusValue: 'input#crossword_bonus_value',
+    xCoord: 'input#crossword_word_items_attributes_{idx}_x_coordinate',
+    yCoord: 'input#crossword_word_items_attributes_{idx}_y_coordinate',
+    isHoriz: 'input#crossword_word_items_attributes_{idx}_is_horizontal',
+    textValue: 'input#crossword_word_items_attributes_{idx}_text_value',
+    tripleIndex: 'input#crossword_word_items_attributes_{idx}_triple_letter_index'
   };
     
   function initialize() {
     $rootTable  = $('#lettergrid');
 
-    var contentTmpl = '<img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" /><img class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" /><img class="xw-fill xw-revealed" src="<%= path_to_image 'fill/brite1.png' %>" /><img class="xw-fill xw-selected" src="<%= path_to_image 'fill/selected1.png' %>" /><img class="xw-fill xw-altword" src="<%= path_to_image 'fill/imageSrc.png' %>" /><img class="xw-fill xw-altopen" src="<%= path_to_image 'fill/briteblue.png' %>" /><img class="xw-fill xw-locked" src="<%= path_to_image 'fill/locked.png' %>" /><img class="xw-fill xw-tooshort" src="<%= path_to_image 'fill/altPath.png' %>" /><img class="xw-fill xw-tripshort" src="<%= path_to_image 'fill/altPath.png' %>" /><img class="xw-fill xw-triple" src="<%= path_to_image 'fill/golden.png' %>" /><img class="xw-fill xw-halflock" src="<%= path_to_image 'fill/cornsilk.png' %>" /><img class="xw-fill xw-initial" src="<%= path_to_image 'fill/pink2.png' %>" /></div></td>';
-    var selectRowTmpl = 'table#lettergrid div[data-rowid="{row}"]';
-    var selectColTmpl = 'table#lettergrid div[data-colid="{col}"]';
+    var selectRowTmpl = 'div.xw-cell[data-rowid="{row}"]';
+    var selectColTmpl = 'div.xw-cell.xw-cell[data-colid="{col}"]';
 
     // Iterate through the cells in document order, adding image data to
     // each cell and building a horizontal doubly linked lists connecting
@@ -138,12 +165,10 @@
     for (var row=0; row<11; row++) {
       var lastHCell = null;
       var lastVCell = null;
-      $horizontalTable[row] = [];
-      $verticalTable[row]   = [];
-      $horizontalGrid[row]  = [];
+      $horizontalGrid[row]   = [];
+      $verticalPhysical[row] = [];
 
-      var thisRow   = $(selectRowTmpl.format( {row: row}, $rootTable ));
-      thisRow.append(contentTmpl);
+      var thisRow   = $(selectRowTmpl.format({row: row}), $rootTable);
 
       thisRow.each(
         function(col, nextElement) { 
@@ -152,7 +177,6 @@
             col: col,
             selfNode: $(nextElement),
             sameRow: thisRow,
-            sameCol: null,
             content: {
               current: '', previous: ''
             },
@@ -173,7 +197,6 @@
             col: row,
             selfNode: thisHCell.selfNode,
             sameRow: null,
-            sameCol: thisRow,
             content: thisHCell.content,
             hasTriple: thisHCell.hasTriple,
             open: {
@@ -198,13 +221,8 @@
           // dimension is toggled.
           lastHCell = thisHCell;
           lastVCell = thisVCell;
-          $horizontalTable[row][col] = thisHCell;
-          $verticalTable[row][col] = thisVCell;
-
-          // The "Rows" arrays are used for logical lookup when cleaning up
-          // bookkeeping info using logical objects rather than selected
-          // <div> objects.
-          $horizontalGrid[row][col] = thisHCell;
+          $horizontalGrid[row][col]   = thisHCell;
+          $verticalPhysical[row][col] = thisVCell;
         }
       );
     }
@@ -216,16 +234,15 @@
     for (var col=0; col<11; col++) {
       var lastHCell = null;
       var lastVCell = null;
-      $verticalGrid[col]   = [];
+      $verticalLogical[col]   = [];
 
-      var thisCol = $(selectColTmpl.format({col: col}, $rootTable));
+      var thisCol = $(selectColTmpl.format({col: col}), $rootTable);
 
       thisCol.each(
         function(row, nextElement) { 
           var thisHCell = $horizontalGrid[row][col];
-          var thisVCell = $verticalTable[row][col];
+          var thisVCell = $verticalPhysical[row][col];
 
-          thisHCell.sameCol = thisCol;
           thisVCell.sameRow = thisCol;
   
           thisHCell.toAbove = lastHCell;
@@ -238,112 +255,94 @@
   
           lastHCell = thisHCell;
           lastVCell = thisVCell;
-          $verticalGrid[col][row] = thisVCell;
+          $verticalLogical[col][row] = thisVCell;
         }
       );
     } // Latter of two intialization "for" loops.
 
-    // Clear any previous mouse and key handlers.
     $docWrapper = $(document);
-    if($currentKeyHandler != null) {
-       $docWrapper.off('keydown', $currentKeyHandler); }
-    if($currentClickHandler != null) {
-       $docWrapper.off('click', $currentClickHandler); }
+    // if($currentKeyHandler != null) {
+    //    $docWrapper.off('keydown', $currentKeyHandler); }
 
-    // Set mouse and keyboard handlers.
-    $docWrapper.on('keydown', onKeyboardInput);
-    $currentKeyHandler = onKeyboardInput;
-    $rootTable.on('click', 'div.xw-cell', onClickWordGrid);
-    $currentClickHandler = onClickWordGrid;
-    $rootTable.on('contextmenu', 'div.xw-cell', onWordGridContext);
+    // Set keyboard handler.
+    // $docWrapper.on('keydown', onCrosswordKeyInput);
+    // $currentKeyHandler = onCrosswordKeyInput;
+    // $currentClickHandler = onCrosswordClick;
 
+    // Initialize the bonus word grid.
+    $bonusTable = $("table#bonusword")
+    var tempImgTags = $("img.xw-value", $bonusTable);
     for( var ii=0; ii<5; ii++ ) {
-      $bonusWord[ii] = { letter: '', valImg: null }; }
-    $bonusTable = $("table#bonusgrid")
-    $("img.xw-value", $bonusTable).each(
-      function(idx, obj) {
-        $bonusWord[idx].valImg = $(obj)
-      }
-    );
+      $bonusWord[ii] = { letter: '', imgTag: tempImgTags.eq(ii) };
+    }
 
-    $foundWordBadges = $("table#wordsummary span.badge");
-    $playerLetters   = $("table#yourletters div.xw-cell");
-  }
-
-  function badLoadWords() {
-    var $wordFilter = ('word01', 'word02', 'word03', 'word04', 'word05', 'word06', 'word07', 'word08', 'word09', 'word10', 'word11', 'word12', 'word13', 'wrod14', 'word15', 'word16', 'word17', 'word18', 'word19', 'word20', 'word21', 'word22');
-//    $("input.xw-initword").each(
-//      function(idx, tag) {
-//        var wordinput = $(tag);
-//        if (wordinput.val() != '') {
-//          wordinput.addClass('xw-foundword uneditable-input').removeClass('xw-initword');
-//        } else {
-//          wordinput.addClass('xw-blankword').removeClass('xw-initword');
-//        }
-//      });
-
-    for( var ii=0; ii<22; ii=ii + 1 ) {
-      var x_coordinate = -1;
-      var y_coordinate = -1;
-      var triple_index = -1;
-      var is_horizontal = null;
-      var text_value = '';
-      $($wordFilter[ii]).each(
-        function( idx, tag ) {
-          if( idx == 0 ) {
-            x_coordinate = $(tag).val();
-          } else if( idx == 1 ) {
-            y_coordinate = $(tag).val();
-          } else if( idx == 2 ) {
-            is_horizontal = $(tag).val();
-          } else if( idx == 3 ) {
-            text_value = $(tag).val();
-          } else if( idx == 4 ) {
-            triple_index = $(tag).val();
-          }
-        }
-      );
-
-      if (is_horizontal != null) {
-        var cell = $logicalTable[x_coordinate][y_coordinate];
-        var len = text_value.length;
-        for( var jj=0; jj<len; jj++ ) {
-          var nextChar = text_value[jj];
-          cell.content.current = nextChar;
-          cell.selfNode.data('content', nextChar);
-          $('img', cell.selfNode).attr('src', $valueImages.attr(nextChar))
-  
-          if (jj == triple_index) { cell.selfNode.addClass('xw-triple'); }
-
-          if (is_horizontal) { cell = cell.toRight; } else { cell = cell.toBelow; }
-        }
+    // Initialize the "your letters" grid.
+    $yourLettersGrid   = $("table#yourletters");
+    tempImgTags = $("img.xw-value", $yourLettersGrid);
+    for( var ii=0, idx=0; ii<3; ii++ ) {
+      $yourLetters[ii] = [];
+      for( var jj=0; jj<6; jj++, idx++ ) {
+        $yourLetters[ii][jj] = { letter: '', imgTag: tempImgTags.eq(idx) };
       }
     }
+
+    // Initialize the word and prize feedback grids.
+    $foundWordBadges = $("table#wordsummary span.badge");
+    $prizeInfo       = $("table#prizeinfo span.badge");
+
+    // Set the invariant click handler for each clickable entity.
+    $rootTable.on('click', 'div.xw-cell', onCrosswordClick);
+    $rootTable.on('contextmenu', 'div.xw-cell', onCrosswordContext);
+    $bonusTable.on('click', 'div.xw-cell', onBonusWordClick);
+    $yourLettersGrid.on('click', 'div.xw-cell', onYourLettersClick);
   }
 
   //
   // Javascript Event Handlers
   //
 
-  function onClickWordGrid(event) {
+  function onCrosswordClick(event) {
     var wrap = $(this); 
     goToCell(wrap.data('rowid'), wrap.data('colid'));
+    
+    selectKeyboardHandler(onCrosswordKeyInput);
   }
   
-  function onClickBonusGrid(event) {
+  function onBonusWordClick(event) {
     var wrap = $(this); 
     if ($editorCell != null) { closeWordEditor(); }
 
     $bonusColumn = wrap.data('colid');
-    $("img.xw-fill", wrap).attr('src', $fillImages.revealed);
+    $("img.xw-fill", wrap).attr('src', $fillImages.selected);
     $("img.xw-border", wrap).attr('style', 'visibility: visible;');
-    $("img.xw-value", wrap).attr('src', $fillImages.qm);
+    $("img.xw-value", wrap).attr('src', $cursorImage);
     
-    $(document).off('keydown', $currentKeyInput);
-    $(document).on('keydown', onBonusKeyInput);
+    selectKeyboardHandler(onBonusWordKeyInput);
   }
   
-  function onKeyboardInput(event) {
+  function onYourLettersClick(event) {
+    var wrap = $(this); 
+    if ($editorCell != null) { closeWordEditor(); }
+
+    selectKeyboardHandler(onYourLettersKeyInput);
+  }
+
+  function onBonusPrizeClick(event) {
+    // TODO: Set bonus prize modal
+  }
+  
+  function selectKeyboardHandler(handler) {
+    if ($currentKeyHandler != handler) {
+      if ($currentKeyHandler != null) {
+        $(document).off('keydown', $currentKeyHandler);
+      }
+
+      $(document).on('keydown', handler);
+      $currentKeyHandler = handler;
+    }
+  }
+
+  function onCrosswordKeyInput(event) {
     if ($editorCell == null) { return true; }
     if (!event) var event = window.event;
 
@@ -359,36 +358,26 @@
       // <SPACE> marks a tripling multiplier TODO
     } else if (keyValue == 9) {
       if ($hasAltDir) { 
-        commitActiveChanges();
         toggleDirectionMode();   // <TAB> toggles horiz/vert direction modes
-      } else {                   // and accepts changes. (TODO only accept 
-        // showBadToggleError(); // changes after the first change in a toggled
-      }                          // direction).
-    } else if (keyValue == 27) {
-      // TODO:
-      // abortWordEditor();  // <ESC> stops editting and rolls back changes
-      closeWordEditor();  // <RETURN> stops editting and accepts changes
-    } else if (keyValue == 13) {
-      closeWordEditor();  // <RETURN> stops editting and accepts changes
+        refreshVisualCues();
+      }
+    } else if ((keyValue == 27) || (keyValue == 13)) {
+      closeWordEditor();  // <RETURN> or <ESC> stops editting.
     } else if (keyValue == 37) {
-      // moveCursorLeft();   // <LEFT> moves the cursor left
-      goLeft();
+      goLeft();   // <LEFT> moves the cursor left
     } else if (keyValue == 38) {
-      // moveCursorLeft();   // <UP> moves the cursor up
-      goUp();
+      goUp();     // <UP> moves the cursor up
     } else if (keyValue == 39) {
-      // moveCursorRight();  // <RIGHT> moves the cursor right
-      goRight();
+      goRight();  // <RIGHT> moves the cursor right
     } else if (keyValue == 40) {
-      // moveCursorRight();  // <DOWN> moves the cursor down
-      goDown();
+      goDown();   // <DOWN> moves the cursor down
     }
   
     return false;
   }
   
-  function onBonusKeyInput(event) {
-    if ($editorCell == null) { return true; }
+  function onBonusWordKeyInput(event) {
+    // if ($editorCell == null) { return true; }
     if (!event) var event = window.event;
 
     var keyValue = event.keyCode;
@@ -400,53 +389,57 @@
 
       var keyChar = String.fromCharCode(keyValue);
       $bonusWord[$bonusColumn].letter = keyChar
-      $bonusWord[$bonusColumn].valImg.attr('src', $valueImages.attr(keyChar));
+      $bonusWord[$bonusColumn].imgTag.attr('src', $valueImages.attr(keyChar));
 
       $bonusColumn = $bonusColumn + 1;
       if($bonusColumn < 5) {
-        $bonusWord[$bonusColumn].valImg.attr(
-          'src', $valueImages.qm);
+        $bonusWord[$bonusColumn].imgTag.attr('src', $cursorImage);
       }
     } else if (keyValue == 27 || keyValue == 13) {
       // <ESC> and <RETURN> each stop editting and accept changes
       var bonusWord = 
         $bonusWord[0].letter + $bonusWord[1].letter + $bonusWord[2].letter +
         $bonusWord[3].letter + $bonusWord[4].letter;
-      // TODO: Set it in the appropriate form field
 
-      
+      // Set the bonus word form field value
+      $($formSelectors.bonusWord).val(bonusWord);
+
+      // TODO: Deactivate the selection visuals for the bonus word grid
+
+      // Clear the keyboard handler
+      selectKeyboardHandler(null);
     } else if (keyValue == 37 && $bonusColumn > 0) {
       // <LEFT> shifts the cursor left if possible.
-      $bonusWord[$bonusColumn].valImg.attr(
+      $bonusWord[$bonusColumn].imgTag.attr(
         'src', $valueImages.attr($bonusWord[$bonusColumn].letter));
       $bonusColumn = $bonusColumn - 1;
-      $bonusWord[$bonusColumn].valImg.attr(
-        'src', $valueImages.attr($valueImages.qm));
-    } else if (keyValue == 39) {
+      $bonusWord[$bonusColumn].imgTag.attr('src', $cursorImage);
+    } else if (keyValue == 39 && $bonusColumn < 4) {
       // <RIGHT> shifts the cursor right if possible.
-      if($bonusColumn < 4) {
-        $bonusWord[$bonusColumn].valImg.attr(
-          'src', $valueImages.attr($bonusWord[$bonusColumn].letter));
-        $bonusColumn = $bonusColumn + 1;
-        $bonusWord[$bonusColumn].valImg.attr(
-          'src', $valueImages.attr($valueImages.qm));
-      }
+      $bonusWord[$bonusColumn].imgTag.attr(
+        'src', $valueImages.attr($bonusWord[$bonusColumn].letter));
+      $bonusColumn = $bonusColumn + 1;
+      $bonusWord[$bonusColumn].imgTag.attr('src', $cursorImage);
     }
   
     return false;
   }
+
+  function onYourLettersKeyInput(event) {
+    // TODO
+    return false;
+  }
   
-  function onWordGridContext(event) {
-    var wrap = $(this); // $(event.target).parent();
+  function onCrosswordContext(event) {
+    var wrap = $(this); 
     var row = wrap.data('rowid');
     var col = wrap.data('colid');
-    var cellState = $logicalTable[row][col];
+    var cellState = $physicalGrid[row][col];
 
-    if( $tripleCellCount > 0 ) {
-      if( cellState.hasTriple.current ) {
-        // Render remove triple context option.
-        return false;
-      } else if ($tripleCellCount >= 4) {
+    if (cellState.selfNode.data('triple') == 1) {
+      cellState.selfNode.data('triple', 0);
+    } else {
+      if ($tripleCellCount >= 4) {
         // Render unselectable error.
         return false;
       } else if (isBlank(cellState)) {
@@ -459,10 +452,11 @@
         // Render illegal intersection.
         return false;
       }
+
+      cellState.selfNode.data('triple', 1);
     }
 
     // Render add triple context option.
-    cellState.data('triple', ! cellStateData('triple'));
     refreshVisualCues();
     return true;
   }
@@ -475,7 +469,7 @@
       return false;
     }
 
-    var cellState = $logicalTable[rowIdx][colIdx];
+    var cellState = $physicalGrid[rowIdx][colIdx];
   
     if($editorCell != null) {
       if (! isWord(cellState)) {
@@ -483,20 +477,17 @@
             (isFilled(cellState.toLeft))) {
           shiftWordTail(cellState.toLeft, cellState);
           moveCursor($editorCell, cellState);
-          $editorCell = cellState;
 
           return true;
         } else if ((isWordHead(cellState.toRight)) &&
                    (isFilled(cellState.toRight))) {
           shiftWordHead(cellState.toRight, cellState);
           moveCursor($editorCell, cellState);
-          $editorCell = cellState;
 
           return true;
         }
       } else {
         moveCursor($editorCell, cellState);
-        $editorCell = cellState;
 
         return true;
       }
@@ -523,7 +514,7 @@
       toggleDirectionMode();
 
       $hasAltDir  = false;
-      $editorCell = $logicalTable[rowIdx][colIdx];
+      $editorCell = $physicalGrid[rowIdx][colIdx];
     } else {
       if (cellState.open.crossing.length < 3) {
         $hasAltDir  = false;
@@ -535,13 +526,9 @@
     }
 
     $openRange = $editorCell.open.parallel;
-    $oldWordRange = bootstrapWordRange($editorCell);
-    $newWordRange  =
-      { head:   $oldWordRange.head,
-        tail:   $oldWordRange.tail,
-        length: $oldWordRange.length };
+    $wordRange = bootstrapWordRange($editorCell);
 
-    decorateOpenWord();
+    decorateEditRegion();
     showCursor();
   }
 
@@ -587,41 +574,31 @@
   }
 
   function closeWordEditor() {
-    commitActiveChanges();
-
     hideCursor();
-    removeEditorDecorations();
-
     $editorCell = null;
-  }
+    selectKeyboardHandler(null);
 
-  function commitActiveChanges() {
-    // var open = cells.slice(openRange.openHead, openRange.openTail);
-    var row = $editorCell.row;
-    var wrc = $newWordRange;
-    var wrp = $oldWordRange;
+    removeEditorDecorations();
+    refreshVisualCues();
 
-    // Apply changes to cells in the open range first.
-    var first;
-    if( wrc.head < wrp.head ) { first = wrc.head; } else { first = wrp.head; }
-
-    var last;
-    if( wrc.tail > wrp.tail ) { last = wrc.tail; } else { last = wrp.tail; }
-
-    for( var ii=first; ii<=last; ii++ ) {
-      var currentCell = $logicalGrid[row][ii];
-      currentCell.content.previous = currentCell.content.current;
-      currentCell.hasTriple.previous = currentCell.hasTriple.current;
+    var url;
+    if ($('input:hidden#crossword_id').val() != '') {
+      url = '/crosswords/' + $('input:hidden#crossword_id').val() + '.json';
+    } else {
+      url = '/crosswords.json';
     }
-    
-    // Re-evaluate the open ranges of logical rows above and below
-    // only if there were any changes that could affect them.  If the
-    // head or tail moved and the length did not remain unity, the changes
-    // have an impact. (TODO!)
-    // if ((wrc.head != wrp.head || wrc.tail != wrp.tail) &&
-    //     (wrc.length != 1 || wrp.length != 1)) {
-      refreshVisualCues();
-    // }
+
+    jQuery.ajax({
+      type: 'POST',
+      url: url,
+      data: $('form').serialize(),
+      success: function(response) {
+        alert(response);
+        if( response.crossword_id != null ) {
+          $('input:hidden#crossword_id').val(response.crossword_id)
+        }
+      }
+    });
   }
 
   // Let 'a', 'b', and 'c' designate any three consecutive cells, with
@@ -649,15 +626,18 @@
   function refreshVisualCues() {
     $wordCount = 0;
     $foundWordBadges.text('');
-    $('div.xw-cell', $rootTable).removeClass('xw-short xw-triple xw-tripshort xw-hclosed xw-vclosed xw-blocked');
+    $('div.xw-cell', $rootTable).removeClass('xw-short xw-triple xw-tripshort xw-tripdual xw-blocked');
 
+    var rowTrack = [ ];
     var colTrack = [ ];
     for( var ii=0; ii<11; ii++ ) {
-      colTrack[ii] = { openStart: null, wordRun: $() };
+      rowTrack[ii] = { openStart: null, wordRun: $(), isHorizontal: true };
+      colTrack[ii] = { openStart: null, wordRun: $(), isHorizontal: false };
     }
 
     var blockedFlags = { rowBlocked: $(), colBlocked: $() };
-    var wordModFlags = { shortHRuns: $(), shortVRuns: $(), triples: $() };
+    var wordModFlags = 
+      { shortHRuns: $(), shortVRuns: $(), hTriples: $(), vTriples: $() };
 
     // Check down the row.  If a cell is populated, it must be in an unlocked
     // space by definition.  If a cell is blank, check its corner adjacencies,
@@ -668,18 +648,15 @@
     // the open region bounds discovered, then increment openStart and keep 
     // on searching.
     for( var ii=0; ii<11; ii++ ) {
-      var rowTrack =
-        { openStart: null, wordRun: $() };
-
       for( var jj=0; jj<11; jj++ ) {
         var thisCell = $horizontalGrid[ii][jj];
 
         // Do both horizontal and vertical word tracking first.
         if (! isFilled(thisCell)) {
-          markWordBoundary(rowTrack, true, wordModFlags);
-          markWordBoundary(colTrack[jj], false, wordModFlags);
+          markWordBoundary(rowTrack[ii], wordModFlags);
+          markWordBoundary(colTrack[jj], wordModFlags);
         } else {
-          rowTrack.wordRun = rowTrack.wordRun.add(thisCell.selfNode);
+          rowTrack[ii].wordRun = rowTrack[ii].wordRun.add(thisCell.selfNode);
           colTrack[jj].wordRun = colTrack[jj].wordRun.add(thisCell.selfNode);
         }
 
@@ -689,13 +666,13 @@
             (isFilled(thisCell.toBelow) &&
              isFilled(thisCell.toBelow.toRight))) {
           if(isFilled(thisCell.toRight)) {
-            scanInRow(rowTrack.openStart, thisCell.toLeft, blockedFlags);
+            scanInRow(rowTrack[ii].openStart, thisCell.toLeft, blockedFlags);
             scanInRow(thisCell, thisCell, blockedFlags);
           } else {
-            scanInRow(rowTrack.openStart, thisCell, blockedFlags);
+            scanInRow(rowTrack[ii].openStart, thisCell, blockedFlags);
           }
 
-          rowTrack.openStart = thisCell.toRight;
+          rowTrack[ii].openStart = thisCell.toRight;
         }
 
         // Next, check horizontal open region boundaries.
@@ -716,31 +693,40 @@
         
       // Close off the remaining horizontal words and open horizontal region
       // boundary discoveries at end-of-row.
-      markWordBoundary(rowTrack, true, wordModFlags);
-      scanInRow(rowTrack.openStart, thisCell, blockedFlags);
+      markWordBoundary(rowTrack[ii], wordModFlags);
+      scanInRow(rowTrack[ii].openStart, thisCell, blockedFlags);
     }
   
     // Close off the remaining vertical words and open vertical region boundary
     // discoveries at end-of-grid.
-    for( var ii=0; ii<11; ii++ ) {
-      markWordBoundary(colTrack[ii], false, wordModFlags);
-      scanInCol(colTrack[ii].openStart, $horizontalGrid[10][ii], blockedFlags);
+    for( var jj=0; jj<11; jj++ ) {
+      markWordBoundary(colTrack[jj], wordModFlags);
+      scanInCol(colTrack[jj].openStart, $horizontalGrid[10][jj], blockedFlags);
     }
 
     // Mark three subsets of filled cell modifiers:
     // -- Short (not part of a 3 letter run in either direction)
-    // -- Triple (Bears a prize tripling modifier)
-    // -- Short Triple (Both of the above hold true)
-    var shortRuns = wordModFlags.shortHRuns.filter( wordModFlags.shortVRuns );
-    shortRuns.filter(wordModFlags.triples).addClass("xw-tripshort");
-    shortRuns.not(wordModFlags.triples).addClass("xw-short");
-    wordModFlags.triples.not(shortRuns).addClass("xw-triple");
+    // -- Triple (bears a prize tripling modifier)
+    // -- Short Triple (not part of a 3 letter run and bears a tripling mod)
+    // -- Dual Triple (prize tripling modifier at a word intersection)
+    // -- Short Dual Triple (prize tripling modifier at an intersection of 
+    //                       a pair of two-letter runs).
+    var shortRuns = wordModFlags.shortHRuns.filter(wordModFlags.shortVRuns);
+    var allTrips  = wordModFlags.hTriples.add(wordModFlags.vTriples);
+    var dualTrips = wordModFlags.hTriples.filter(wordModFlags.vTriples);
+    var monoTrips = allTrips.not(dualTrips);
+
+    $tripleCellCount = $tripleCellCount - dualTrips.size;
+
+    shortRuns.filter(monoTrips).addClass("xw-tripshort");
+    shortRuns.filter(dualTrips).addClass("xw-dualtripshort");
+    shortRuns.not(allTrips).addClass("xw-short");
+    monoTrips.not(shortRuns).addClass("xw-triple");
+    dualTrips.not(shortRuns).addClass("xw-dualtrip");
 
     // Mark cells that are blocked in both directions for the regular UI and
     // those blocked in only one direction for the debugging style sheet.
-    var allBlocked = blockedFlags.rowBlocked.filter( blockedFlags.colBlocked );
-    blockedFlags.rowBlocked.not(allBlocked).addClass("xw-hclosed");
-    blockedFlags.colBlocked.not(allBlocked).addClass("xw-vclosed");
+    var allBlocked = blockedFlags.rowBlocked.filter(blockedFlags.colBlocked);
     allBlocked.addClass("xw-blocked");
   }
 
@@ -760,7 +746,7 @@
         regionCell.open.parallel.length = rangeLen;
 
         if (rangeLen < 3) {
-          blockedFlags.rowBlocked = blockedCells.add(regionCell.selfNode);
+          blockedCells = blockedCells.add(regionCell.selfNode);
         }
 
         regionCell = regionCell.toLeft;
@@ -774,7 +760,7 @@
         tailCell.open.parallel.tail = tailCell.col;
         tailCell.open.parallel.length = 1;
  
-        blockedFlags.rowBlocked = blockedCells.add(tailCell);
+        blockedFlags.rowBlocked = blockedCells.add(tailCell.selfNode);
         return;
       } else {
         rangeLen = tailCell.col - headCell.col + 1;
@@ -788,13 +774,14 @@
         regionCell.open.parallel.length = rangeLen;
 
         if( rangeLen < 3 ) { 
-          blockedFlags.rowBlocked = blockedCells.add(regionCell.selfNode);
+          blockedCells = blockedCells.add(regionCell.selfNode);
         }
 
         regionCell = regionCell.toRight;
       }
     }
 
+    blockedFlags.rowBlocked = blockedCells;
     return closed;
   }
 
@@ -814,7 +801,7 @@
         regionCell.open.crossing.length = rangeLen;
 
         if( rangeLen < 3 ) { 
-          blockedFlags.colBlocked = blockedCells.add(regionCell.selfNode);
+          blockedCells = blockedCells.add(regionCell.selfNode);
         }
 
         regionCell = regionCell.toAbove;
@@ -828,7 +815,7 @@
         tailCell.open.crossing.tail = tailCell.row;
         tailCell.open.crossing.length = 1;
 
-        blockedFlags.colBlocked = blockedCells.add(tailCell);
+        blockedFlags.colBlocked = blockedCells.add(tailCell.selfNode);
         return;
       } else {
         rangeLen = tailCell.row - headCell.row + 1;
@@ -842,18 +829,20 @@
         regionCell.open.crossing.length = rangeLen;
 
         if( rangeLen < 3 ) { 
-          blockedFlags.colBlocked = blockedCells.add(regionCell.selfNode);
+          blockedCells = blockedCells.add(regionCell.selfNode);
         }
 
         regionCell = regionCell.toBelow;
       }
     }
 
+    blockedFlags.colBlocked = blockedCells;
     return closed;
   }
 
-  function markWordBoundary(trackObj, isHorizontal, wordModFlags) {
+  function markWordBoundary(trackObj, wordModFlags) {
     var wordRun = trackObj.wordRun;
+    var isHorizontal = trackObj.isHorizontal;
 
     if (wordRun.size() > 0) {
       if (wordRun.size() < 3) {
@@ -866,8 +855,13 @@
         wordRun.each(
           function(letterIdx, cell) { 
             var wrappedCell = $(cell);
-            if (wrappedCell.data('triple')) {
-              wordModFlags.triples = wordModFlags.triples.add(wrappedCell)
+            if (wrappedCell.data('triple') == 1) {
+              if (isHorizontal) {
+                wordModFlags.hTriples = wordModFlags.hTriples.add(wrappedCell)
+              } else {
+                wordModFlags.vTriples = wordModFlags.vTriples.add(wrappedCell)
+              }
+
               $tripleCellCount = $tripleCellCount + 1;
             }
           }
@@ -883,23 +877,29 @@
   
             text_value = text_value + wrappedCell.data('content');
   
-            if (wrappedCell.data('triple')) {
-              $($wordAttrs.tripleIndex.format(subst)).val(letterIdx);
-              wordModFlags.triples = wordModFlags.triples.add(wrappedCell)
+            if (wrappedCell.data('triple') == 1) {
+              $($formSelectors.tripleIndex.format(subst)).val(letterIdx);
+
+              if (isHorizontal) {
+                wordModFlags.hTriples = wordModFlags.hTriples.add(wrappedCell)
+              } else {
+                wordModFlags.vTriples = wordModFlags.vTriples.add(wrappedCell)
+              }
+
               $tripleCellCount = $tripleCellCount + 1;
             }
           }
         );
         
         // Update form fields.
-        $($wordAttrs.textValue.format(subst)).val(text_value);
-        $($wordAttrs.xCoord.format(subst)).val(firstCell.data('rowid'));
-        $($wordAttrs.yCoord.format(subst)).val(firstCell.data('colid'));
-        $($wordAttrs.isHoriz.format(subst)).val(isHorizontal);
+        $($formSelectors.textValue.format(subst)).val(text_value);
+        $($formSelectors.xCoord.format(subst)).val(firstCell.data('rowid'));
+        $($formSelectors.yCoord.format(subst)).val(firstCell.data('colid'));
+        $($formSelectors.isHoriz.format(subst)).val(isHorizontal);
 
-        // Display badges self-collapse when empty and self-several when
+        // Display badges self-collapse when empty and self-reveal when
         // given content.  Awesome!
-        $foundWordBadges.eq($wordCount).text($bonusWord);
+        $foundWordBadges.eq($wordCount).text(text_value);
 
         $wordCount = $wordCount + 1;
       }
@@ -915,9 +915,8 @@
   var $horizontalStrategy = {
     toggleDirectionMode: function() {
       $dirModeStrategy = $verticalStrategy;
-      $logicalTable = $verticalTable;
-      $altLogicalGrid = $logicalGrid;
-      $logicalGrid = $verticalGrid;
+      $physicalGrid = $verticalPhysical;
+      $logicalGrid = $verticalLogical;
       
       $rootTable.removeClass('xw-horizontal').addClass('xw-vertical');
 
@@ -931,30 +930,16 @@
     goRight: function() { goToCell( $editorCell.row, $editorCell.col + 1 ); },
     goDown: function() { goToCell( $editorCell.row + 1, $editorCell.col ); },
 
-    decorateParallel: function(open, word, focus) {
+    decorateEditRegion: function(open, word) {
       open.addClass('xw-open xw-asrow');
-      word.addClass('xw-word xw-asrow');
+      word.addClass('xw-word');
     },
-
-    decorateCrossing: function(open, word, focus) {
-      open.not(focus).addClass('xw-tabopen xw-astabcol');
-      word.not(focus).addClass('xw-tabword xw-astabcol');
-    },
-
-    decorateShortWord: function(wordRun, orientation) {
-      if(orientation == $logicalGrid) {
-        wordRun.addClass('xw-shortcol');
-      } else {
-        wordRun.addClass('xw-shortrow');
-      }
-    }
   };
 
   var $verticalStrategy = {
     toggleDirectionMode: function() {
       $dirModeStrategy = $horizontalStrategy;
-      $logicalTable = $horizontalTable;
-      $altLogicalGrid = $logicalGrid;
+      $physicalGrid = $horizontalGrid;
       $logicalGrid = $horizontalGrid;
 
       $rootTable.removeClass('xw-vertical').addClass('xw-horizontal');
@@ -969,22 +954,9 @@
     goRight: function() { goToCell( $editorCell.col, $editorCell.row + 1 ); },
     goDown: function() { goToCell( $editorCell.col + 1, $editorCell.row ); },
 
-    decorateParallel: function(open, word, focus) {
+    decorateEditRegion: function(open, word) {
       open.addClass('xw-open xw-ascol');
-      word.addClass('xw-word xw-ascol');
-    },
-
-    decorateCrossing: function(open, word, focus) {
-      open.not(focus).addClass('xw-tabopen xw-astabrow');
-      word.not(focus).addClass('xw-tabword xw-astabrow');
-    },
-
-    decorateShortWord: function(wordRun, orientation) {
-      if(orientation == $logicalGrid) {
-        wordRun.addClass('xw-shortrow');
-      } else {
-        wordRun.addClass('xw-shortcol');
-      }
+      word.addClass('xw-word');
     }
   };
 
@@ -995,14 +967,10 @@
 
     if ($editorCell != null) {
       $openRange = $editorCell.open.parallel;
-      $oldWordRange = bootstrapWordRange($editorCell);
-      $newWordRange =
-         { head:   $oldWordRange.head,
-           tail:   $oldWordRange.tail,
-           length: $oldWordRange.length };
+      $wordRange = bootstrapWordRange($editorCell);
 
       removeEditorDecorations();
-      decorateOpenWord();
+      decorateEditRegion();
     }
   }
 
@@ -1013,55 +981,30 @@
 
   function removeEditorDecorations() {
     $('div.xw-cell', $rootTable).removeClass(
-      'xw-openhead xw-opentail xw-midopen xw-open xw-wordhead xw-wordtail xw-midword xw-word xw-tabopenhead xw-tabopentail xw-midtabopen xw-tabopen xw-tabwordhead xw-tabwordtail xw-midtabword xw-tabword xw-asrow xw-ascol xw-astabrow xw-astabcol');
+      'xw-open xw-word xw-wordhead xw-wordtail xw-midword xw-asrow xw-ascol');
   }
 
-  function decorateOpenWord() {
-    decorateDimension(
-      $editorCell, $editorCell.sameRow, $openRange, $newWordRange,
-      $dirModeStrategy.decorateParallel,
-      'xw-openhead', 'xw-opentail', 'xw-midopen',
-      'xw-wordhead', 'xw-wordtail', 'xw-midword'
-    );
+  function decorateEditRegion() {
+    var cells = $editorCell.sameRow;
+    var word  = cells.slice($wordRange.head, $wordRange.tail + 1);
 
-    if($hasAltDir) {
-      var altMidCell = $altLogicalGrid[$editorCell.col][$editorCell.row];
-      var altWordRange = bootstrapWordRange(altMidCell);
+    // Indicate the border positions which will combine with the orientation
+    // class set in the delegate method below.
+    word.first().addClass("xw-wordhead");
+    word.slice(1, $wordRange.length - 1).addClass("xw-midword");
+    word.last().addClass("xw-wordtail");
 
-      decorateDimension(
-        altMidCell, altMidCell.sameRow, altMidCell.open.parallel, altWordRange,
-        $dirModeStrategy.decorateCrossing,
-        'xw-tabopenhead', 'xw-tabopentail', 'xw-midtabopen',
-        'xw-tabwordhead', 'xw-tabwordtail', 'xw-midtabword'
-      );
-    }
-  }
-
-  function decorateShortWord(wordRun, orientation) {
-    $dirModeStrategy.decorateShortWord(wordRun, orientation);
-  }
-
-  function decorateDimension(focus, cells, openRange, wordRange, dimMethod, openhead, opentail, midopen, wordhead, wordtail, midword) {
-    var open = cells.slice(openRange.head, openRange.tail + 1);
-    var word = cells.slice(wordRange.head, wordRange.tail + 1);
-
-    dimMethod(open, word, focus.selfNode);
-
-    open.first().addClass(openhead);
-    open.last().addClass(opentail);
-    open.slice(1, openRange.length - 1).addClass(midopen);
-
-    word.first().addClass(wordhead);
-    word.last().addClass(wordtail);
-    word.slice(1, wordRange.length - 1).addClass(midword);
+    // Fill in the details about "row-ness" or "column-ness" by delegation.
+    var open = cells.slice($openRange.head, $openRange.tail + 1);
+    $dirModeStrategy.decorateEditRegion(open, word);
   }
       
   function shiftWordHead(fromCell, toCell) {
-    if(toCell.col > $newWordRange.tail) { 
-      alert('Coding error!  Illegal move of word head to <' + toCell.col + '> after word at <{head},{tail}>!'.format($newWordRange));
+    if(toCell.col > $wordRange.tail) { 
+      alert('Coding error!  Illegal move of word head to <' + toCell.col + '> after word at <{head},{tail}>!'.format($wordRange));
     } else if((toCell.col < $openRange.head) ||
               (toCell.col > $openRange.tail)) {
-      alert('Coding errror!  Illegal move of word head to <' + toCell.col + '> beyond open range of <{head},{tail}>!'.format($openRange));
+      alert('Coding error!  Illegal move of word head to <' + toCell.col + '> beyond open range of <{head},{tail}>!'.format($openRange));
     }
 
     if(fromCell.col < toCell.col) {
@@ -1093,12 +1036,12 @@
       toCell.selfNode.addClass('xw-word xw-wordhead');
     }
 
-    $newWordRange.head = toCell.col;
+    $wordRange.head = toCell.col;
   }
 
   function shiftWordTail(fromCell, toCell) {
-    if(toCell.col < $newWordRange.head) { 
-      alert('Coding error!  Illegal move of word tail to <' + toCell.col + '> before word at <{head},{tail}>!'.format($newWordRange));
+    if(toCell.col < $wordRange.head) { 
+      alert('Coding error!  Illegal move of word tail to <' + toCell.col + '> before word at <{head},{tail}>!'.format($wordRange));
     } else if((toCell.col < $openRange.head) ||
               (toCell.col > $openRange.tail)) {
       alert('Coding errror!  Illegal move of word tail to <' + toCell.col + '> beyond open range of <{head},{tail}>!'.format($openRange));
@@ -1133,7 +1076,7 @@
       toCell.selfNode.addClass('xw-word xw-wordtail');
     }
 
-    $newWordRange.tail = toCell.col;
+    $wordRange.tail = toCell.col;
   }
 
   function moveCursor(fromCell, toCell) {
@@ -1141,29 +1084,16 @@
     if (isBlank(fromCell)) {
       cursorReplacement = $blankImage
     } else {
-      cursorReplacement = $valueImages.attr($editorCell.content.current);
+      cursorReplacement =
+        $valueImages.attr($editorCell.selfNode.data('content'));
     }
 
-    fromCell.sameCol.removeClass(
-      'xw-tabopenhead xw-tabopentail xw-midtabopen xw-tabopen xw-tabwordhead xw-tabwordtail xw-midtabword xw-tabword xw-astabrow xw-astabcol');
-
-    if(toCell.open.crossing.length < 3) {
-      $hasAltDir  = false;
-    } else {
-      $hasAltDir  = true;
-
-      var altMidCell = $altLogicalGrid[toCell.col][toCell.row];
-      var altWordRange = bootstrapWordRange(altMidCell);
-      decorateDimension(
-        altMidCell, altMidCell.sameRow, altMidCell.open.parallel, altWordRange,
-        $dirModeStrategy.decorateCrossing,
-        'xw-tabopenhead', 'xw-tabopentail', 'xw-midtabopen',
-        'xw-tabwordhead', 'xw-tabwordtail', 'xw-midtabword'
-      );
-    }
+    $hasAltDir  = toCell.open.crossing.length >= 3;
 
     $('img.xw-value', fromCell.selfNode).attr('src', cursorReplacement);
     $('img.xw-value', toCell.selfNode).attr('src', $cursorImage);
+
+    $editorCell = toCell;
   }
 
   //
@@ -1186,69 +1116,59 @@
   // |  ''   |   TRUE    |    FALSE   |
   // +=======+===========+============+
   function isBlank(cell) {
-    return ((cell != null) && (cell.content.current == ''));
+    return ((cell != null) && (cell.selfNode.data('content') == ''));
   }
 
   function isFilled(cell) {
-    return ((cell != null) && (cell.content.current != ''));
+    return ((cell != null) && (cell.selfNode.data('content') != ''));
   }
 
   function isOpen(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-open')));
-  }
-
-  function isOpenHead(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-openhead')));
-  }
-
-  function isOpenTail(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-opentail')));
+    return ((cell != null) &&
+            (cell.row == $editorCell.row) &&
+            (cell.col >= $openRange.head) &&
+            (cell.col <= $openRange.tail));
   }
 
   function isWord(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-word')));
+    return ((cell != null) &&
+            (cell.row == $editorCell.row) &&
+            (cell.col >= $wordRange.head) &&
+            (cell.col <= $wordRange.tail));
   }
 
   function isWordHead(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-wordhead')));
+    return ((cell != null) &&
+            (cell.row == $editorCell.row) &&
+            (cell.col == $wordRange.head));
   }
 
   function isWordTail(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-wordtail')));
+    return ((cell != null) &&
+            (cell.row == $editorCell.row) &&
+            (cell.col == $wordRange.tail));
   }
 
-  function isTabOpen(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-tabopen')));
+  function getWordHead() {
+//    var nextCell = $editorCell;
+//
+//    while (! isWordHead(nextCell)) {
+//      nextCell = nextCell.toLeft;
+//    }
+//
+//    return nextCell;
+    return $logicalGrid[$editorCell.row][$wordRange.tail];
   }
 
-  function isTabOpenHead(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-tabopenhead')));
-  }
-
-  function isTabOpenTail(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-tabopentail')));
-  }
-
-  function isTabWord(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-tabword')));
-  }
-
-  function isTabWordHead(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-tabwordhead')));
-  }
-
-  function isTabWordTail(cell) {
-    return ((cell != null) && (cell.selfNode.hasClass('xw-tabwordtail')));
-  }
-
-  function getWordEnd() {
-    var nextCell = $editorCell;
-
-    while (! isWordTail(nextCell)) {
-      nextCell = nextCell.toRight;
-    }
-
-    return nextCell;
+  function getWordTail() {
+//    var nextCell = $editorCell;
+//
+//    while (! isWordTail(nextCell)) {
+//      nextCell = nextCell.toRight;
+//    }
+//
+//    return nextCell;
+    return $logicalGrid[$editorCell.row][$wordRange.head];
   }
 
   //
@@ -1265,32 +1185,24 @@
     if (isBlank($editorCell)) {
       cursorReplacement = $blankImage
     } else {
-      cursorReplacement = $valueImages.attr($editorCell.content.current);
+      cursorReplacement =
+        $valueImages.attr($editorCell.selfNode.data('content'));
     }
 
     $('img.xw-value', $editorCell.selfNode).attr('src', cursorReplacement);
   }
 
   function setCharacter(c) {
-    $editorCell.content.current = c;
     $editorCell.selfNode.data('content', c);
 
     var rightCell = $editorCell.toRight;
+    if (! isOpen(rightCell)) { return; }
 
-    if (! isOpen(rightCell)) { return }
-    if ((! isWord(rightCell)) &&
-        ((! isWord($editorCell)) || isBlank($editorCell))) { return }
-    if (isWordTail($editorCell)) {
-      moveCursor($editorCell, rightCell);
-      shiftWordTail($editorCell, rightCell);
-    } else if (isBlank($editorCell) && isWordHead($editorCell)) {
-      moveCursor($editorCell, rightCell);
-      shiftWordHead($editorCell, rightCell);
-    } else {
-      moveCursor($editorCell, rightCell);
+    moveCursor($editorCell, rightCell);
+    if (! isWord(rightCell)) {
+      while(isFilled(rightCell.toRight)) { rightCell = rightCell.toRight; }
+      shiftWordTail($editorCell.toLeft, rightCell);
     }
-
-    $editorCell = rightCell;
   }
 
   function clearCharacter() {
@@ -1298,41 +1210,39 @@
     // does not apply to the top cell of a word.
     if (isWordHead($editorCell)) { return false; }
   
-    // Shift all content down by one cell, then shrink the word region by one.
-    var pruneCell = getWordEnd();
+    // If the current cell is blank, leave cells to the right alone, and 
+    // let the editor cell be the last cell to shift left.  Otherwise, let the
+    // last cell of the present word be the last cell to shift left.
+    var pruneCell;
+    if (isBlank($editorCell)) {
+      pruneCell = $editorCell;
+    } else {
+      pruneCell = getWordTail();
+    }
+
+    // Shift all content from $editorCell to pruneCell left by one cell, then
+    // blank out the content of pruneCell.
     var thisCell  = $editorCell.toLeft;
     var thisImg   = $('img.xw-value', thisCell.selfNode);
     var nextCell  = $editorCell;
     var nextImg   = null;
     while (thisCell != pruneCell) {
-      thisCell.content.current = nextCell.content.current;
-      thisCell.selfNode.data('content', thisCell.content.current);
+      thisCell.selfNode.data('content', nextCell.selfNode.data('content'));
   
       nextImg  = $('img.xw-value', nextCell.selfNode);
       thisImg.attr('src', nextImg.attr('src'));
       
-      thisCell = nextCell;  thisImg  = nextImg;  nextCell = thisCell.toRight;
+      thisCell = nextCell;
+      thisImg  = nextImg;
+      nextCell = thisCell.toRight;
     }
+    thisCell.selfNode.data('content', '');
+    thisImg.attr('src', $blankImage);
   
-    var leftCell = $editorCell.toLeft;
-
-    if (! isOpen(leftCell)) { return }
-
-    if ((! isWord(leftCell)) &&
-        ((! isWord($editorCell)) || isBlank($editorCell))) { return }
-
-    if (isWordHead($editorCell)) {
-      moveCursor($editorCell, leftCell);
-      shiftWordHead($editorCell, leftCell);
-    } else if (isBlank($editorCell) && isWordTail($editorCell)) {
-      moveCursor($editorCell, leftCell);
-      shiftWordTail($editorCell, leftCell);
-    } else {
-      moveCursor($editorCell, leftCell);
-    }
-
-    // shiftWordTail(pruneCell, pruneCell.toLeft);
-    $editorCell = leftCell;
+    // Reduce the active word region to one left of pruneCell, then shift the
+    // cursor one cell to the left from $editorCell.
+    shiftWordTail(pruneCell, pruneCell.toLeft);
+    moveCursor($editorCell, $editorCell.toLeft);
   }
 
   //

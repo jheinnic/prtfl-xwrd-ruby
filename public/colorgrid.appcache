@@ -1,0 +1,22 @@
+CACHE_MANIFEST
+# 2013-01-09 v1.0.0
+/assets/bootstrap/css/bootstrap.min.css
+/assets/crosswords.css
+/assets/jquery.js
+/assets/jquery_ujs.js
+/assets/bootstrap/js/bootstrap.min.js
+/assets/crosswords.js
+/assets/fill/pink2.jpg
+/assets/fill/brite1.png
+/assets/fill/selected1.png
+/assets/fill/imageSrc.png
+/assets/fill/locked.png
+/assets/fill/altPath.png
+/assets/fill/golden.png
+/assets/val/blank.png
+/assets/border/grid.png
+
+NETWORK:
+*
+
+FALLBACK:

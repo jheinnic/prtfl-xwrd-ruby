@@ -94,16 +94,19 @@ table.xw-layered {
     height: 28px;
     img {
       position: absolute;
+      visibility: hidden;
       &.xw-fill {
         z-index: 11;
       }
       &.xw-grid  {
+        visibility: visible;
         z-index: 14;
       }
       &.xw-border {
         z-index: 16;
       }
       &.xw-value {
+        visibility: visible;
         z-index: 20;
       }
     }
@@ -140,23 +143,25 @@ table#bonusvalue {
 // animation to cause a cursor flicker to indicate the xwt-active cell--the one exception that where style-sheet 
 // rules are overridden.
 
-// The background image to display depends on the state of a its parent TD cell.  There are four basic states:
-// Inactive -- Base state--not involved in any current edit activity
-// Active -- The result of a mouse click to activate editing on a cell.
-// Connected -- The result of keyboard input flowing to a subsequent cell until word completion
-// Illegal -- An un-clickable cell next to both a horizontal and a vertical word.
+// The background image to display depends on the state of a its parent TD cell.
+// There are four basic states:
+// -- Inactive Baseline: No special modifiers, not reachable for active edit.
+// -- Selected: Reachable part of current edit's open space.
+// -- Tripled: Not reachable for active edit, and has a triple score modifier
+// -- Too Short: Not reachable for active edit, and is not connected to any
+//               word of length 3 or greater.
+// -- Short Tripled: Not reachable for active edit, has a triple score modifier,
+//                   and is not connected to any word of length 3 or greater.
+// -- Illegal Triple: Not reachable for active edit, has a triple score 
+//                    modifier, and is also the intersection of two words.
+// -- Blocked: Not reachable for active edit, and incapable of taking on a
+//             letter value without violating the minimum of one cell between
+//             parallel words.
 //
-// The Active and Connected states have sub-states to distinguish the single-cell and multi-cell regions.  In
-// the latter case, horizontal and vertical matter as well.
-
-// Highlighting is the most complicated style set present since there are
-// 7 possible states.  Each state needs two rules: one activating it under its
-// own div parent selector, and a rule hiding it when its matching selector is
-// not present on the parent div.
-
-// Any image tag not explicitly styled as visible by this point is not active
-// under any cell's given state and so this catch-all rule de-activates the
-// rest to avoid writing lots of rules for de-activation.
+// The Selected state is used with one of two groups of 3 additional states
+// that are used to draw a red borded around the subrange that bears a word.
+// These mark the head, middle, and tail of a region either horiziontally or 
+// vertically.
 
 
 // The TD elements are given relative positioning so that they can provide an
@@ -195,7 +200,7 @@ table#lettergrid {
     &.xw-open img.xw-fill.xw-selected {
       visibility: visible;
     }
-    &.xw-triple img.xw-fill.xw-tripshort {
+    &.xw-triple img.xw-fill.xw-triple {
       visibility: visible;
     }
     &.xw-short img.xw-fill.xw-tooshort {
@@ -204,7 +209,7 @@ table#lettergrid {
     &.xw-tripshort img.xw-fill.xw-tripshort {
       visibility: visible;
     }
-    &.xw-blocked img.xw-fill.xw-locked {
+    &.xw-blocked img.xw-fill.xw-blocked {
       visibility: visible;
     }
     &.xw-revealed img.xw-fill.xw-revealed {

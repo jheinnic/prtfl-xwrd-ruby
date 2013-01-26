@@ -50,11 +50,11 @@
       <td colspan="3">
         <table id="bonusword" class="xw-layered">
           <tr>
-              <td><div colid="0" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
-              <td><div colid="1" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
-              <td><div colid="2" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
-              <td><div colid="3" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
-              <td><div colid="4" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div data-colid="0" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div data-colid="1" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div data-colid="2" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div data-colid="3" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+              <td><div data-colid="4" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
           </tr>
         </table>
       </td>
@@ -66,7 +66,7 @@
     </tr>
     <tr valign="top">
       <td colspan="2"><img name="card_12" src="<%= path_to_image 'card/card_12.jpg' %>"></td>
-      <td rowspan="3" colspan="6"><table id="lettergrid" class="xw-layered">
+      <td rowspan="3" colspan="6"><table id="lettergrid" class="xw-layered xw-horizontal">
         <% for ii in (0..10) do %>
         <tr>
           <% for jj in (0..10) do %>
@@ -75,8 +75,8 @@
             <img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>">
             <img class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" />
             <img class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" />
-            <img class="xw-fill xw-revealed" src="<%= path_to_image 'fill/brite1.png' %>" /><img class="xw-fill xw-selected" src="<%= path_to_image 'fill/selected1.png' %>" /><img class="xw-fill xw-triple" src="<%= path_to_image 'fill/imageSrc.png' %>" /><img class="xw-fill xw-locked" src="<%= path_to_image 'fill/locked.png' %>" /><img class="xw-fill xw-tooshort" src="<%= path_to_image 'fill/altPath.png' %>" /><img class="xw-fill xw-tripshort" src="<%= path_to_image 'fill/golden.png' %>" /><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/pink2.png' %>" />
-           </div></td>
+            <img class="xw-fill xw-revealed" src="<%= path_to_image 'fill/brite1.png' %>" /><img class="xw-fill xw-selected" src="<%= path_to_image 'fill/selected1.png' %>" /><img class="xw-fill xw-triple" src="<%= path_to_image 'fill/imageSrc.png' %>" /><img class="xw-fill xw-blocked" src="<%= path_to_image 'fill/locked.png' %>" /><img class="xw-fill xw-tooshort" src="<%= path_to_image 'fill/altPath.png' %>" /><img class="xw-fill xw-tripshort" src="<%= path_to_image 'fill/golden.png' %>" /><img class="xw-fill xw-dualtrip" src="<%= path_to_image 'fill/cornsilk.png' %>" /><img class="xw-fill xw-dualtripshort" src="<%= path_to_image 'fill/briteblue.png' %>" /><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/pink2.png' %>" />
+          </div></td>
           <% end %>
         </tr>
         <% end %>
@@ -109,11 +109,11 @@
   <%= form_for(@crossword) do |f| %>
     <%= f.submit %><%= f.hidden_field :bonus_value %><%= f.hidden_field :bonus_word %>
     <%= f.fields_for :word_items do |w| %>
-      <%= w.hidden_field :x_coordinate, :html => {:'data-wordid' => word_id} %>
-      <%= w.hidden_field :y_coordinate, :html => {:'data-wordid' => word_id} %>
-      <%= w.hidden_field :is_horizontal, :html => {:'data-wordid' => word_id} %>
-      <%= w.hidden_field :text_value, :html => {:'data-wordid' => word_id} %>
-      <%= w.hidden_field :triple_letter_index, :html => {:'data-wordid' => word_id} %>
+      <%= w.hidden_field :x_coordinate, :data => {:wordid => word_id} %>
+      <%= w.hidden_field :y_coordinate, :data => {:wordid => word_id} %>
+      <%= w.hidden_field :is_horizontal, :data => {:wordid => word_id} %>
+      <%= w.hidden_field :text_value, :data => {:wordid => word_id} %>
+      <%= w.hidden_field :triple_letter_index, :data => {:wordid => word_id} %>
       <% word_id = word_id + 1 %>
     <% end %>
   <% end %>

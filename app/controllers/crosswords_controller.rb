@@ -4,7 +4,7 @@ class CrosswordsController < ApplicationController
   # GET /crosswords
   # GET /crosswords.json
   def index
-    @crosswords = Crossword.all
+    @crosswords = Crossword.as_summary.all
 
     # respond_to do |format|
     #   format.html # index.html.erb
@@ -16,7 +16,7 @@ class CrosswordsController < ApplicationController
   # GET /crosswords/1
   # GET /crosswords/1.json
   def show
-    @crossword = Crossword.find(params[:id])
+    @crossword = Crossword.with_words.find(params[:id])
 
     #  respond_to do |format|
     #    format.html # show.html.erb
@@ -29,7 +29,7 @@ class CrosswordsController < ApplicationController
   # GET /crosswords/new
   # GET /crosswords/new.json
   def new
-    @crossword = Crossword.new(params[:crossword])
+    @crossword = Crossword.with_words.new(params[:crossword])
     @crossword.allocate_word_slots
 
     # respond_to do |format|
@@ -54,7 +54,7 @@ class CrosswordsController < ApplicationController
   # POST /crosswords.json
   def create
     logger.debug(params.inspect)
-    @crossword = Crossword.new(params[:crossword])
+    @crossword = Crossword.create(params[:crossword])
 
     respond_with(@crossword)
     # respond_to do |format|

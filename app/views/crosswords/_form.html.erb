@@ -20,11 +20,11 @@
     <tr valign="top">
       <td rowspan="5" colspan="2"><img name="card_01" src="<%= path_to_image 'card/card_01.jpg' %>"></td>
       <td rowspan="3" colspan="3">
-        <table id="yourletters" class="xw-layered">
+        <table id="yourletters" data-activecell="0" class="xw-layered">
           <% for ii in (0..2) %>
           <tr>
             <% for jj in (0..5) %>
-            <td><div data-rowid="<%= ii %>" data-colid="<%= jj %>" data-content='' class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
+            <td><div data-content="" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"><img class="xw-fill xw-revealed" src="<%= path_to_image 'fill/scratched.png' %>"></div></td>
             <% end %>
           </tr>
           <% end %>
@@ -32,11 +32,11 @@
       </td>
       <td rowspan="2" colspan="2"><img name="card_03" src="<%= path_to_image 'card/card_03.jpg' %>"></td>
       <td>
-        <table id="bonusvalue" class="xw-sliced">
+        <table id="bonusvalue" class="xw-sliced" data-validx="-1">
           <tr>
-            <td><img class="xw-fill" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
-            <td><img class="xw-fill" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
-            <td><img class="xw-fill" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
+            <td><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
+            <td><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
+            <td><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
           </tr>
         </table>
       </td>
@@ -48,13 +48,11 @@
     <tr valign="top">
       <td rowspan="2"><img name="card_07" src="<%= path_to_image 'card/card_07.jpg' %>"></td>
       <td colspan="3">
-        <table id="bonusword" class="xw-layered">
+        <table id="bonusword" class="xw-layered xw-inactive" data-activecell="0">
           <tr>
-              <td><div data-colid="0" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
-              <td><div data-colid="1" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
-              <td><div data-colid="2" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
-              <td><div data-colid="3" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
-              <td><div data-colid="4" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-dark" src="<%= path_to_image 'fill/pink2.png' %>"></div></td>
+            <% for ii in (0..4) %>
+            <td><div class="xw-cell" data-content=''><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/pink2.png' %>"><img class="xw-fill xw-active" src="<%= path_to_image 'fill/selected1.png' %>"></div></td>
+            <% end %>
           </tr>
         </table>
       </td>
@@ -105,22 +103,17 @@
       <% end %></ul>
     </div>
   <% end %>
-  <% word_id = 0 %>
+  <div id="debug_messages"></div>
   <%= form_for(@crossword) do |f| %>
-    <%= f.submit %><%= f.hidden_field :bonus_value %><%= f.hidden_field :bonus_word %>
+    <%= f.hidden_field :bonus_value %><%= f.hidden_field :bonus_word %>
     <%= f.fields_for :word_items do |w| %>
-      <%= w.hidden_field :x_coordinate, :data => {:wordid => word_id} %>
-      <%= w.hidden_field :y_coordinate, :data => {:wordid => word_id} %>
-      <%= w.hidden_field :is_horizontal, :data => {:wordid => word_id} %>
-      <%= w.hidden_field :text_value, :data => {:wordid => word_id} %>
-      <%= w.hidden_field :triple_letter_index, :data => {:wordid => word_id} %>
-      <% word_id = word_id + 1 %>
+      <%= w.hidden_field :x_coordinate %><%= w.hidden_field :y_coordinate %><%= w.hidden_field :is_horizontal %><%= w.hidden_field :text_value %><%= w.hidden_field :triple_letter_index %>
     <% end %>
   <% end %>
-  <table id="wordsummary"><% for ii in [0,2,4,6,8,10,12,14,16,18,20] %>
-    <tr><td><span data-wordid="<%= ii %>" class="badge badge-info"></span></td><td><span data-wordid="<%= ii+1 %>" class="badge badge-info"></span></td></tr>
+  <table id="wordsummary" class="table table-compact"><% for ii in (0..10) %>
+    <tr><td><span class="badge badge-info"></span></td><td><span class="badge badge-info"></span></td></tr>
   <% end %></table>
-  <table id="payoutsummary" class="table">
+  <table id="payoutsummary" class="table table-compact">
     <tr>
       <td><span class="label label-info">Free Ticket</span></td><td><span data-prizeid="1" class="badge badge-info">0</span></td>
       <td><span class="label label-success">$60</span></td><td><span data-prizeid="10" class="badge badge-info">0</span></td>

@@ -97,6 +97,10 @@ table.xw-layered {
       visibility: hidden;
       &.xw-fill {
         z-index: 11;
+        &.xw-baseline {
+          visibility: visible;
+          z-index: 10;
+        }
       }
       &.xw-grid  {
         visibility: visible;
@@ -194,9 +198,6 @@ table#lettergrid {
     }
   }
   div.xw-cell {
-    img {
-      visibility: hidden;
-    }
     &.xw-open img.xw-fill.xw-selected {
       visibility: visible;
     }
@@ -216,20 +217,29 @@ table#lettergrid {
       visibility: visible;
     }
   }
-  div.xw-cell img {
-    visibility: hidden;
+}
 
-    &.xw-fill.xw-baseline {
-      visibility:visible;
-      z-index: 8;
+table#bonusword {
+  &.xw-inactive {
+    img.xw-fill.xw-baseline {
+      visibility: visible;
     }
-    &.xw-grid, &.xw-value {
+    img.xw-border {
+      visibility: hidden;
+    }
+    img.xw-fill.xw-selected {
+      visibility: hidden;
+    }
+  }
+  &.xw-active {
+    img.xw-fill.xw-baseline {
+      visibility: hidden;
+    }
+    img.xw-border {
+      visibility: visible;
+    }
+    img.xw-fill.xw-selected {
       visibility: visible;
     }
   }
 }
-
-input.xw-initword, input.xw-blankword {
-  visibility: hidden;
-}
-

@@ -5,6 +5,8 @@ class CrosswordsController < ApplicationController
   # GET /crosswords.json
   def index
     @crosswords = Crossword.as_summary.all
+    @crossword = Crossword.with_words.new(params[:crossword])
+    # @crossword.allocate_word_slots
 
     # respond_to do |format|
     #   format.html # index.html.erb
@@ -23,65 +25,59 @@ class CrosswordsController < ApplicationController
     #    format.json { render :json => @crossword }
     #  end
 
-    respond_with @crossword
+    respond_with @crossword, :include => :word_items
   end
 
   # GET /crosswords/new
   # GET /crosswords/new.json
   def new
     @crossword = Crossword.with_words.new(params[:crossword])
-    @crossword.allocate_word_slots
+    # @crossword.allocate_word_slots
 
     # respond_to do |format|
     #   format.html # new.html.erb
     #   format.json { render :json => @crossword }
     # end
-    respond_with(@crossword) do |f|
-      if request.xhr?
-        f.html do 
-          render :partial => "crosswords/form", :layout => false
-        end
-      end
-    end
+    respond_with @crossword
+    # do |f|
+    #   if request.xhr?
+    #     f.html do 
+    #       render :partial => "crosswords/form", :layout => false
+    #     end
+    #   end
+    # end
   end
 
   # GET /crosswords/1/edit
   def edit
-    @crossword = Crossword.find(params[:id])
+    @crossword = Crossword.where(:id => params[:id])
+
+    respond_with @crossword, :include => :word_items
   end
 
   # POST /crosswords
   # POST /crosswords.json
   def create
-    logger.debug(params.inspect)
     @crossword = Crossword.create(params[:crossword])
 
-    respond_with(@crossword)
-    # respond_to do |format|
-    #   if @crossword.save
-    #     format.html { redirect_to @crossword, :notice => 'Crossword was successfully created.' }
-    #     format.json { render :json => @crossword, :status => :created, :location => @crossword }
-    #   else
-    #     format.html { render :action => "new" }
-    #     format.json { render :json => @crossword.errors, :status => :unprocessable_entity }
-    #   end
-    # end
+    respond_with(@crossword, :include => :word_items)
   end
 
   # PUT /crosswords/1
   # PUT /crosswords/1.json
   def update
     @crossword = Crossword.find(params[:id])
+    @crossword.update_attributes(params[:crossword])
 
-    respond_to do |format|
-      if @crossword.update_attributes(params[:crossword])
-        format.html { redirect_to @crossword, :notice => 'Crossword was successfully updated.' }
-        format.json { head :no_content }
-      else
-        format.html { render :action => "edit" }
-        format.json { render :json => @crossword.errors, :status => :unprocessable_entity }
-      end
-    end
+    #if @crossword.update_attributes(params[:crossword])
+    #  format.html { redirect_to @crossword, :notice => 'Crossword was successfully updated.' }
+    #  format.json { head :no_content }
+    #else
+    #  format.html { render :action => "edit" }
+    #  format.json { render :json => @crossword.errors, :status => :unprocessable_entity }
+    #end
+
+    respond_with(@crossword, :include => :word_items)
   end
 
   # DELETE /crosswords/1
@@ -90,9 +86,9 @@ class CrosswordsController < ApplicationController
     @crossword = Crossword.find(params[:id])
     @crossword.destroy
 
-    respond_to do |format|
-      format.html { redirect_to crosswords_url }
-      format.json { head :no_content }
-    end
+    # respond_to do |format|
+    #   format.html { redirect_to crosswords_url }
+    #   format.json { head :no_content }
+    # end
   end
 end

@@ -123,10 +123,8 @@
   var $wordBadgeTable;
   var $prizeDistTable;
   
-  // D
-  var $bonusWord  = [];
-  var $bonusWordColumn;
-  var $yourLetters = [];
+  var $bonusValLastClicked = -1;
+  var $bonusValLastSaved   = -1;
 
   var $blankImage = '<%= path_to_image 'val/blank.png' %>';
   var $cursorImage = '<%= path_to_image 'val/qm.png' %>';
@@ -163,7 +161,7 @@
     tripleIndex: 'input#crossword_word_items_attributes_{idx}_triple_letter_index'
   };
 
-  var $bonusValueImages = [ 
+  var $bonusValImages = [ 
     '<tr><td><img class="xw-value" src="<%= path_to_image 'val/4.png' %>"></td></tr>',
     '<tr><td><img class="xw-value" src="<%= path_to_image 'val/5.png' %>"></td></tr>',
     '<tr><td><img class="xw-value" src="<%= path_to_image 'val/10.png' %>"></td></tr>',
@@ -283,6 +281,12 @@
     $bonusWordTable.on('click', 'div.xw-cell', onBonusWordClick);
     $bonusValueTable.on('click', onBonusValueClick);
     $yourLettersTable.on('click', onYourLettersClick);
+
+    $("div#bonusradio").on('click', 'button', onBonusValueSelectClick);
+    $("a#bonusmodalsave").on('click', onBonusValueSaveClick);
+    $("a#bonusmodalcancel").on('click', onBonusValueCancelClick);
+    $("div#bonusmodal div.modal-header button").on(
+      'click', onBonusValueCancelClick);
   }
 
   //
@@ -322,10 +326,33 @@
 
   function onBonusValueClick(event) {
     // TODO: Set bonus prize modal
-    $bonusValueIndex = 1;
+    $("div#bonusmodal").modal('show');
+  }
 
-    $($formSelectors.bonusValue).val($bonusValueIndex);
-    $("tr", $bonusValueTable).replaceWith($bonusValueImages[$bonusValueIndex]);
+  function onBonusValueSelectClick(event) {
+    var wrap = $(event.target);
+    $bonusValLastClicked = $("div#bonusradio button").index(wrap);
+  }
+
+  function onBonusValueCancelClick(event) {
+    $("div#bonusmodal").modal('hide');
+
+    if ($bonusValLastSaved > -1) {
+      $("div#bonusradio button").eq($bonusValLastSaved).button('toggle');
+    } else if ($bonusValLastClicked > -1) {
+      $("div#bonusradio button").eq($bonusValLastClicked).removeClass('active');
+    }
+
+    $bonusValLastClicked = $bonusValLastSaved;
+  }
+
+  function onBonusValueSaveClick(event) {
+    $bonusValLastSaved = $bonusValLastClicked;
+
+    $("tr", $bonusValueTable).replaceWith($bonusValImages[$bonusValLastSaved]);
+    $($formSelectors.bonusValue).val($bonusValLastSaved);
+
+    $("div#bonusmodal").modal('hide');
   }
 
   function selectChangeHandler(handler) {

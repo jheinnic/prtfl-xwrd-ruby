@@ -94,14 +94,14 @@
     </tr>
   </table>
 </div>
-<div class="span2">
+<div class="span3">
   <% if @crossword.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@crossword.errors.count, "error") %> prohibited this crossword from being saved:</h2>
-      <ul><% @crossword.errors.full_messages.each do |msg| %>
-        <li><%= msg %></li>
-      <% end %></ul>
-    </div>
+  <div id="error_explanation">
+    <h2><%= pluralize(@crossword.errors.count, "error") %> prohibited this crossword from being saved:</h2>
+    <ul><% @crossword.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %></ul>
+  </div>
   <% end %>
   <div id="debug_messages"></div>
   <%= form_for(@crossword) do |f| %>
@@ -110,10 +110,10 @@
       <%= w.hidden_field :x_coordinate %><%= w.hidden_field :y_coordinate %><%= w.hidden_field :is_horizontal %><%= w.hidden_field :text_value %><%= w.hidden_field :triple_letter_index %>
     <% end %>
   <% end %>
-  <table id="wordsummary" class="table table-compact"><% for ii in (0..10) %>
+  <table id="wordsummary" class="table table-condensed"><% for ii in (0..10) %>
     <tr><td><span class="badge badge-info"></span></td><td><span class="badge badge-info"></span></td></tr>
   <% end %></table>
-  <table id="payoutsummary" class="table table-compact">
+  <table id="payoutsummary" class="table table-condensed">
     <tr>
       <td><span class="label label-info">Free Ticket</span></td><td><span data-prizeid="1" class="badge badge-info">0</span></td>
       <td><span class="label label-success">$60</span></td><td><span data-prizeid="10" class="badge badge-info">0</span></td>
@@ -148,7 +148,26 @@
     </tr>
     <tr>
       <td><span class="label label-success">$50</span></td><td><span data-prizeid="9" class="badge badge-info">0</span></td>
-      <td><span class="label label-inverse">Invalid Ticket</span></td><td><span data-prizeid="17" class="badge badge-info">0</span></td>
+      <td><span class="label label-inverse">Invalid</span></td><td><span data-prizeid="17" class="badge badge-info">0</span></td>
     </tr>
   </table>
+</div>
+<div id="bonusmodal" class="modal hide fade" data-keyboard="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h3>Bonus Prize Value</h3>
+  </div>
+  <div class="modal-body">
+    <p>How much cash does your ticket offer as a prize if you complete the bonus word?  Please find and click its corresponding button below.</p>
+    <div id="bonusradio" class="btn-group" data-toggle="buttons-radio">
+      <button type="button" class="btn btn-primary">$4.00</button>
+      <button type="button" class="btn btn-primary">$5.00</button>
+      <button type="button" class="btn btn-primary">$10.00</button>
+      <button type="button" class="btn btn-primary">$30.00</button>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a id="bonusmodalcancel" href="#" class="btn">Cancel</a>
+    <a id="bonusmodalsave" href="#" class="btn btn-primary">Save</a>
+  </div>
 </div>

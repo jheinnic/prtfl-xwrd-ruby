@@ -49,8 +49,10 @@ class MockCrossword
     # return 'yuehwpivjzrs'
     # return 'yuehwpivj'
     # return 'yuehwp'
-    return 'yue'
+    # return 'yue'
     # return ''
+
+    return 'yuehwpi'
   end
 
   MOCK_BONUS_OFFSETS = [22, 44, 66, 88]
@@ -102,7 +104,6 @@ class MockCrossword
     return unless win_criteria_defined?
 
     parse_letter_sets
-
     @payout_counters = Array.new(18, 0)
     @unused_bitset.combination(@num_unknowns) { |next_combination|
       calculate_payout_index(next_combination)
@@ -110,11 +111,30 @@ class MockCrossword
   end
 
   def recount
-    return unless win_criteria_defined?
-
     parse_letter_sets
-
     @unused_bitset.combination(@num_unknowns) { |next_combination| }
+  end
+
+  def reconsider
+    parse_letter_sets
+    @last_combination = Array.new
+    @unused_bitset.combination(@num_unknowns) { |next_combination|
+      added = next_combination - @last_combination
+      dropped = @last_combination - next_combination
+      @last_combination = next_combination
+    }
+  end
+
+  def report
+    parse_letter_sets
+    @last_combination = Array.new
+    @unused_bitset.combination(@num_unknowns) { |next_combination|
+      added = next_combination - @last_combination
+      dropped = @last_combination - next_combination
+      @last_combination = next_combination
+
+      puts "** Next :: #{next_combination.inspect}\n** Added :: #{added.inspect}\n** Minus :: #{dropped.inspect}\n\n"
+    }
   end
 
   def win_criteria_defined?
@@ -176,8 +196,10 @@ class Experiment
     # @realSubject.revealed = 'moqjuepwakin'
     # @realSubject.revealed = 'moqjuepwa'
     # @realSubject.revealed = 'moqjue'
-    @realSubject.revealed = 'moq'
+    # @realSubject.revealed = 'moq'
     # @realSubject.revealed = ''
+
+    @realSubject.revealed = 'moqjuep'
 
     @realSubject.last_calc_revealed = 'xox';
   end
@@ -220,9 +242,25 @@ class Experiment
     puts "Time elapsed #{(later-time)*1000} milliseconds"
     time = later
   end
+  
+  def report
+    # @mockSubject.report() 
+    time = Time.now
+    Benchmark.bm(7) do |x|
+      x.report('First Experiment: ')  { @mockSubject.reconsider(); }
+      x.report('Second Experiment: ')  { @mockSubject.reconsider(); }
+      x.report('Third Experiment: ')  { @mockSubject.reconsider(); }
+      x.report('Fourth Experiment: ')  { @mockSubject.reconsider(); }
+    end
+    
+    later = Time.now
+    puts "Time elapsed #{(later-time)*1000} milliseconds"
+  end
 end
 
+
 demo = Experiment.new()
+demo.report()
 while (true) do
   demo.run_test()
 end

@@ -1,96 +1,95 @@
 <div class="span6">
   <table id="cardroot" class="xw-sliced">
     <tr>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="10" height="1" border="0"></td>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="42" height="1" border="0"></td>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="34" height="1" border="0"></td>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="22" height="1" border="0"></td>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="112" height="1" border="0"></td>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1" border="0"></td>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1" border="0"></td>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="84" height="1" border="0"></td>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1" border="0"></td>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1" border="0"></td>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="24" height="1" border="0"></td>
-      <td><img src="<%= path_to_image 'card/shim.gif' %>" width="1" height="1" border="0"></td>
+      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="10" height="1"></td>
+      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="42" height="1"></td>
+      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="34" height="1"></td>
+      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="22" height="1"></td>
+      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="112" height="1"></td>
+      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1"></td>
+      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1"></td>
+      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="84" height="1"></td>
+      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1"></td>
+      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1"></td>
+      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="24" height="1"></td>
     </tr>
-    <tr valign="top">
-      <td colspan="11"><img name="card_00" src="<%= path_to_image 'card/card_00.jpg' %>"></td>
+    <tr>
+      <td colspan="11"><img alt="card00" src="<%= path_to_image 'card/card_00.jpg' %>"></td>
     </tr>
-    <tr valign="top">
-      <td rowspan="5" colspan="2"><img name="card_01" src="<%= path_to_image 'card/card_01.jpg' %>"></td>
+    <tr>
+      <td rowspan="5" colspan="2"><img alt="card01" src="<%= path_to_image 'card/card_01.jpg' %>"></td>
       <td rowspan="3" colspan="3">
         <table id="yourletters" data-activecell="0" class="xw-layered">
           <% for ii in (0..2) %>
           <tr>
             <% for jj in (0..5) %>
-            <td><div data-content="" class="xw-cell"><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"><img class="xw-fill xw-revealed" src="<%= path_to_image 'fill/scratched.png' %>"></div></td>
+            <td><div data-content="" class="xw-cell"><img alt="alt" class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img alt="alt" class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"><img alt="alt" class="xw-fill xw-revealed" src="<%= path_to_image 'fill/scratched.png' %>"></div></td>
             <% end %>
           </tr>
           <% end %>
         </table>
       </td>
-      <td rowspan="2" colspan="2"><img name="card_03" src="<%= path_to_image 'card/card_03.jpg' %>"></td>
+      <td rowspan="2" colspan="2"><img alt="card03" src="<%= path_to_image 'card/card_03.jpg' %>"></td>
       <td>
         <table id="bonusvalue" class="xw-sliced" data-validx="-1">
           <tr>
-            <td><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
-            <td><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
-            <td><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"></div></td>
+            <td><img alt="alt" class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"></td>
+            <td><img alt="alt" class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"></td>
+            <td><img alt="alt" class="xw-fill xw-baseline" src="<%= path_to_image 'fill/SilverCover.png' %>"></td>
           </tr>
         </table>
       </td>
-      <td rowspan="2" colspan="3"><img name="card_05" src="<%= path_to_image 'card/card_05.jpg' %>"></td>
+      <td rowspan="2" colspan="3"><img alt="card05" src="<%= path_to_image 'card/card_05.jpg' %>"></td>
     </tr>
-    <tr valign="top">
-      <td><img name="card_06" src="<%= path_to_image 'card/card_06.jpg' %>"></td>
+    <tr>
+      <td><img alt="card06" src="<%= path_to_image 'card/card_06.jpg' %>"></td>
     </tr>
-    <tr valign="top">
-      <td rowspan="2"><img name="card_07" src="<%= path_to_image 'card/card_07.jpg' %>"></td>
+    <tr>
+      <td rowspan="2"><img alt="card07" src="<%= path_to_image 'card/card_07.jpg' %>"></td>
       <td colspan="3">
         <table id="bonusword" class="xw-layered xw-inactive" data-activecell="0">
           <tr>
             <% for ii in (0..4) %>
-            <td><div class="xw-cell" data-content=''><img class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/pink2.png' %>"><img class="xw-fill xw-active" src="<%= path_to_image 'fill/selected1.png' %>"></div></td>
+            <td><div class="xw-cell" data-content=''><img alt="alt" class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img alt="alt" class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img alt="alt" class="xw-fill xw-baseline" src="<%= path_to_image 'fill/pink2.png' %>"><img alt="alt" class="xw-fill xw-active" src="<%= path_to_image 'fill/selected1.png' %>"></div></td>
             <% end %>
           </tr>
         </table>
       </td>
-      <td rowspan="2" colspan="2"><img name="card_09" src="<%= path_to_image 'card/card_09.jpg' %>"></td>
+      <td rowspan="2" colspan="2"><img alt="card09" src="<%= path_to_image 'card/card_09.jpg' %>"></td>
     </tr>
-    <tr valign="top">
-      <td colspan="3"><img name="card_10" src="<%= path_to_image 'card/card_10.jpg' %>"></td>
-      <td colspan="3"><img name="card_11" src="<%= path_to_image 'card/card_11.jpg' %>"></td>
+    <tr>
+      <td colspan="3"><img alt="card10" src="<%= path_to_image 'card/card_10.jpg' %>"></td>
+      <td colspan="3"><img alt="card11" src="<%= path_to_image 'card/card_11.jpg' %>"></td>
     </tr>
-    <tr valign="top">
-      <td colspan="2"><img name="card_12" src="<%= path_to_image 'card/card_12.jpg' %>"></td>
+    <tr>
+      <td colspan="2"><img alt="card12" src="<%= path_to_image 'card/card_12.jpg' %>"></td>
       <td rowspan="3" colspan="6"><table id="lettergrid" class="xw-layered xw-horizontal">
         <% for ii in (0..10) do %>
         <tr>
           <% for jj in (0..10) do %>
           <td><div data-rowid="<%= ii %>" data-colid="<%= jj %>" data-content="" data-triple="-1" class="xw-cell">
-            <img class="xw-value" src="<%= path_to_image 'val/blank.png'%>">
-            <img class="xw-grid" src="<%= path_to_image 'border/grid.png' %>">
-            <img class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" />
-            <img class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" />
-            <img class="xw-fill xw-revealed" src="<%= path_to_image 'fill/brite1.png' %>" /><img class="xw-fill xw-selected" src="<%= path_to_image 'fill/selected1.png' %>" /><img class="xw-fill xw-triple" src="<%= path_to_image 'fill/imageSrc.png' %>" /><img class="xw-fill xw-blocked" src="<%= path_to_image 'fill/locked.png' %>" /><img class="xw-fill xw-tooshort" src="<%= path_to_image 'fill/altPath.png' %>" /><img class="xw-fill xw-tripshort" src="<%= path_to_image 'fill/golden.png' %>" /><img class="xw-fill xw-dualtrip" src="<%= path_to_image 'fill/cornsilk.png' %>" /><img class="xw-fill xw-dualtripshort" src="<%= path_to_image 'fill/briteblue.png' %>" /><img class="xw-fill xw-baseline" src="<%= path_to_image 'fill/pink2.png' %>" />
+            <img alt="alt" class="xw-value" src="<%= path_to_image 'val/blank.png'%>">
+            <img alt="alt" class="xw-grid" src="<%= path_to_image 'border/grid.png' %>">
+            <img alt="alt" class="xw-border xw-htop" src="<%= path_to_image 'border/htop.png' %>" /><img alt="alt" class="xw-border xw-hmid" src="<%= path_to_image 'border/hmid.png' %>" /><img alt="alt" class="xw-border xw-hend" src="<%= path_to_image 'border/hend.png' %>" />
+            <img alt="alt" class="xw-border xw-vtop" src="<%= path_to_image 'border/vtop.png' %>" /><img alt="alt" class="xw-border xw-vmid" src="<%= path_to_image 'border/vmid.png' %>" /><img alt="alt" class="xw-border xw-vend" src="<%= path_to_image 'border/vend.png' %>" />
+            <img alt="alt" class="xw-fill xw-revealed" src="<%= path_to_image 'fill/brite1.png' %>" /><img alt="alt" class="xw-fill xw-selected" src="<%= path_to_image 'fill/selected1.png' %>" /><img alt="alt" class="xw-fill xw-triple" src="<%= path_to_image 'fill/imageSrc.png' %>" /><img alt="alt" class="xw-fill xw-blocked" src="<%= path_to_image 'fill/locked.png' %>" /><img alt="alt" class="xw-fill xw-tooshort" src="<%= path_to_image 'fill/altPath.png' %>" /><img alt="alt" class="xw-fill xw-tripshort" src="<%= path_to_image 'fill/golden.png' %>" /><img alt="alt" class="xw-fill xw-dualtrip" src="<%= path_to_image 'fill/cornsilk.png' %>" /><img alt="alt" class="xw-fill xw-dualtripshort" src="<%= path_to_image 'fill/briteblue.png' %>" /><img alt="alt" class="xw-fill xw-baseline" src="<%= path_to_image 'fill/pink2.png' %>" />
           </div></td>
           <% end %>
         </tr>
         <% end %>
       </table></td>
-      <td rowspan="4"><img name="card_14" src="<%= path_to_image 'card/card_14.jpg' %>"></td>
+      <td rowspan="4"><img alt="card14" src="<%= path_to_image 'card/card_14.jpg' %>"></td>
     </tr>
-    <tr valign="top">
-      <td rowspan="3"><img name="card_15" src="<%= path_to_image 'card/card_15.jpg' %>"></td>
-      <td colspan="2"><img name="card_16" src="<%= path_to_image 'card/card_16C.jpg' %>"></td>
-      <td rowspan="3"><img name="card_17" src="<%= path_to_image 'card/card_17.jpg' %>"></td>
+    <tr>
+      <td rowspan="3"><img alt="card15" src="<%= path_to_image 'card/card_15.jpg' %>"></td>
+      <td colspan="2"><img alt="card16" src="<%= path_to_image 'card/card_16C.jpg' %>"></td>
+      <td rowspan="3"><img alt="card17" src="<%= path_to_image 'card/card_17.jpg' %>"></td>
     </tr>
-    <tr valign="top">
-      <td rowspan="2" colspan="2"><img name="card_18" src="<%= path_to_image 'card/card_18.jpg' %>"></td>
+    <tr>
+      <td rowspan="2" colspan="2"><img alt="card18" src="<%= path_to_image 'card/card_18.jpg' %>"></td>
     </tr>
-    <tr valign="top">
-      <td colspan="6"><img name="card_19" src="<%= path_to_image 'card/card_19.jpg' %>"></td>
+    <tr>
+      <td colspan="6"><img alt="card19" src="<%= path_to_image 'card/card_19.jpg' %>"></td>
     </tr>
   </table>
 </div>

@@ -18,7 +18,7 @@ class CrosswordsController < ApplicationController
   # GET /crosswords/1
   # GET /crosswords/1.json
   def show
-    @crossword = Crossword.with_words.find(params[:id])
+    @crossword = Crossword.with_words.where(:id => params[:id]).first()
 
     #  respond_to do |format|
     #    format.html # show.html.erb
@@ -50,7 +50,7 @@ class CrosswordsController < ApplicationController
 
   # GET /crosswords/1/edit
   def edit
-    @crossword = Crossword.where(:id => params[:id])
+    @crossword = Crossword.where(:id => params[:id]).first()
 
     respond_with @crossword, :include => :word_items
   end

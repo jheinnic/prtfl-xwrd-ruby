@@ -38,12 +38,12 @@
   var $currentChangeHandler;
 
   var $editorCell = null;
+  var $openRange = null;
+  var $wordRange = null;
+
   var $hasAltDir = true;
   var $wordCount = 0;
   var $tripleCellCount = 0;
-
-  var $openRange    = null;
-  var $wordRange = null;
 
   // GRID NODE:
   // Every grid is an 11x11 2-dimensional array of node objects.  There are
@@ -699,8 +699,8 @@
       data: $('form').serialize(),
       success: function(response) {
         $("debug_messages").append("<p><b>URL: {url}</p>".format({url : url}));
-        $("debug_messages").append("<p><b>Data: {data}</p>".format({data : $('form').serialize()}));
-        $("debug_messages").append("<p><b>Response: {response}</p>".format({response : response}));
+        $("debug_messages").append("<p><b>Query String: {data}</p>".format({data : $('form').serialize()}));
+        $("debug_messages").append("<p><b>Response: {response}</p>".format({response : response.data}));
         if( response.crossword_id != null ) {
           $('input:hidden#crossword_id').val(response.crossword_id)
         }

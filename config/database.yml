@@ -18,12 +18,12 @@ development:
 test:
   adapter: mysql2
   encoding: utf8
-  database: crosswords_test
+  database: sample_test
   pool: 3
-  username: testuser
-  password: 8ozAS2qh
+  username: rubystack
+  password: fd37Hpnu
+  host: localhost
   port: 3306
-  socket: /opt/bitnami/mysql/tmp/mysql.sock
 
 production:
   adapter: mysql2

@@ -60,64 +60,84 @@ module ApplicationHelper
     
           # *x = j-1
           # *y = i-1
-           return j-1, i-1, zVal, true
+          return j-1, i-1, zVal, true
         end
       end
     end
   end
   
+  # TODO: Can we use @n instead of a copy of it?
   class CollectionTwiddler < Twiddler
-    def initialize selected, pool, numToSelect
-      super numToSelect, pool.size
-      @selected = selected
-      @pool = pool
+    include Enumerable
+
+    def initialize numToSelect, pool
+      super numToSelect, pool.size 
+
       @numToSelect = numToSelect
+      @pool = pool
     end
     
-    def next
-      x, q, z, hadNext = twiddle
-      
-      # Apply the next swap -- Note that when the return value is false, z and x are set such that 
-      # they put an item in from the pool that is already in selected at the given position--in other
-      # words, its a no-op swap.  The judgment call is to perform one pointless assignment at loop
-      # end rather than test hadNext on every iteration.
-      if hadNext
-        @selected[z] = @pool[x]
+    # Be aware that the value of selected is reused with altered contents!
+    # Copy it before leaving a call to the enumerator's block if access to
+    # pervious permutations is needed!
+    def each 
+      hadNext = @n > @numToSelect
+      selected = @pool.slice(0, @numToSelect)
+
+      while (hadNext)
+        x, q, z, hadNext = twiddle
+        yield selected
+        selected[z] = @pool[x]
       end
-        
-      return hadNext
     end
   end
 
+  # TODO: Can we use @n instead of a copy of it?
   class BitsetTwiddler < Twiddler
-    def initialize bitSet, numBitsOn, numBitsTotal
-      super(numBitsOn, numBitsTotal)
-      @bitSet = bitSet
-      @numBitsOn = numBitsOn
+    include Enumerable
+
+    def initialize numBitsOn, numBitsTotal
+      super numBitsOn, numBitsTotal
+
       @numBitsTotal = numBitsTotal
+      @numBitsOn = numBitsOn
+      
+      @allBitsOn  = (1 << numBitsTotal) - 1
+      @oneBitOn   = (0...numBitsTotal).map { |x| 1 << x }
+      @oneBitOff  = @oneBitOn.map { |x| @allBitsOn & ~x }
+      @initialBitSet = (1 << numBitsTotal) - (1 << (numBitsTotal-numBitsOn))
     end
     
-    def next
-      x, y, q, hadNext = twiddle
+    def each 
+      hadNext = @numBitsTotal > @numBitsOn
+      currentBitSet = @initialBitSet
 
-      # Apply the next swap -- Note that when the return value is false, z and x are set such that 
-      # they put an item in from the pool that is already in selected at the given position--in other
-      # words, its a no-op swap.  The judgment call is to perform one pointless assignment at loop
-      # end rather than test hadNext on every iteration.
-      if hadNext
-        @bitSet[x] = 1
-        @bitSet[y] = 0
+      while(hadNext)
+        x, y, q, hadNext = twiddle
+        yield currentBitSet
+        currentBitSet = currentBitSet & @oneBitOff[y] | @oneBitOn[x]
       end
-      
-      return hadNext
     end
   end
-  
-  # A bit of debugging leftover.  Harmless.
-  def runBitTest numOn, numTotal
-    bitSet = Array.new(numTotal, 0)
-    for i in (numTotal-numOn)..(numTotal-1) do bitSet[i] = 1; end
-    bt = BitsetTwiddler.new(bitSet, numOn, numTotal)
-    while bt.next do puts bt.inspect; end
+
+  class SwapTwiddler < Twiddler
+    include Enumerable
+
+    def initialize numBitsOn, numBitsTotal
+      super numBitsOn, numBitsTotal
+    end
+    
+    def each 
+      x, y, q, hadNext = twiddle
+      yieldVal = [y, x]
+
+      while(hadNext)
+	yield yieldVal   # Yield a pair, [ElementOut, ElementIn].
+
+        x, y, q, hadNext = twiddle
+        yieldVal[0] = y
+        yieldVal[1] = x
+      end
+    end
   end
 end

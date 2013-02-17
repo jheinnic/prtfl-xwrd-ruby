@@ -1,28 +1,31 @@
 <div class="row">
   <div class="span3">
-    <div data-class="affix"><h1>Crosswords</h1></div>
-    <table class="table table-condensed">
-    <div data-class="affix">
-      <tr>
-        <th>Bonus<br>word</th>
-        <th></th>
-        <th></th>
-        <th></th>
-      </tr>
+    <div data-spy="affix" class="tiklist-header affix">
+      <h1>Crosswords</h1>
+      <p><%= link_to 'New Crossword', new_crossword_path, :remote => true, :'data-type' => 'json', :'data-action' => 'new_crossword' %></p>
+      <table class="table table-condensed">
+        <tr>
+          <th>Bonus<br>word</th>
+          <th></th>
+          <th></th>
+        </tr>
+        <tr><td></td><td></td><td></td></tr>
+      </table>
     </div>
-    
-    <% @crosswords.each do |crossword| %>
-      <tr>
-        <td><%= crossword.bonus_word %></td>
-        <td><%= link_to 'Show', crossword_path(crossword), :remote => true, :'data-type' => 'json', :'data-action' => 'show_crossword' %></td>
-        <td><%= link_to 'Edit', edit_crossword_path(crossword), :remote => true, :'data-type' => 'json', :'data-action' => 'edit_crossword' %></td>
-        <td><%= link_to 'Del', crossword_path(crossword), :remote => true, :'data-type' => 'json', :'data-action' => 'delete_crossword', :data => { :confirm => 'Are you sure?' } %></td>
-      </tr>
-    <% end %>
-    </table>
+    <div class="tiklist-body">
+      <table class="table table-condensed">
+      <% @crosswords.each do |crossword| %>
+        <tr>
+          <td><%= crossword.bonus_word %></td>
+          <td><%= link_to 'Open', edit_crossword_path(crossword), :remote => true, :'data-type' => 'json', :'data-action' => 'edit_crossword' %></td>
+          <td><%= link_to 'Delete', crossword_path(crossword), :remote => true, :'data-type' => 'json', :'data-action' => 'delete_crossword', :data => { :confirm => 'Are you sure?' } %></td>
+        </tr>
+      <% end %>
+      </table>
+    </div>
   </div>
-  <div id="ticketview" class="span9">
-    <div data-spy="affix" id="ticketplaceholder"><p><%= link_to 'New Crossword', new_crossword_path, :remote => true, :'data-type' => 'html', :'data-action' => 'new_crossword' %></p></div>
+  <div id="ticketview" class="collapse">
+    <%= render 'form' %>
   </div>
 </div>
 
@@ -31,37 +34,28 @@
 var $successHandlers = $({
   new_crossword:
     function(evt, xhr, settings) {
-      $('a[data-action]').attr('data-type', 'json');
-      var placeholder = $('#ticketplaceholder');
-      placeholder.children().remove();
-      placeholder.append(xhr.responseText);
-      initialize();
-    },
+      var editView = $('div#ticketview.collapse');
+      if (! editView.hasClass('in')) {
+        editView.collapse('toggle');
+      }
 
-  show_crossword:
-    function(evt, xhr, settings) {
-      var placeholder = $('#ticketplaceholder');
-      placeholder.children().remove();
-      placeholder.append("<pre>" + xhr.responseText+ "</pre>");
+      // $('a[data-action]').attr('data-type', 'json');
+      initialize();
+      updateView(xhr.responseText);
     },
 
   edit_crossword:
     function(evt, xhr, settings) {
-      var placeholder = $('#ticketplaceholder');
-      placeholder.children().remove();
-      placeholder.append("<pre>" + xhr.responseText+ "</pre>");
+      var editView = $('div#ticketview.collapse');
+      if (! editView.hasClass('in')) {
+        editView.collapse('toggle');
+      }
+
+      initialize();
+      updateView(xhr.responseText);
     },
 
-  save_crossword:
-    function(evt, xhr, settings) {
-      var placeholder = $('#ticketplaceholder');
-      placeholder.children().remove();
-      placeholder.append("<pre>" + xhr.responseText+ "</pre>");
-    },
-
-  delete_crossword:
-    function(evt, xhr, settings) {
-    }
+  delete_crossword: function(evt, xhr, settings) { }
 });
 
 $(document).ready(

@@ -3,38 +3,28 @@
   <head>
     <title>John Heinnickel's Portfolio Site</title>
     <%= stylesheet_link_tag    "application", :media => "all" %>
-    <%= javascript_include_tag "application" %>
     <%= csrf_meta_tags %>
   </head>
   <body>
-    <div data-spy="affix" style="width: 100%">
+    <div class="navbar navbar-fixed-top">
       <div class="navbar-inner">
-        <div class="navbar navbar-fixed-top">
-          <div class="container">
-            <a class="brand" href="#">John Heinnickel</a>
-            <ul class="nav">
-              <li class="<%= ns = yield(:active_navtab); 'active' if ns.nil? or ns == 'home' or ns == '' %>"><a href="/">Home</a></li>
-              <li class="divider-vertical"></li>
-              <li class="<%= 'active' if ns == 'crosswords' %>"><%= link_to 'Crosswords', crosswords_path %></li>
-              <li class="<%= 'active' if ns == 'poker' %>"><%= link_to 'Poker Odds', crosswords_path %></li>
-              <li class="<%= 'active' if ns == 'video' %>"><%= link_to 'Video Streaming', crosswords_path %></li>
-              <li class="divider-vertical"></li>
-            </ul>
-          </div> <!-- navbar-inner -->
-        </div> <!-- fill, navbar -->
-      </div> <!-- topbar, container -->
-    </div> <!-- topbar affix -->
-    <div style="height: 64px">
-      <!-- The nav bar is taken "out of the document" by fixed positioning
-           both from its original design and for supporting "affix" placement
-           by bootstrap.  Without this explicit padding, the sections that
-           follow would land underneath the header bar. -->
-    </div>
+        <div class="container">
+          <ul class="nav pull-left">
+            <li class="<%= ns = yield(:active_navtab); 'active' if ns.nil? or ns == 'home' or ns == '' %>"><a href="/">Home</a></li>
+            <li class="divider-vertical"></li>
+            <li class="<%= 'active' if ns == 'crosswords' %>"><%= link_to 'Crosswords', crosswords_path %></li>
+            <li class="<%= 'active' if ns == 'poker' %>"><%= link_to 'Poker Odds', crosswords_path %></li>
+            <li class="<%= 'active' if ns == 'video' %>"><%= link_to 'Fuzzy Match', crosswords_path %></li>
+          </ul>
+          <div class="pull-right"><a class="brand" href="#">John Heinnickel</a></div>
+        </div> <!-- container -->
+      </div> <!-- navbar-inner -->
+    </div> <!-- navbar navbar-fixed-top -->
     <div class="container">
       <%= yield %> <!-- Should encapsulate one or more <div id="row">s -->
-      <footer><p>&copy; John Heinnickel, 2012</p></footer>
+      <div class="row"><div class="span12"><footer><p>&copy; John Heinnickel, 2012</p></footer></div></div>
     </div> <!-- container -->
   </body>
-<%= javascript_include_tag "crosswords" %>
+<%= javascript_include_tag "application" %>
 <%= yield(:scripts) %>
 </html>

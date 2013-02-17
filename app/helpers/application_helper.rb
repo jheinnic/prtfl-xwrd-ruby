@@ -60,7 +60,7 @@ module ApplicationHelper
     
           # *x = j-1
           # *y = i-1
-           return j-1, i-1, zVal, true
+          return j-1, i-1, zVal, true
         end
       end
     end
@@ -70,8 +70,9 @@ module ApplicationHelper
   class CollectionTwiddler < Twiddler
     include Enumerable
 
-    def initialize pool, numToSelect
-      super numToSelect, pool.size
+    def initialize numToSelect, pool
+      super numToSelect, pool.size 
+
       @numToSelect = numToSelect
       @pool = pool
     end
@@ -80,10 +81,10 @@ module ApplicationHelper
     # Copy it before leaving a call to the enumerator's block if access to
     # pervious permutations is needed!
     def each 
-      hadNext = @numBitsTotal > @numBitsOn
+      hadNext = @n > @numToSelect
       selected = @pool.slice(0, @numToSelect)
 
-      while(hadNext)
+      while (hadNext)
         x, q, z, hadNext = twiddle
         yield selected
         selected[z] = @pool[x]
@@ -96,7 +97,7 @@ module ApplicationHelper
     include Enumerable
 
     def initialize numBitsOn, numBitsTotal
-      super(numBitsOn, numBitsTotal)
+      super numBitsOn, numBitsTotal
 
       @numBitsTotal = numBitsTotal
       @numBitsOn = numBitsOn
@@ -115,6 +116,27 @@ module ApplicationHelper
         x, y, q, hadNext = twiddle
         yield currentBitSet
         currentBitSet = currentBitSet & @oneBitOff[y] | @oneBitOn[x]
+      end
+    end
+  end
+
+  class SwapTwiddler < Twiddler
+    include Enumerable
+
+    def initialize numBitsOn, numBitsTotal
+      super numBitsOn, numBitsTotal
+    end
+    
+    def each 
+      x, y, q, hadNext = twiddle
+      yieldVal = [y, x]
+
+      while(hadNext)
+	yield yieldVal   # Yield a pair, [ElementOut, ElementIn].
+
+        x, y, q, hadNext = twiddle
+        yieldVal[0] = y
+        yieldVal[1] = x
       end
     end
   end

@@ -1,3 +1,34 @@
+class Counter
+  def initialize( word, needed, isTriple, isBonus ) 
+    @word = word
+    @needed = needed
+    @isTriple = isTriple
+    @isBonus = isBonus
+  end
+
+  def cover()
+    @needed = @needed - 1
+    return :no_change if @needed > 0
+
+    return :score_triple if @isTriple
+
+    return :score_bonus if @isBonus
+
+    return :score_word
+  end
+
+  def uncover()
+    @needed = @needed + 1
+    return :no_change if @needed > 1
+
+    return :lose_triple if @isTriple
+
+    return :lose_bonus if @isBonus
+
+    return :lose_word
+  end
+end
+
 class Crossword < ActiveRecord::Base
   attr_accessible :bonus_value, :bonus_word, :revealed, :word_items_attributes
 
@@ -62,6 +93,18 @@ class Crossword < ActiveRecord::Base
   ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.chars.to_a
   UNUSED_LETTER_COUNT = 8
 
+  # Only return true when we have both enough information to do a calculation
+  # and a change to the "revealed" character set, without which we would merely
+  # calculate the same values currently stored.
+  def new_calculation_possible?
+    (self.bonus_value > -1) and (self.bonus_value < 4) and
+    (! self.bonus_word.nil?) and (self.bonus_word.length == 5) and
+    ( (self.last_calc_revealed.nil?) or
+      (self.revealed.length < self.last_calc_revealed.length) ) and
+    (self.word_items.size == 22) and
+    (self.word_items.where(:triple_letter_index => -1).count() == 18)
+  end
+
   def recalculate
     return unless new_calculation_possible?
 
@@ -74,57 +117,109 @@ class Crossword < ActiveRecord::Base
     unused = Hash[
       ALPHABET.select do |c|
         !known.include?(c)
-      end.zip(0...@letters_unused).map {|c,i| [c, 1<<i]}
+      end.map {|c| [c, Array.new]}
     ]
-    # puts "Alphabet: #{unused.inspect} from #{ALPHABET.select {|c| ! known.include?(c)}} at #{@letters_unused}"
 
-    # Extract information needed from the WordItem objects so we need not
-    # incur the over head of ActiveRecord access during the payout frequency
-    # computation.  This accelerates the time cost to 1/25 of the time cost.
-    @triple_words    =
-      Enumerator.new do |y|
-        word_items.each do |wi|
-          if (wi.triple_letter_index > -1)
-            y.yield Crossword.word_to_bitfield(wi.text_value, unused)
-          end
-        end
-      end.to_a
-    @standard_words  = 
-      Enumerator.new do |y|
-        word_items.each do |wi|
-          if (wi.triple_letter_index == -1)
-            y.yield Crossword.word_to_bitfield(wi.text_value, unused)
-          end
-        end
-      end.to_a
-
+    words_scored = 0
+    triples_scored = 0
+    word_items.each do |w|
+      needed = w.text_value.chars.to_set - known
+      if (needed.size > 0)
+        counter = Counter.new(w.text_value, needed.size, w.triple_letter_index != -1, false)
+        needed.each {|l| unused[l] << counter}
+      else
+        words_scored = words_scored + 1
+        triples_scored = triples_scored + 1 if (w.triple_letter_index != -1) 
+      end
+    end
+     
     # Transform the bonus word for easy comparison too.
-    @bonus_bitfield = Crossword.word_to_bitfield(bonus_word, unused)
-    @bonus_value    = bonus_value
+    needed = bonus_word.chars.to_set - known
+    if (needed.size > 0)
+      bonus_index = 0
+      @bonus_value = bonus_value
+      counter = Counter.new(bonus_word, needed.size, false, true)
+      needed.each {|l| unused[l] << counter}
+    else
+      bonus_index = bonus_value
+    end
 
     # Zero out an array of counters so we can defer mapping indices to variable
     # names until after all the counters have accumulated their frequencies.
     # @payout_counters.fill(0)
     @payout_counters = Array.new(18, 0)
 
-    ApplicationHelper::BitsetTwiddler.new(
+    # Score an initial permutation of the first letters listed.
+    @unknown_letters = unused.values 
+    @unknown_letters.slice(
+      UNUSED_LETTER_COUNT, @letters_unused - UNUSED_LETTER_COUNT
+    ).each do |l|
+      l.each do |counter|
+        result = counter.cover()
+        if result != :no_change
+          if result == :score_word 
+            words_scored = words_scored + 1
+          elsif result == :score_triple
+            words_scored = words_scored + 1
+            triples_scored = triples_scored + 1
+          else
+            bonus_index = @bonus_value
+          end
+        end
+      end
+    end
+
+    @last_payout =
+      PAYOUT_LOOKUP[triples_scored > 0 ? 1 : 0][bonus_index][words_scored]
+    @payout_counters[@last_payout] += 1
+
+    # Swap one letter in and one letter out each iteration until we have 
+    # visitted each permutation.  Track the incremnetal changes to payout.
+    ApplicationHelper::SwapTwiddler.new(
       @letters_unused - UNUSED_LETTER_COUNT, @letters_unused
-    ).each { |next_combo| calculate_payout(next_combo) }
+    ).each do |next_combo| 
+      @unknown_letters[next_combo[0]].each do |counter|
+        result = counter.uncover()
+        if result != :no_change
+          if result == :lose_word
+            words_scored = words_scored - 1
+          elsif result == :lose_triple
+            words_scored = words_scored - 1
+            triples_scored = triples_scored - 1
+          else 
+            bonus_index = 0
+          end
+        end
+      end
+
+      @unknown_letters[next_combo[1]].each do |counter|
+        result = counter.cover()
+        if result != :no_change
+          if result == :score_word
+            words_scored = words_scored + 1
+          elsif result == :score_triple
+            words_scored = words_scored + 1
+            triples_scored = triples_scored + 1
+          else 
+            bonus_index = @bonus_value
+          end
+        end
+      end
+
+      # puts "#{words_scored}, #{triples_scored}, #{bonus_index}"
+      @last_payout =
+        PAYOUT_LOOKUP[triples_scored > 0 ? 1 : 0][bonus_index][words_scored]
+      @payout_counters[@last_payout] += 1
+    end
     
     # Transfer the counter array to the "paysNN" field set.
     set_payout_counters
   end
 
-  # Only return true when we have both enough information to do a calculation
-  # and a change to the "revealed" character set, without which we would merely
-  # calculate the same values currently stored.
-  def new_calculation_possible?
-    (self.bonus_value > -1) and (self.bonus_value < 4) and
-    (! self.bonus_word.nil?) and (self.bonus_word.length == 5) and
-    ( (self.last_calc_revealed.nil?) or
-      (self.revealed.length < self.last_calc_revealed.length) ) and
-    (self.word_items.size == 22) and
-    (self.word_items.where(:triple_letter_index => -1).count() == 18)
+  def allocate_word_slots
+    22.times do
+      self.word_items << WordItem.new
+    end
   end
 
   private
@@ -141,25 +236,6 @@ class Crossword < ActiveRecord::Base
   #    Doubling the 115 slots required to allocate one for each combination
   #    of a word count (one of 23) and bonus result (one of 5) yields a total
   #    payout table size of 230 slots.
-  def calculate_payout(mask)
-    # Score the combination's crossword hits and look for a tripling modifier
-    # by performing bitwise ANDs of the word string (where letters present are
-    # 1's) and the hypothesis coverage (where letters present are 0's).  If
-    # the result is 0, then the word was covered and counts towards a prize.
-    #
-    # The bonus word is also scored by checking for a 0 after bitwise AND on
-    # the mask.  Use the bonus_value property for the second dimension if the
-    # AND yields 0, otherwise use an index of 0 to represent no-bonus.
-    triple_offset = @triple_words.count {|w| (w & mask) == 0}
-    @last_payout =
-      PAYOUT_LOOKUP[triple_offset > 0 ? 1 : 0
-      ][(@bonus_bitfield & mask) == 0 ? @bonus_value : 0
-      ][@standard_words.count {|w| (w & mask) == 0} + triple_offset];
-
-    # puts "Mask: #{mask}, Words: #{@standard_words.inspect}, Triple Words: #{@triple_words.inspect}, Bonus: #{@bonus_bitfield & mask}, #{@bonus_bitfield}, #{@bonus_value}, TO: #{triple_offset > 0 ? 1 : 0}, BO: #{(@bonus_bitfield & mask) == 0 ? @bonus_value : 0}, WO: #{@standard_words.count {|w| (w & mask) == 0} + triple_offset}, PI: #{@last_payout}"
-
-    @payout_counters[@last_payout] += 1
-  end
   
   def set_payout_counters
     self[:pays00] = @payout_counters[0]

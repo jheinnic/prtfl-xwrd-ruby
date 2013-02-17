@@ -6,7 +6,7 @@ class CrosswordsController < ApplicationController
   def index
     @crosswords = Crossword.as_summary.all
     @crossword = Crossword.with_words.new(params[:crossword])
-    # @crossword.allocate_word_slots
+    @crossword.allocate_word_slots
 
     # respond_to do |format|
     #   format.html # index.html.erb
@@ -32,7 +32,7 @@ class CrosswordsController < ApplicationController
   # GET /crosswords/new.json
   def new
     @crossword = Crossword.with_words.new(params[:crossword])
-    # @crossword.allocate_word_slots
+    @crossword.allocate_word_slots
 
     # respond_to do |format|
     #   format.html # new.html.erb

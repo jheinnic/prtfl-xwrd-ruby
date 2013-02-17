@@ -1,17 +1,18 @@
 <div class="row">
   <div class="span3">
-    <div data-spy="affix" class="affix">
+    <div data-spy="affix" class="tiklist-header affix">
       <h1>Crosswords</h1>
-      <p><%= link_to 'New Crossword', new_crossword_path, :remote => true, :'data-type' => 'json', :'data-action' => 'new_crossword', :style => 'text-alignment: center;' %></p>
+      <p><%= link_to 'New Crossword', new_crossword_path, :remote => true, :'data-type' => 'json', :'data-action' => 'new_crossword' %></p>
       <table class="table table-condensed">
         <tr>
           <th>Bonus<br>word</th>
           <th></th>
           <th></th>
         </tr>
+        <tr><td></td><td></td><td></td></tr>
       </table>
     </div>
-    <div data-spy="affix" class="affix" style="padding: 140px 0px 0px 0px;">
+    <div class="tiklist-body">
       <table class="table table-condensed">
       <% @crosswords.each do |crossword| %>
         <tr>
@@ -33,21 +34,25 @@
 var $successHandlers = $({
   new_crossword:
     function(evt, xhr, settings) {
-      // $('a[data-action]').attr('data-type', 'json');
       var editView = $('div#ticketview.collapse');
-      initialize(xhr.responseText);
       if (! editView.hasClass('in')) {
         editView.collapse('toggle');
       }
+
+      // $('a[data-action]').attr('data-type', 'json');
+      initialize();
+      updateView(xhr.responseText);
     },
 
   edit_crossword:
     function(evt, xhr, settings) {
       var editView = $('div#ticketview.collapse');
-      initialize(xhr.responseText);
       if (! editView.hasClass('in')) {
         editView.collapse('toggle');
       }
+
+      initialize();
+      updateView(xhr.responseText);
     },
 
   delete_crossword: function(evt, xhr, settings) { }

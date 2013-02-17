@@ -154,6 +154,7 @@
   var $formSelectors = {
     bonusWord: 'input#crossword_bonus_word',
     bonusValue: 'input#crossword_bonus_value',
+    revealed: 'input#crossword_revealed',
     xCoord: 'input#crossword_word_items_attributes_{idx}_x_coordinate',
     yCoord: 'input#crossword_word_items_attributes_{idx}_y_coordinate',
     isHoriz: 'input#crossword_word_items_attributes_{idx}_is_horizontal',
@@ -255,7 +256,7 @@
           var thisHCell = $horizontalGrid[row][col];
           var thisVCell = $verticalPhysical[row][col];
 
-          thisVCell.sameRow = thisCol;
+         thisVCell.sameRow = thisCol;
   
           thisHCell.toAbove = lastHCell;
           thisVCell.toLeft  = lastVCell;
@@ -272,6 +273,15 @@
       );
     } // Latter of two intialization "for" loops.
 
+
+    if(!("WebSocket" in window)) {
+      alert("Sorry, the build of your browser does not support WebSockets.  Ticket analysis refresh is adversely affected.")
+      ws = { send: function(msg) {} };
+    } else {
+      //ws = new WebSocket("ws://www.jchein.info:8080/crossword/recalculator");
+      //ws.onmessage = function(evt) {updateView(evt.data);}
+    }
+
     // Get a document jQuery wrapper to use when setting key-down handlers.
     $docWrapper = $(document);
 
@@ -287,6 +297,61 @@
     $("a#bonusmodalcancel").on('click', onBonusValueCancelClick);
     $("div#bonusmodal div.modal-header button").on(
       'click', onBonusValueCancelClick);
+  }
+
+  //
+  // Asynchronous model render mode
+  //
+
+  function updateView(modelText) {
+    modelState = eval("(" + modelText + ")");
+    console.log(modelState);
+
+    for( ii=0; ii<5; ii++ ) {
+      var c = modelState.bonus_word[ii]
+      var wrap = $('div.xw-cell', $bonusWordTable).eq(ii);
+      $('img.xw-value', wrap).attr('src', $valueImages.attr(c));
+      wrap.data('content', c);
+    }
+
+    $($formSelectors.bonusWord).val(modelState.bonus_word);
+
+    // TODO: Ensure horizontal mode
+    // TODO: Apply formSelectors and badges to word text_values and propogate
+    //       other word items.  Initialize tripler state (and later reveal state)
+    for( ii=0; ii<modelState.word_items.length; ii++ ) {
+      var w = modelState.word_items[ii]
+      console.log(w)
+      var wrap = $physicalGrid[w.x_coordinate][w.y_coordinate]
+      if (w.is_horizontal && ($dirModeStrategy == $horizontalStrategy)) {
+        for( jj=0; jj<w.text_value.length; jj++ ) {
+          var c = w.text_value[jj]
+          $('img.xw-value', wrap.selfNode).attr('src', $valueImages.attr(c));
+          wrap.selfNode.data('content', c);
+          wrap = wrap.toRight;
+        }
+      } else {
+        for( jj=0; jj<w.text_value.length; jj++ ) {
+          var c = w.text_value[jj]
+          $('img.xw-value', wrap.selfNode).attr('src', $valueImages.attr(c));
+          wrap.selfNode.data('content', c);
+          wrap = wrap.toBelow;
+        }
+      }
+    }
+
+    for( ii=0; ii<modelState.revealed.length; ii++ ) {
+      var c = modelState.revealed[ii]
+      var wrap = $('div.xw-cell', $yourLettersTable).eq(ii);
+      $('img.xw-value', wrap).attr('src', $valueImages.attr(c));
+      wrap.data('content', c);
+    }
+    $($formSelectors.revealed).val(modelState.revealed);
+
+    // TODO: Any propogation requirements here?  PUT/POST consideration.  
+    //       Preference is to use PUT and omit these, if that can work.
+    // $($formSelectors.last_calc_revealed).val(modelState.last_calc_revealed);
+    // $($formSelectors.actual_payout).val(modelState.actual_payout);
   }
 
   //
@@ -318,8 +383,11 @@
     selectChangeHandler(onChangeFromYourLetters);
 
     var cellIdx = $yourLettersTable.data('active');
+    alert(cellIdx)
     var wrap = $("div.xw-cell", $yourLettersTable).eq(cellIdx);
+    alert(wrap)
     $("img.xw-value", wrap).attr('src', $cursorImage);
+    alert($("img.xw-value", wrap))
 
     selectKeyboardHandler(onYourLettersKeyInput);
   }
@@ -687,23 +755,43 @@
 
   function saveContentRefreshStats() {
     var url;
-    if ($('input:hidden#crossword_id').val() != null) {
-      url = '/crosswords/' + $('input:hidden#crossword_id').val() + '.json';
+    var idField;
+    idField = $('input:hidden#crossword_id')
+    if (idField.size() > 0) {
+      url = '/crosswords/' + idField.val() + '.json';
     } else {
       url = '/crosswords.json';
     }
 
+    console.log( url )
+    console.log( $('form').serialize() )
+    console.log(idField)
     jQuery.ajax({
       type: 'POST',
       url: url,
       data: $('form').serialize(),
       success: function(response) {
+        console.log("Response Data Follows")
+        console.log(response)
         $("debug_messages").append("<p><b>URL: {url}</p>".format({url : url}));
         $("debug_messages").append("<p><b>Query String: {data}</p>".format({data : $('form').serialize()}));
-        $("debug_messages").append("<p><b>Response: {response}</p>".format({response : response.data}));
-        if( response.crossword_id != null ) {
-          $('input:hidden#crossword_id').val(response.crossword_id)
+        $("debug_messages").append("<p><b>Response: {response}</p>".format({response : response}));
+
+        response = eval(response);
+        if (response.id > 0) {
+          
+          if (idField.size() > 0) {
+            idField.val(response.id)
+          } else {
+            $('form').append('<input type="hidden" id="crossword_id" name="crossword_id" value="' + response.crossword_id + '"/>')
+          }
+
+          ws.send({id:response.id})
         }
+      },
+      error: function(response) {
+        console.log("ERROR")
+        console.log(response)
       }
     });
   }

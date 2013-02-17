@@ -1,17 +1,17 @@
 <div class="span6">
   <table id="cardroot" class="xw-sliced">
     <tr>
-      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="10" height="1"></td>
-      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="42" height="1"></td>
-      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="34" height="1"></td>
-      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="22" height="1"></td>
-      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="112" height="1"></td>
-      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1"></td>
-      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1"></td>
-      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="84" height="1"></td>
-      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1"></td>
-      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="28" height="1"></td>
-      <td><img alt="shim" src="<%= path_to_image 'card/shim.gif' %>" width="24" height="1"></td>
+      <td width="10" height="0"></td>
+      <td width="42" height="0"></td>
+      <td width="34" height="0"></td>
+      <td width="22" height="0"></td>
+      <td width="112" height="0"></td>
+      <td width="28" height="0"></td>
+      <td width="28" height="0"></td>
+      <td width="84" height="0"></td>
+      <td width="28" height="0"></td>
+      <td width="28" height="0"></td>
+      <td width="24" height="0"></td>
     </tr>
     <tr>
       <td colspan="11"><img alt="card00" src="<%= path_to_image 'card/card_00.jpg' %>"></td>
@@ -19,7 +19,7 @@
     <tr>
       <td rowspan="5" colspan="2"><img alt="card01" src="<%= path_to_image 'card/card_01.jpg' %>"></td>
       <td rowspan="3" colspan="3">
-        <table id="yourletters" data-activecell="0" class="xw-layered">
+        <table id="yourletters" data-active="0" class="xw-layered">
           <% for ii in (0..2) %>
           <tr>
             <% for jj in (0..5) %>
@@ -47,7 +47,7 @@
     <tr>
       <td rowspan="2"><img alt="card07" src="<%= path_to_image 'card/card_07.jpg' %>"></td>
       <td colspan="3">
-        <table id="bonusword" class="xw-layered xw-inactive" data-activecell="0">
+        <table id="bonusword" class="xw-layered xw-inactive" data-active="0">
           <tr>
             <% for ii in (0..4) %>
             <td><div class="xw-cell" data-content=''><img alt="alt" class="xw-value" src="<%= path_to_image 'val/blank.png'%>"><img alt="alt" class="xw-grid" src="<%= path_to_image 'border/grid.png' %>"><img alt="alt" class="xw-fill xw-baseline" src="<%= path_to_image 'fill/pink2.png' %>"><img alt="alt" class="xw-fill xw-active" src="<%= path_to_image 'fill/selected1.png' %>"></div></td>

@@ -1,0 +1,177 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+shelter:
+  id: 890
+  crossword_id: 4
+  text_value: SHELTER
+  x_coordinate: 0
+  y_coordinate: 4
+  triple_letter_index: 1
+  is_horizontal: true
+event:
+  id: 891
+  crossword_id: 4
+  text_value: EVENT
+  x_coordinate: 1
+  y_coordinate: 0
+  triple_letter_index: -1
+  is_horizontal: true
+permanent:
+  id: 892
+  crossword_id: 4
+  text_value: PERMANENT
+  x_coordinate: 3
+  y_coordinate: 0
+  triple_letter_index: 3
+  is_horizontal: true
+year:
+  id: 893
+  crossword_id: 4
+  text_value: YEAR
+  x_coordinate: 0
+  y_coordinate: 2
+  triple_letter_index: -1
+  is_horizontal: false
+strap:
+  id: 894
+  crossword_id: 4
+  text_value: STRAP
+  x_coordinate: 0
+  y_coordinate: 4
+  triple_letter_index: 0
+  is_horizontal: false
+layout:
+  id: 895
+  crossword_id: 4
+  text_value: LAYOUT
+  x_coordinate: 5
+  y_coordinate: 5
+  triple_letter_index: -1
+  is_horizontal: true
+iron:
+  id: 896
+  crossword_id: 4
+  text_value: IRON
+  x_coordinate: 6
+  y_coordinate: 0
+  triple_letter_index: -1
+  is_horizontal: true
+tattoo:
+  id: 897
+  crossword_id: 4
+  text_value: TATTOO
+  x_coordinate: 0
+  y_coordinate: 8
+  triple_letter_index: -1
+  is_horizontal: false
+zest:
+  id: 898
+  crossword_id: 4
+  text_value: ZEST
+  x_coordinate: 2
+  y_coordinate: 10
+  triple_letter_index: -1
+  is_horizontal: false
+piece:
+  id: 899
+  crossword_id: 4
+  text_value: PIECE
+  x_coordinate: 7
+  y_coordinate: 5
+  triple_letter_index: -1
+  is_horizontal: true
+even:
+  id: 900
+  crossword_id: 4
+  text_value: EVEN
+  x_coordinate: 8
+  y_coordinate: 0
+  triple_letter_index: -1
+  is_horizontal: true
+use:
+  id: 901
+  crossword_id: 4
+  text_value: USE
+  x_coordinate: 5
+  y_coordinate: 9
+  triple_letter_index: -1
+  is_horizontal: false
+expedite:
+  id: 902
+  crossword_id: 4
+  text_value: EXPEDITE
+  x_coordinate: 1
+  y_coordinate: 0
+  triple_letter_index: -1
+  is_horizontal: false
+nose:
+  id: 903
+  crossword_id: 4
+  text_value: NOSE
+  x_coordinate: 5
+  y_coordinate: 2
+  triple_letter_index: -1
+  is_horizontal: false
+avenue:
+  id: 904
+  crossword_id: 4
+  text_value: AVENUE
+  x_coordinate: 9
+  y_coordinate: 3
+  triple_letter_index: 4
+  is_horizontal: true
+snap:
+  id: 905
+  crossword_id: 4
+  text_value: SNAP
+  x_coordinate: 10
+  y_coordinate: 0
+  triple_letter_index: -1
+  is_horizontal: true
+sedation:
+  id: 906
+  crossword_id: 4
+  text_value: SEDATION
+  x_coordinate: 2
+  y_coordinate: 6
+  triple_letter_index: -1
+  is_horizontal: false
+few:
+  id: 907
+  crossword_id: 4
+  text_value: FEW
+  x_coordinate: 10
+  y_coordinate: 8
+  triple_letter_index: -1
+  is_horizontal: true
+van:
+  id: 908
+  crossword_id: 4
+  text_value: VAN
+  x_coordinate: 8
+  y_coordinate: 1
+  triple_letter_index: -1
+  is_horizontal: false
+nap:
+  id: 909
+  crossword_id: 4
+  text_value: NAP
+  x_coordinate: 8
+  y_coordinate: 3
+  triple_letter_index: -1
+  is_horizontal: false
+chef:
+  id: 910
+  crossword_id: 4
+  text_value: CHEF
+  x_coordinate: 7
+  y_coordinate: 8
+  triple_letter_index: -1
+  is_horizontal: false
+row:
+  id: 911
+  crossword_id: 4
+  text_value: ROW
+  x_coordinate: 8
+  y_coordinate: 10
+  triple_letter_index: -1
+  is_horizontal: false 

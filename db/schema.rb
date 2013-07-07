@@ -11,43 +11,44 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20121226092101) do
+ActiveRecord::Schema.define(:version => 20130623122731) do
 
   create_table "crosswords", :force => true do |t|
-    t.string   "bonus_word",         :limit => 5,                                :default => "", :null => false
-    t.decimal  "bonus_value",                      :precision => 1, :scale => 0, :default => -1, :null => false
-    t.string   "revealed",           :limit => 18,                               :default => "", :null => false
-    t.string   "last_calc_revealed", :limit => 18,                               :default => "", :null => false
-    t.decimal  "actual_prize",                     :precision => 2, :scale => 0
-    t.integer  "pays00",                                                         :default => 0,  :null => false
-    t.integer  "pays01",                                                         :default => 0,  :null => false
-    t.integer  "pays02",                                                         :default => 0,  :null => false
-    t.integer  "pays03",                                                         :default => 0,  :null => false
-    t.integer  "pays04",                                                         :default => 0,  :null => false
-    t.integer  "pays05",                                                         :default => 0,  :null => false
-    t.integer  "pays06",                                                         :default => 0,  :null => false
-    t.integer  "pays07",                                                         :default => 0,  :null => false
-    t.integer  "pays08",                                                         :default => 0,  :null => false
-    t.integer  "pays09",                                                         :default => 0,  :null => false
-    t.integer  "pays10",                                                         :default => 0,  :null => false
-    t.integer  "pays11",                                                         :default => 0,  :null => false
-    t.integer  "pays12",                                                         :default => 0,  :null => false
-    t.integer  "pays13",                                                         :default => 0,  :null => false
-    t.integer  "pays14",                                                         :default => 0,  :null => false
-    t.integer  "pays15",                                                         :default => 0,  :null => false
-    t.integer  "pays16",                                                         :default => 0,  :null => false
-    t.integer  "pays17",                                                         :default => 0,  :null => false
-    t.datetime "created_at",                                                                     :null => false
-    t.datetime "updated_at",                                                                     :null => false
+    t.string   "bonus_word",         :limit => 5,   :default => "",                                                                                                                          :null => false
+    t.integer  "bonus_value",                       :default => -1,                                                                                                                          :null => false
+    t.string   "revealed",           :limit => 18,  :default => "",                                                                                                                          :null => false
+    t.string   "last_calc_revealed", :limit => 18,  :default => "",                                                                                                                          :null => false
+    t.integer  "actual_prize"
+    t.integer  "pays00",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays01",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays02",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays03",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays04",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays05",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays06",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays07",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays08",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays09",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays10",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays11",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays12",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays13",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays14",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays15",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays16",                            :default => 0,                                                                                                                           :null => false
+    t.integer  "pays17",                            :default => 0,                                                                                                                           :null => false
+    t.datetime "created_at",                                                                                                                                                                 :null => false
+    t.datetime "updated_at",                                                                                                                                                                 :null => false
+    t.string   "board",              :limit => 121, :default => "_________________________________________________________________________________________________________________________", :null => false
   end
 
   create_table "word_items", :force => true do |t|
-    t.integer "crossword_id",                                                                      :null => false
-    t.string  "text_value",          :limit => 11,                               :default => "",   :null => false
-    t.decimal "x_coordinate",                      :precision => 2, :scale => 0, :default => -1,   :null => false
-    t.decimal "y_coordinate",                      :precision => 2, :scale => 0, :default => -1,   :null => false
-    t.decimal "triple_letter_index",               :precision => 2, :scale => 0, :default => -1,   :null => false
-    t.boolean "is_horizontal",                                                   :default => true, :null => false
+    t.integer "crossword_id",                                         :null => false
+    t.string  "text_value",          :limit => 12, :default => "",    :null => false
+    t.integer "x_coordinate",                      :default => -1,    :null => false
+    t.integer "y_coordinate",                      :default => -1,    :null => false
+    t.boolean "is_horizontal",                     :default => false
+    t.integer "triple_letter_index",               :default => -1,    :null => false
   end
 
   add_index "word_items", ["crossword_id", "text_value"], :name => "index_word_items_on_crossword_id_and_text_value", :unique => true

@@ -1,9 +1,9 @@
-print_ticket:
+one:
   id: 4
   bonus_word: PRINT
   bonus_value: 1
   revealed: moqjuepw
-  last_calc_revealed: 
+  last_calc_revealed: m 
   pays00: 0
   pays01: 0
   pays02: 0

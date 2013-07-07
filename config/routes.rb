@@ -1,7 +1,31 @@
 Sample::Application.routes.draw do
-  root :to => 'crosswords#index'
+  # get "portfolio/index"
+  root :to => 'portfolio#index'
   
-  resources :crosswords
+  scope :api do
+    resources :crosswords do
+      collection do
+        get 'index'
+	post 'create'
+      end
+
+      member do
+        get 'show'
+	post 'save'
+	put 'save'
+      end
+    end
+      
+    # get "/crosswords(.:format)" => "crosswords#index"
+    # post "/crosswords(.:format)" => "crosswords#create"
+    # get "/crosswords/:id(.:format)" => "crosswords#show"
+    # post "/crosswords/:id(.:format)" => "crosswords#save"
+    # put "/crosswords/:id(.:format)" => "crosswords#save"
+  end
+
+  # get '/partials', to: 'app/assets/partials', :as => :angular_partials
+
+  # resources :crosswords
 
   # get '/tbd', to: 'public/tbd.html', :as => :pokerodds
   # get '/videostreams', to: 'public/portfolio/playstreams.html', :as => :videostreams

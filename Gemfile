@@ -1,11 +1,12 @@
 source 'https://rubygems.org'
 
-gem 'rails', '3.2.9'
+gem 'rails', '3.2.13'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 gem 'mysql2', '0.3.11'
+gem 'mysql', '2.9.1'
 
 
 # Gems used only for assets and not required
@@ -24,8 +25,9 @@ group :test do
   gem 'ruby-prof'
 end
 
-gem 'jquery-rails'
-gem 'jwplayer-rails'
+# TODO: Why have both this here and jwplayer in the assets directory?
+gem 'jwplayer-rails', '1.0.1'
+gem 'jquery-rails', '3.0.1'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
@@ -46,3 +48,6 @@ gem 'jwplayer-rails'
 # gem 'livescript'
 gem 'has_scope'
 gem 'responders'
+gem 'em-websocket', '0.5.0'
+gem 'rack', '1.4.5'
+gem 'rake', '10.1.0'

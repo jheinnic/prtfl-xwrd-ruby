@@ -1,30 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="portfolio">
   <head>
     <title>John Heinnickel's Portfolio Site</title>
-    <%= stylesheet_link_tag    "application", :media => "all" %>
+    <%= stylesheet_link_tag "application", :media => "all" %>
     <%= csrf_meta_tags %>
   </head>
   <body>
-    <div class="navbar navbar-fixed-top">
+    <div ng-controller="NavBarCtrl" class="navbar navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
           <ul class="nav pull-left">
-            <li class="<%= ns = yield(:active_navtab); 'active' if ns.nil? or ns == 'home' or ns == '' %>"><a href="/">Home</a></li>
+	    <li ng-class="{active: section == 'home'}"><a ng-click="changeSection('home')">Home</a></li>
             <li class="divider-vertical"></li>
-            <li class="<%= 'active' if ns == 'crosswords' %>"><%= link_to 'Crosswords', crosswords_path %></li>
-            <li class="<%= 'active' if ns == 'poker' %>"><%= link_to 'Poker Odds', crosswords_path %></li>
-            <li class="<%= 'active' if ns == 'video' %>"><%= link_to 'Fuzzy Match', crosswords_path %></li>
+	    <li ng-class="{active: section == 'crosswords'}">
+	    <a ng-click="changeSection('crosswords')">Crosswords</a></li>
+	    <li ng-class="{active: section == 'poker'}">
+	    <a ng-click="changeSection('poker')">Poker Odds</a></li>
+	    <li ng-class="{active: section == 'video'}">
+	    <a ng-click="changeSection('video')">Fuzzy Match</a></li>
           </ul>
-          <div class="pull-right"><a class="brand" href="#">John Heinnickel</a></div>
+          <div class="pull-right"><a class="brand" href="javascript:;">John Heinnickel</a></div>
         </div> <!-- container -->
       </div> <!-- navbar-inner -->
     </div> <!-- navbar navbar-fixed-top -->
     <div class="container">
-      <%= yield %> <!-- Should encapsulate one or more <div id="row">s -->
+      <div ng-view="/"></div>
       <div class="row"><div class="span12"><footer><p>&copy; John Heinnickel, 2012</p></footer></div></div>
     </div> <!-- container -->
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular-loader.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular-resource.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular-cookies.js"></script>
+    <%= javascript_include_tag "application" %>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
+    <!--%= yield(:scripts) %-->
   </body>
-<%= javascript_include_tag "application" %>
-<%= yield(:scripts) %>
 </html>

@@ -13,3 +13,9 @@
 //= require angular/crosswords
 //= require angular/portfolio
 
+// Deprecated content.  Should be excluded due to preceding blank line.
+//= require jquery
+//= require jquery_ujs
+//= require bootstrap/js/bootstrap.min.js
+//= require crosswords
+//= require jwplayer/jwplayer.js
